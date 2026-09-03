@@ -39,3 +39,4 @@ Thumbs.db
 .venv/
 Scrapling/
 .crawl_checkpoints/
+.vercel

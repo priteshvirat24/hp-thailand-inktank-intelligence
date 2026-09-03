@@ -6,9 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { ragService } from '@/services/rag/ragService';
-import { TargetBrand } from '@/types/brands';
-import { AnalyticalMonth } from '@/types/analytics';
-import { ChannelType, PlatformType } from '@/types/sources';
+import { PlatformType } from '@/types/sources';
 
 export const dynamic = 'force-dynamic';
 
