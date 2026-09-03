@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Server-only packages to prevent client-side credential bundling
   serverExternalPackages: ['zod'],
+  outputFileTracingIncludes: {
+    '/api/**/*': ['./data/**/*'],
+  },
 };
 
 export default nextConfig;

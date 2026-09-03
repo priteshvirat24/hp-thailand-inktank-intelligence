@@ -30,12 +30,24 @@ export class EvidenceStore {
     if (process.env.NODE_ENV === 'test' && !force) return;
     if (this.initializedFromDisk && this.records.size > 0 && !force) return;
     try {
-      if (force) {
-        this.records.clear();
+      const candidatePaths = [
+        path.join(process.cwd(), 'data/evidence_lake/scrapling_verified_lake.json'),
+        path.resolve(process.cwd(), 'data/evidence_lake/scrapling_verified_lake.json'),
+        path.join(__dirname, '../../../../data/evidence_lake/scrapling_verified_lake.json'),
+        path.join(__dirname, '../../../data/evidence_lake/scrapling_verified_lake.json'),
+        path.join(__dirname, '../../data/evidence_lake/scrapling_verified_lake.json'),
+      ];
+
+      let foundPath: string | null = null;
+      for (const p of candidatePaths) {
+        if (fs.existsSync(p)) {
+          foundPath = p;
+          break;
+        }
       }
-      const lakePath = path.join(process.cwd(), 'data/evidence_lake/scrapling_verified_lake.json');
-      if (fs.existsSync(lakePath)) {
-        const raw = fs.readFileSync(lakePath, 'utf-8');
+
+      if (foundPath) {
+        const raw = fs.readFileSync(foundPath, 'utf-8');
         const items = JSON.parse(raw);
         if (Array.isArray(items)) {
           if (force) this.records.clear();

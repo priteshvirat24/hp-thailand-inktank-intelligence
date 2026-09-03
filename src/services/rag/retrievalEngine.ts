@@ -45,6 +45,12 @@ function tokenize(text: string): string[] {
     .filter((t) => t.length > 1);
 }
 
+function isAllOrEmpty(val?: string | null): boolean {
+  if (!val) return true;
+  const upper = val.trim().toUpperCase();
+  return upper === 'ALL' || upper === '' || upper === 'UNDEFINED' || upper === 'NULL';
+}
+
 export class RetrievalEngine {
   /**
    * Retrieves supporting analytical metrics from the Analytical Cube based on query intent.
@@ -86,9 +92,9 @@ export class RetrievalEngine {
       metricsToFetch.push('TOTAL_VISIBILITY_TOUCHPOINTS', 'ECOMMERCE_SOV', 'AVG_SELLING_PRICE_THB');
     }
 
-    const targetMonth = (query.monthFilter && query.monthFilter !== 'All' ? query.monthFilter : '2026-08') as AnalyticalMonth;
+    const targetMonth = (!isAllOrEmpty(query.monthFilter) ? query.monthFilter : '2026-08') as AnalyticalMonth;
     const targetBrands: readonly TargetBrand[] =
-      query.brandFilter && query.brandFilter !== 'All' ? [query.brandFilter] : TARGET_BRANDS;
+      !isAllOrEmpty(query.brandFilter) ? [query.brandFilter as TargetBrand] : TARGET_BRANDS;
 
     const results: RagSupportingMetric[] = [];
 
@@ -100,7 +106,7 @@ export class RetrievalEngine {
         const row = analyticsService.getMetricValue(metricId, {
           brand,
           month: targetMonth,
-          sku_id: query.skuFilter && query.skuFilter !== 'All' ? query.skuFilter : 'All',
+          sku_id: !isAllOrEmpty(query.skuFilter) ? query.skuFilter : 'All',
         });
 
         results.push({
@@ -133,25 +139,34 @@ export class RetrievalEngine {
     // 1. Structured metadata filtering
     let candidateChunks = [...allChunks];
 
-    if (query.brandFilter && query.brandFilter !== 'All') {
-      candidateChunks = candidateChunks.filter((c) => c.brand === query.brandFilter);
+    if (!isAllOrEmpty(query.brandFilter)) {
+      const brandLower = query.brandFilter!.toLowerCase();
+      candidateChunks = candidateChunks.filter((c) => c.brand.toLowerCase() === brandLower);
     }
-    if (query.monthFilter && query.monthFilter !== 'All') {
+    if (!isAllOrEmpty(query.monthFilter)) {
       candidateChunks = candidateChunks.filter((c) => c.analytical_month === query.monthFilter);
     }
-    if (query.channelFilter && query.channelFilter !== 'All') {
-      candidateChunks = candidateChunks.filter((c) => c.channel === query.channelFilter);
+    if (!isAllOrEmpty(query.channelFilter)) {
+      const channelLower = query.channelFilter!.toLowerCase();
+      candidateChunks = candidateChunks.filter((c) => c.channel.toLowerCase() === channelLower);
     }
-    if (query.platformFilter && query.platformFilter !== 'All') {
-      candidateChunks = candidateChunks.filter((c) => c.platform === query.platformFilter);
+    if (!isAllOrEmpty(query.platformFilter)) {
+      const platformLower = query.platformFilter!.toLowerCase();
+      candidateChunks = candidateChunks.filter((c) => c.platform.toLowerCase() === platformLower);
     }
-    if (query.skuFilter && query.skuFilter !== 'All') {
+    if (!isAllOrEmpty(query.skuFilter)) {
+      const skuLower = query.skuFilter!.toLowerCase();
       candidateChunks = candidateChunks.filter(
-        (c) => c.sku_id === query.skuFilter || c.canonical_model?.toLowerCase() === query.skuFilter?.toLowerCase()
+        (c) =>
+          c.sku_id?.toLowerCase() === skuLower ||
+          c.canonical_model?.toLowerCase() === skuLower
       );
     }
 
-    if (candidateChunks.length === 0) return [];
+    // Safety: If overly restrictive filter combination produces 0 candidates, fallback to allChunks
+    if (candidateChunks.length === 0) {
+      candidateChunks = [...allChunks];
+    }
 
     // 2. Extract query terms and intent signals
     const queryTokens = tokenize(query.query);
