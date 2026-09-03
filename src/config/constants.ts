@@ -1,0 +1,126 @@
+/**
+ * Authoritative Domain Constants, Invariants, and Category Keywords
+ */
+
+export const PROJECT_METADATA = {
+  name: 'HP Thailand Ink Tank Competitive Intelligence Platform',
+  geography: 'Thailand',
+  country_code: 'TH',
+  locale: 'th-TH',
+  currency: 'THB',
+  currency_symbol: '฿',
+  hardware_price_envelope: {
+    min_thb: 2500,  // Price threshold validation signal from brief
+    max_thb: 25000, // Consumer / SMB upper bound
+  },
+} as const;
+
+export const POSITIVE_CATEGORY_KEYWORDS = {
+  english: [
+    'Ink Tank',
+    'InkTank',
+    'Smart Tank',
+    'SmartTank',
+    'Eco Tank',
+    'EcoTank',
+    'Mega Tank',
+    'MegaTank',
+    'InkBenefit',
+    'Refill Tank',
+    'Refillable ink',
+    'Tank printer',
+    'Refillable reservoir',
+    'All-in-One Ink Tank',
+  ],
+  thai: [
+    'แท็งก์หมึก',
+    'แทงค์หมึก',
+    'เครื่องพิมพ์แท็งก์หมึก',
+    'ปริ้นเตอร์เติมหมึก',
+    'เครื่องพิมพ์เติมหมึก',
+    'แท็งก์แท้',
+    'สมาร์ทแท็งก์',
+    'อีโค่แท็งก์',
+    'เมกะแท็งก์',
+    'อิงค์เบเนฟิต',
+  ],
+} as const;
+
+export const NEGATIVE_EXCLUSION_KEYWORDS = {
+  cartridge_inkjet: [
+    'DeskJet',
+    'Envy',
+    'PIXMA TS',
+    'PIXMA MG',
+    'PIXMA E',
+    'PIXMA iP',
+    'Expression Home',
+    'cartridge',
+    'cartridge printer',
+    'หมึกตลับ',
+    'ตลับหมึก',
+    'เดสก์เจ็ท',
+  ],
+  laser_toner: [
+    'LaserJet',
+    'Laser 107',
+    'imageCLASS',
+    'i-SENSYS',
+    'HL-L',
+    'DCP-L',
+    'MFC-L',
+    'Laser Printer',
+    'Laser',
+    'toner',
+    'ผงหมึก',
+    'โทนเนอร์',
+    'เครื่องพิมพ์เลเซอร์',
+    'เลเซอร์',
+  ],
+  standalone_consumables: [
+    'ink bottle',
+    'bottle only',
+    'refill ink',
+    'refill bottle',
+    'standalone ink',
+    'ink multipack',
+    'เฉพาะขวดหมึก',
+    'หมึกเติมขวด',
+    'น้ำหมึกเติม',
+    '003',
+    '664',
+    'GT52',
+    'GT53',
+    'GI-790',
+    'GI-71',
+    'GI-71S',
+    'BTD60',
+    'BT5000',
+  ],
+  accessories_and_parts: [
+    'printhead',
+    'printhead only',
+    'maintenance box',
+    'waste ink',
+    'roller',
+    'cable',
+    'photo paper',
+    'sublimation',
+    'ribbon',
+    'spare part',
+    'หัวพิมพ์',
+    'กล่องซับหมึก',
+    'กระดาษโฟโต้',
+  ],
+} as const;
+
+export const CONSUMER_SENTIMENT_THEMES = [
+  'Print Quality & Vividness',
+  'Refill Experience & Spill-Free',
+  'Running Cost & Ink Yield',
+  'Reliability & Head Clogging',
+  'Print Speed',
+  'Wi-Fi & App Connectivity',
+  'Setup Simplicity',
+  'Hardware Price & Value',
+] as const;

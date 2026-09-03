@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ffffff;
+    --surface: #111111;
+    --surface-raised: #151515;
+    --card: #111111;
+    --card-foreground: #ffffff;
+    --card-hover: #161616;
+    --border: #222222;
+    --border-subtle: #1a1a1a;
+    --border-strong: #2a2a2a;
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+    --text-muted: #888888;
+    --text-dim: #666666;
+  }
+
+  .light-theme {
+    --background: #f8fafc;
+    --foreground: #09090b;
+    --surface: #ffffff;
+    --surface-raised: #f1f5f9;
+    --card: #ffffff;
+    --card-foreground: #09090b;
+    --card-hover: #f8fafc;
+    --border: #e2e8f0;
+    --border-subtle: #f1f5f9;
+    --border-strong: #cbd5e1;
+    --text-primary: #09090b;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'tnum';
+    overflow-x: hidden;
+  }
+}
+
+/* Tabular numbers for financial and intelligence precision */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom Scrollbar in Dark Monochrome */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+/* Hide scrollbar for horizontal nav overflow */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ==========================================================================
+   True Negative / Inverted Theme Engine
+   Converts Black -> White, White -> Black, Gray -> Light Gray
+   Hue-rotate(180deg) preserves all authentic brand colors (HP blue, Canon red, etc.)
+   Images, videos, and charts are counter-inverted to retain natural visual fidelity.
+   ========================================================================== */
+
+html.light-theme {
+  filter: invert(0.93) hue-rotate(180deg) brightness(1.02) contrast(1.02);
+  background-color: #0a0a0a !important;
+}
+
+/* Counter-invert images, videos, live ad captures, and product photos */
+html.light-theme img,
+html.light-theme video,
+html.light-theme .no-invert {
+  filter: invert(1) hue-rotate(180deg) !important;
+}
+
