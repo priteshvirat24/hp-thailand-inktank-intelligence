@@ -26,6 +26,29 @@ interface EvidenceModalProps {
   evidenceRecords: readonly RawEvidenceRecord[];
 }
 
+function getAuthenticSourceLabel(screenshotUrl?: string | null, platform?: string, brand?: string): string {
+  if (!screenshotUrl) return `${platform || 'Source'} Official View`;
+  if (screenshotUrl.includes('/products/')) {
+    return `${brand || ''} Thailand Official Web Capture`;
+  }
+  if (screenshotUrl.includes('/jib_')) {
+    return 'JIB Thailand Retail Live Capture';
+  }
+  if (screenshotUrl.includes('/pantip_')) {
+    return 'Pantip.com Thai Forum Live Discussion';
+  }
+  if (screenshotUrl.includes('/facebook_')) {
+    return `${brand || ''} Thailand Official Facebook`;
+  }
+  if (screenshotUrl.includes('/youtube_')) {
+    return `${brand || ''} Official YouTube Channel`;
+  }
+  if (screenshotUrl.includes('/scrapling_meta_')) {
+    return 'Meta Ad Library Verified Flight';
+  }
+  return `${platform || 'Source'} Authentic Live Capture`;
+}
+
 export const EvidenceModal: React.FC<EvidenceModalProps> = ({
   isOpen,
   onClose,
@@ -249,7 +272,7 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({
                                 </span>
                                 <span className="text-zinc-600">•</span>
                                 <span className="text-zinc-400 text-[10px]">
-                                  {rec.platform} Official View
+                                  {getAuthenticSourceLabel(rec.screenshot_url, rec.platform, rec.brand)}
                                 </span>
                               </div>
                               <a

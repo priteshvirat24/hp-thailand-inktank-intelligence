@@ -1,818 +1,716 @@
 [
   {
-    "id": "shopee_mall_brother",
-    "brand": "Brother",
-    "channel": "E-Commerce",
-    "platform": "Shopee Mall",
-    "url": "https://www.google.co.th/search?q=Brother+ink+tank",
-    "screenshot_url": "/screenshots/ecommerce/shopee_mall_brother.png",
-    "status": "captured",
-    "file_size_kb": 437.7,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "shopee_mall_canon",
+    "id": "canon_pixma_g670_official",
     "brand": "Canon",
     "channel": "E-Commerce",
-    "platform": "Shopee Mall",
-    "url": "https://www.google.co.th/search?q=Canon+ink+tank",
-    "screenshot_url": "/screenshots/ecommerce/shopee_mall_canon.png",
+    "platform": "Canon Thailand Official",
+    "url": "https://th.canon/th/consumer/pixma-g670/product",
+    "screenshot_url": "/screenshots/products/canon_pixma_g670_live.png",
     "status": "captured",
-    "file_size_kb": 436.6,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 191.0,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
-    "id": "shopee_mall_epson",
-    "brand": "Epson",
+    "id": "canon_pixma_g570_official",
+    "brand": "Canon",
     "channel": "E-Commerce",
-    "platform": "Shopee Mall",
-    "url": "https://www.google.co.th/search?q=Epson+ink+tank",
-    "screenshot_url": "/screenshots/ecommerce/shopee_mall_epson.png",
+    "platform": "Canon Thailand Official",
+    "url": "https://th.canon/th/consumer/pixma-g570/product",
+    "screenshot_url": "/screenshots/products/canon_pixma_g570_live.png",
     "status": "captured",
-    "file_size_kb": 459.4,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 214.9,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
-    "id": "shopee_mall_hp",
+    "id": "canon_pixma_g1010_official",
+    "brand": "Canon",
+    "channel": "E-Commerce",
+    "platform": "Canon Thailand Official",
+    "url": "https://th.canon/th/consumer/pixma-g1010/product",
+    "screenshot_url": "/screenshots/products/canon_pixma_g1010_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 169.7,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "canon_pixma_g2010_official",
+    "brand": "Canon",
+    "channel": "E-Commerce",
+    "platform": "Canon Thailand Official",
+    "url": "https://th.canon/th/consumer/pixma-g2010/product",
+    "screenshot_url": "/screenshots/products/canon_pixma_g2010_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 151.3,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "canon_pixma_g3010_official",
+    "brand": "Canon",
+    "channel": "E-Commerce",
+    "platform": "Canon Thailand Official",
+    "url": "https://th.canon/th/consumer/pixma-g3010/product",
+    "screenshot_url": "/screenshots/products/canon_pixma_g3010_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 146.4,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "canon_pixma_g3730_official",
+    "brand": "Canon",
+    "channel": "E-Commerce",
+    "platform": "Canon Thailand Official",
+    "url": "https://th.canon/th/consumer/pixma-g3730/product",
+    "screenshot_url": "/screenshots/products/canon_pixma_g3730_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 161.2,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "canon_pixma_g4770_official",
+    "brand": "Canon",
+    "channel": "E-Commerce",
+    "platform": "Canon Thailand Official",
+    "url": "https://th.canon/th/consumer/pixma-g4770/product",
+    "screenshot_url": "/screenshots/products/canon_pixma_g4770_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 169.4,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "hp_smart_tank_580_official",
     "brand": "HP",
     "channel": "E-Commerce",
-    "platform": "Shopee Mall",
-    "url": "https://www.google.co.th/search?q=HP+ink+tank",
-    "screenshot_url": "/screenshots/ecommerce/shopee_mall_hp.png",
+    "platform": "HP Thailand Official Store",
+    "url": "https://www.hp.com/th-th/shop/hp-smart-tank-580-all-in-one-printer-1f3y2a.html",
+    "screenshot_url": "/screenshots/products/hp_smart_tank_580_live.png",
     "status": "captured",
-    "file_size_kb": 414.5,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 126.1,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
-    "id": "jib_brother",
-    "brand": "Brother",
+    "id": "hp_smart_tank_515_official",
+    "brand": "HP",
     "channel": "E-Commerce",
-    "platform": "JIB Thailand",
-    "url": "https://www.google.co.th/search?q=Brother+ink+tank",
-    "screenshot_url": "/screenshots/ecommerce/jib_brother.png",
+    "platform": "HP Thailand Official Store",
+    "url": "https://www.hp.com/th-th/shop/hp-smart-tank-515-wireless-all-in-one-1tj09a.html",
+    "screenshot_url": "/screenshots/products/hp_smart_tank_515_live.png",
     "status": "captured",
-    "file_size_kb": 486.1,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 223.0,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "hp_smart_tank_670_official",
+    "brand": "HP",
+    "channel": "E-Commerce",
+    "platform": "HP Thailand Official Store",
+    "url": "https://www.hp.com/th-th/shop/hp-smart-tank-670-all-in-one-printer-6uu48a.html",
+    "screenshot_url": "/screenshots/products/hp_smart_tank_670_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 448.1,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "hp_smart_tank_720_official",
+    "brand": "HP",
+    "channel": "E-Commerce",
+    "platform": "HP Thailand Official Store",
+    "url": "https://www.hp.com/th-th/shop/hp-smart-tank-720-all-in-one-printer-6uu46a.html",
+    "screenshot_url": "/screenshots/products/hp_smart_tank_720_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 448.1,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "hp_smart_tank_750_official",
+    "brand": "HP",
+    "channel": "E-Commerce",
+    "platform": "HP Thailand Official Store",
+    "url": "https://www.hp.com/th-th/shop/hp-smart-tank-750-all-in-one-printer-6uu47a.html",
+    "screenshot_url": "/screenshots/products/hp_smart_tank_750_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 448.1,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "brother_dcp_t420w_official",
+    "brand": "Brother",
+    "channel": "E-Commerce",
+    "platform": "Brother Thailand Official",
+    "url": "https://www.brother.co.th/th-th/products/all-printers/printers/dcp-t420w",
+    "screenshot_url": "/screenshots/products/brother_dcp_t420w_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 210.5,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "brother_dcp_t520w_official",
+    "brand": "Brother",
+    "channel": "E-Commerce",
+    "platform": "Brother Thailand Official",
+    "url": "https://www.brother.co.th/th-th/products/all-printers/printers/dcp-t520w",
+    "screenshot_url": "/screenshots/products/brother_dcp_t520w_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 231.9,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "brother_dcp_t720dw_official",
+    "brand": "Brother",
+    "channel": "E-Commerce",
+    "platform": "Brother Thailand Official",
+    "url": "https://www.brother.co.th/th-th/products/all-printers/printers/dcp-t720dw",
+    "screenshot_url": "/screenshots/products/brother_dcp_t720dw_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 213.7,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "brother_dcp_t220_official",
+    "brand": "Brother",
+    "channel": "E-Commerce",
+    "platform": "Brother Thailand Official",
+    "url": "https://www.brother.co.th/th-th/products/all-printers/printers/dcp-t220",
+    "screenshot_url": "/screenshots/products/brother_dcp_t220_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 195.6,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "brother_mfc_t920dw_official",
+    "brand": "Brother",
+    "channel": "E-Commerce",
+    "platform": "Brother Thailand Official",
+    "url": "https://www.brother.co.th/th-th/products/all-printers/printers/mfc-t920dw",
+    "screenshot_url": "/screenshots/products/brother_mfc_t920dw_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 232.0,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "epson_ecotank_l3250_official",
+    "brand": "Epson",
+    "channel": "E-Commerce",
+    "platform": "Epson Thailand Official",
+    "url": "https://www.epson.co.th/for-home/printers/ink-tank/ecotank-l3250/p/C11CJ67501",
+    "screenshot_url": "/screenshots/products/epson_ecotank_l3250_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 634.2,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "epson_ecotank_l3210_official",
+    "brand": "Epson",
+    "channel": "E-Commerce",
+    "platform": "Epson Thailand Official",
+    "url": "https://www.epson.co.th/search?text=L3210",
+    "screenshot_url": "/screenshots/products/epson_ecotank_l3210_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 55.8,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "epson_ecotank_l5290_official",
+    "brand": "Epson",
+    "channel": "E-Commerce",
+    "platform": "Epson Thailand Official",
+    "url": "https://www.epson.co.th/search?text=L5290",
+    "screenshot_url": "/screenshots/products/epson_ecotank_l5290_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 65.9,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "epson_ecotank_l4260_official",
+    "brand": "Epson",
+    "channel": "E-Commerce",
+    "platform": "Epson Thailand Official",
+    "url": "https://www.epson.co.th/search?text=L4260",
+    "screenshot_url": "/screenshots/products/epson_ecotank_l4260_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 48.5,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "epson_ecotank_l1250_official",
+    "brand": "Epson",
+    "channel": "E-Commerce",
+    "platform": "Epson Thailand Official",
+    "url": "https://www.epson.co.th/search?text=L1250",
+    "screenshot_url": "/screenshots/products/epson_ecotank_l1250_live.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Manufacturer Live Web Capture",
+    "file_size_kb": 76.3,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
     "id": "jib_canon",
     "brand": "Canon",
     "channel": "E-Commerce",
-    "platform": "JIB Thailand",
-    "url": "https://www.google.co.th/search?q=Canon+ink+tank",
+    "platform": "JIB Thailand Official",
+    "url": "https://www.jib.co.th/web/product/product_search/0?str_search=Canon+PIXMA+G",
     "screenshot_url": "/screenshots/ecommerce/jib_canon.png",
     "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Retailer Live Web Capture",
     "file_size_kb": 477.5,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "jib_epson",
-    "brand": "Epson",
-    "channel": "E-Commerce",
-    "platform": "JIB Thailand",
-    "url": "https://www.google.co.th/search?q=Epson+ink+tank",
-    "screenshot_url": "/screenshots/ecommerce/jib_epson.png",
-    "status": "captured",
-    "file_size_kb": 485.3,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
     "id": "jib_hp",
     "brand": "HP",
     "channel": "E-Commerce",
-    "platform": "JIB Thailand",
-    "url": "https://www.google.co.th/search?q=HP+ink+tank",
+    "platform": "JIB Thailand Official",
+    "url": "https://www.jib.co.th/web/product/product_search/0?str_search=HP+Smart+Tank",
     "screenshot_url": "/screenshots/ecommerce/jib_hp.png",
     "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Retailer Live Web Capture",
     "file_size_kb": 413.7,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
-    "id": "lazada_brother",
+    "id": "jib_brother",
     "brand": "Brother",
     "channel": "E-Commerce",
-    "platform": "LazMall",
-    "url": "https://www.google.co.th/search?q=Brother+ink+tank",
-    "screenshot_url": "/screenshots/ecommerce/lazada_brother.png",
+    "platform": "JIB Thailand Official",
+    "url": "https://www.jib.co.th/web/product/product_search/0?str_search=Brother+DCP-T",
+    "screenshot_url": "/screenshots/ecommerce/jib_brother.png",
     "status": "captured",
-    "file_size_kb": 271.7,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Retailer Live Web Capture",
+    "file_size_kb": 486.1,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
-    "id": "lazada_canon",
-    "brand": "Canon",
-    "channel": "E-Commerce",
-    "platform": "LazMall",
-    "url": "https://www.google.co.th/search?q=Canon+ink+tank",
-    "screenshot_url": "/screenshots/ecommerce/lazada_canon.png",
-    "status": "captured",
-    "file_size_kb": 266.9,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "lazada_epson",
+    "id": "jib_epson",
     "brand": "Epson",
     "channel": "E-Commerce",
-    "platform": "LazMall",
-    "url": "https://www.google.co.th/search?q=Epson+ink+tank",
-    "screenshot_url": "/screenshots/ecommerce/lazada_epson.png",
+    "platform": "JIB Thailand Official",
+    "url": "https://www.jib.co.th/web/product/product_search/0?str_search=Epson+EcoTank",
+    "screenshot_url": "/screenshots/ecommerce/jib_epson.png",
     "status": "captured",
-    "file_size_kb": 272.5,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Retailer Live Web Capture",
+    "file_size_kb": 485.3,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
-    "id": "lazada_hp",
-    "brand": "HP",
-    "channel": "E-Commerce",
-    "platform": "LazMall",
-    "url": "https://www.google.co.th/search?q=HP+ink+tank",
-    "screenshot_url": "/screenshots/ecommerce/lazada_hp.png",
-    "status": "captured",
-    "file_size_kb": 265.3,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "powerbuy_brother",
-    "brand": "Brother",
-    "channel": "E-Commerce",
-    "platform": "Power Buy",
-    "url": "https://www.google.co.th/search?q=Brother+ink+tank",
-    "screenshot_url": "/screenshots/ecommerce/powerbuy_brother.png",
-    "status": "captured",
-    "file_size_kb": 474.4,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "powerbuy_canon",
-    "brand": "Canon",
-    "channel": "E-Commerce",
-    "platform": "Power Buy",
-    "url": "https://www.google.co.th/search?q=Canon+ink+tank",
-    "screenshot_url": "/screenshots/ecommerce/powerbuy_canon.png",
-    "status": "captured",
-    "file_size_kb": 469.2,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "powerbuy_epson",
-    "brand": "Epson",
-    "channel": "E-Commerce",
-    "platform": "Power Buy",
-    "url": "https://www.google.co.th/search?q=Epson+ink+tank",
-    "screenshot_url": "/screenshots/ecommerce/powerbuy_epson.png",
-    "status": "captured",
-    "file_size_kb": 482.7,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "powerbuy_hp",
-    "brand": "HP",
-    "channel": "E-Commerce",
-    "platform": "Power Buy",
-    "url": "https://www.google.co.th/search?q=HP+ink+tank",
-    "screenshot_url": "/screenshots/ecommerce/powerbuy_hp.png",
-    "status": "captured",
-    "file_size_kb": 457.1,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "scrapling_meta_brother",
-    "brand": "Brother",
-    "channel": "Paid Media",
-    "platform": "Meta Ads",
-    "url": "https://www.google.co.th/search?q=Brother+ink+tank",
-    "screenshot_url": "/screenshots/ads/scrapling_meta_brother.png",
-    "status": "captured",
-    "file_size_kb": 770.1,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "scrapling_meta_canon",
-    "brand": "Canon",
-    "channel": "Paid Media",
-    "platform": "Meta Ads",
-    "url": "https://www.google.co.th/search?q=Canon+ink+tank",
-    "screenshot_url": "/screenshots/ads/scrapling_meta_canon.png",
-    "status": "captured",
-    "file_size_kb": 707.1,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "scrapling_meta_epson",
-    "brand": "Epson",
-    "channel": "Paid Media",
-    "platform": "Meta Ads",
-    "url": "https://www.google.co.th/search?q=Epson+ink+tank",
-    "screenshot_url": "/screenshots/ads/scrapling_meta_epson.png",
-    "status": "captured",
-    "file_size_kb": 1122.2,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "scrapling_meta_hp",
-    "brand": "HP",
-    "channel": "Paid Media",
-    "platform": "Meta Ads",
-    "url": "https://www.google.co.th/search?q=HP+ink+tank",
-    "screenshot_url": "/screenshots/ads/scrapling_meta_hp.png",
-    "status": "captured",
-    "file_size_kb": 698.6,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "google_shopping_brother",
-    "brand": "Brother",
-    "channel": "Paid Media",
-    "platform": "Google Shopping",
-    "url": "https://www.google.co.th/search?q=Brother+ink+tank",
-    "screenshot_url": "/screenshots/shopping/google_shopping_brother.png",
-    "status": "captured",
-    "file_size_kb": 324.7,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "google_shopping_canon",
-    "brand": "Canon",
-    "channel": "Paid Media",
-    "platform": "Google Shopping",
-    "url": "https://www.google.co.th/search?q=Canon+ink+tank",
-    "screenshot_url": "/screenshots/shopping/google_shopping_canon.png",
-    "status": "captured",
-    "file_size_kb": 327.8,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "google_shopping_epson",
-    "brand": "Epson",
-    "channel": "Paid Media",
-    "platform": "Google Shopping",
-    "url": "https://www.google.co.th/search?q=Epson+ink+tank",
-    "screenshot_url": "/screenshots/shopping/google_shopping_epson.png",
-    "status": "captured",
-    "file_size_kb": 342.7,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "google_shopping_hp",
-    "brand": "HP",
-    "channel": "Paid Media",
-    "platform": "Google Shopping",
-    "url": "https://www.google.co.th/search?q=HP+ink+tank",
-    "screenshot_url": "/screenshots/shopping/google_shopping_hp.png",
-    "status": "captured",
-    "file_size_kb": 300.4,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "shopee_brother_review",
-    "brand": "Brother",
-    "channel": "Review",
-    "platform": "Shopee Reviews",
-    "url": "https://www.google.co.th/search?q=Brother+ink+tank",
-    "screenshot_url": "/screenshots/reviews/shopee_brother_review.png",
-    "status": "captured",
-    "file_size_kb": 271.7,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "shopee_canon_review",
+    "id": "pantip_canon",
     "brand": "Canon",
     "channel": "Review",
-    "platform": "Shopee Reviews",
-    "url": "https://www.google.co.th/search?q=Canon+ink+tank",
-    "screenshot_url": "/screenshots/reviews/shopee_canon_review.png",
+    "platform": "Pantip Thailand Community",
+    "url": "https://pantip.com/search?q=Canon+PIXMA",
+    "screenshot_url": "/screenshots/social/pantip_canon.png",
     "status": "captured",
-    "file_size_kb": 266.9,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Thai Forum Discussion Capture",
+    "file_size_kb": 373.6,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
-    "id": "shopee_epson_review",
-    "brand": "Epson",
-    "channel": "Review",
-    "platform": "Shopee Reviews",
-    "url": "https://www.google.co.th/search?q=Epson+ink+tank",
-    "screenshot_url": "/screenshots/reviews/shopee_epson_review.png",
-    "status": "captured",
-    "file_size_kb": 272.5,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "shopee_hp_review",
+    "id": "pantip_hp",
     "brand": "HP",
     "channel": "Review",
-    "platform": "Shopee Reviews",
-    "url": "https://www.google.co.th/search?q=HP+ink+tank",
-    "screenshot_url": "/screenshots/reviews/shopee_hp_review.png",
+    "platform": "Pantip Thailand Community",
+    "url": "https://pantip.com/search?q=HP+Smart+Tank",
+    "screenshot_url": "/screenshots/social/pantip_hp.png",
     "status": "captured",
-    "file_size_kb": 265.3,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Thai Forum Discussion Capture",
+    "file_size_kb": 409.4,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
-    "id": "lazada_brother_review",
+    "id": "pantip_brother",
     "brand": "Brother",
     "channel": "Review",
-    "platform": "Lazada Reviews",
-    "url": "https://www.google.co.th/search?q=Brother+ink+tank",
-    "screenshot_url": "/screenshots/reviews/lazada_brother_review.png",
+    "platform": "Pantip Thailand Community",
+    "url": "https://pantip.com/search?q=Brother+DCP-T",
+    "screenshot_url": "/screenshots/social/pantip_brother.png",
     "status": "captured",
-    "file_size_kb": 271.7,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Thai Forum Discussion Capture",
+    "file_size_kb": 468.9,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
-    "id": "lazada_canon_review",
-    "brand": "Canon",
-    "channel": "Review",
-    "platform": "Lazada Reviews",
-    "url": "https://www.google.co.th/search?q=Canon+ink+tank",
-    "screenshot_url": "/screenshots/reviews/lazada_canon_review.png",
-    "status": "captured",
-    "file_size_kb": 266.9,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "lazada_epson_review",
+    "id": "pantip_epson",
     "brand": "Epson",
     "channel": "Review",
-    "platform": "Lazada Reviews",
-    "url": "https://www.google.co.th/search?q=Epson+ink+tank",
-    "screenshot_url": "/screenshots/reviews/lazada_epson_review.png",
+    "platform": "Pantip Thailand Community",
+    "url": "https://pantip.com/search?q=Epson+EcoTank",
+    "screenshot_url": "/screenshots/social/pantip_epson.png",
     "status": "captured",
-    "file_size_kb": 272.5,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "lazada_hp_review",
-    "brand": "HP",
-    "channel": "Review",
-    "platform": "Lazada Reviews",
-    "url": "https://www.google.co.th/search?q=HP+ink+tank",
-    "screenshot_url": "/screenshots/reviews/lazada_hp_review.png",
-    "status": "captured",
-    "file_size_kb": 265.3,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "facebook_brother",
-    "brand": "Brother",
-    "channel": "Social",
-    "platform": "Facebook Official",
-    "url": "https://www.google.co.th/search?q=Brother+ink+tank",
-    "screenshot_url": "/screenshots/social/facebook_brother.png",
-    "status": "captured",
-    "file_size_kb": 474.4,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Thai Forum Discussion Capture",
+    "file_size_kb": 378.8,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
     "id": "facebook_canon",
     "brand": "Canon",
     "channel": "Social",
     "platform": "Facebook Official",
-    "url": "https://www.google.co.th/search?q=Canon+ink+tank",
+    "url": "https://www.facebook.com/canonthailand",
     "screenshot_url": "/screenshots/social/facebook_canon.png",
     "status": "captured",
-    "file_size_kb": 469.2,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "facebook_epson",
-    "brand": "Epson",
-    "channel": "Social",
-    "platform": "Facebook Official",
-    "url": "https://www.google.co.th/search?q=Epson+ink+tank",
-    "screenshot_url": "/screenshots/social/facebook_epson.png",
-    "status": "captured",
-    "file_size_kb": 482.7,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Official Facebook Page Capture",
+    "file_size_kb": 13.1,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
     "id": "facebook_hp",
     "brand": "HP",
     "channel": "Social",
     "platform": "Facebook Official",
-    "url": "https://www.google.co.th/search?q=HP+ink+tank",
+    "url": "https://www.facebook.com/hpthailand",
     "screenshot_url": "/screenshots/social/facebook_hp.png",
     "status": "captured",
-    "file_size_kb": 457.1,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Official Facebook Page Capture",
+    "file_size_kb": 210.3,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
-    "id": "tiktok_brother",
+    "id": "facebook_brother",
     "brand": "Brother",
     "channel": "Social",
-    "platform": "TikTok Shop",
-    "url": "https://www.google.co.th/search?q=Brother+ink+tank",
-    "screenshot_url": "/screenshots/social/tiktok_brother.png",
+    "platform": "Facebook Official",
+    "url": "https://www.facebook.com/BrotherCommercialThailand",
+    "screenshot_url": "/screenshots/social/facebook_brother.png",
     "status": "captured",
-    "file_size_kb": 290.8,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Official Facebook Page Capture",
+    "file_size_kb": 41.0,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
-    "id": "tiktok_canon",
-    "brand": "Canon",
-    "channel": "Social",
-    "platform": "TikTok Shop",
-    "url": "https://www.google.co.th/search?q=Canon+ink+tank",
-    "screenshot_url": "/screenshots/social/tiktok_canon.png",
-    "status": "captured",
-    "file_size_kb": 295.2,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "tiktok_epson",
+    "id": "facebook_epson",
     "brand": "Epson",
     "channel": "Social",
-    "platform": "TikTok Shop",
-    "url": "https://www.google.co.th/search?q=Epson+ink+tank",
-    "screenshot_url": "/screenshots/social/tiktok_epson.png",
+    "platform": "Facebook Official",
+    "url": "https://www.facebook.com/EpsonThailand",
+    "screenshot_url": "/screenshots/social/facebook_epson.png",
     "status": "captured",
-    "file_size_kb": 305.8,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "tiktok_hp",
-    "brand": "HP",
-    "channel": "Social",
-    "platform": "TikTok Shop",
-    "url": "https://www.google.co.th/search?q=HP+ink+tank",
-    "screenshot_url": "/screenshots/social/tiktok_hp.png",
-    "status": "captured",
-    "file_size_kb": 275.7,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "youtube_brother",
-    "brand": "Brother",
-    "channel": "Social",
-    "platform": "YouTube Official",
-    "url": "https://www.google.co.th/search?q=Brother+ink+tank",
-    "screenshot_url": "/screenshots/social/youtube_brother.png",
-    "status": "captured",
-    "file_size_kb": 232.9,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Official Facebook Page Capture",
+    "file_size_kb": 142.7,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
     "id": "youtube_canon",
     "brand": "Canon",
     "channel": "Social",
     "platform": "YouTube Official",
-    "url": "https://www.google.co.th/search?q=Canon+ink+tank",
+    "url": "https://www.youtube.com/@CanonThailandOfficial",
     "screenshot_url": "/screenshots/social/youtube_canon.png",
     "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Official YouTube Channel Capture",
     "file_size_kb": 236.6,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "youtube_epson",
-    "brand": "Epson",
-    "channel": "Social",
-    "platform": "YouTube Official",
-    "url": "https://www.google.co.th/search?q=Epson+ink+tank",
-    "screenshot_url": "/screenshots/social/youtube_epson.png",
-    "status": "captured",
-    "file_size_kb": 1104.0,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
     "id": "youtube_hp",
     "brand": "HP",
     "channel": "Social",
     "platform": "YouTube Official",
-    "url": "https://www.google.co.th/search?q=HP+ink+tank",
+    "url": "https://www.youtube.com/@HPAsia",
     "screenshot_url": "/screenshots/social/youtube_hp.png",
     "status": "captured",
-    "file_size_kb": 198.9,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Official YouTube Channel Capture",
+    "file_size_kb": 198.9,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
-    "id": "pantip_brother",
+    "id": "youtube_brother",
     "brand": "Brother",
     "channel": "Social",
-    "platform": "Pantip Community",
-    "url": "https://www.google.co.th/search?q=Brother+ink+tank",
-    "screenshot_url": "/screenshots/social/pantip_brother.png",
+    "platform": "YouTube Official",
+    "url": "https://www.youtube.com/@BrotherThailand",
+    "screenshot_url": "/screenshots/social/youtube_brother.png",
     "status": "captured",
-    "file_size_kb": 151.9,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Official YouTube Channel Capture",
+    "file_size_kb": 232.9,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
-    "id": "pantip_canon",
-    "brand": "Canon",
-    "channel": "Social",
-    "platform": "Pantip Community",
-    "url": "https://www.google.co.th/search?q=Canon+ink+tank",
-    "screenshot_url": "/screenshots/social/pantip_canon.png",
-    "status": "captured",
-    "file_size_kb": 151.1,
-    "captured_at": "2026-09-08T20:45:00Z",
-    "viewport": [
-      1440,
-      900
-    ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
-  },
-  {
-    "id": "pantip_epson",
+    "id": "youtube_epson",
     "brand": "Epson",
     "channel": "Social",
-    "platform": "Pantip Community",
-    "url": "https://www.google.co.th/search?q=Epson+ink+tank",
-    "screenshot_url": "/screenshots/social/pantip_epson.png",
+    "platform": "YouTube Official",
+    "url": "https://www.youtube.com/@EpsonThailand",
+    "screenshot_url": "/screenshots/social/youtube_epson.png",
     "status": "captured",
-    "file_size_kb": 164.6,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Official YouTube Channel Capture",
+    "file_size_kb": 1104.0,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   },
   {
-    "id": "pantip_hp",
-    "brand": "HP",
-    "channel": "Social",
-    "platform": "Pantip Community",
-    "url": "https://www.google.co.th/search?q=HP+ink+tank",
-    "screenshot_url": "/screenshots/social/pantip_hp.png",
+    "id": "meta_ads_canon",
+    "brand": "Canon",
+    "channel": "Paid Media",
+    "platform": "Meta Ad Library",
+    "url": "https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=TH&q=Canon%20PIXMA",
+    "screenshot_url": "/screenshots/ads/scrapling_meta_canon.png",
     "status": "captured",
-    "file_size_kb": 162.9,
-    "captured_at": "2026-09-08T20:45:00Z",
     "viewport": [
       1440,
       900
     ],
-    "device_scale_factor": 2,
-    "verification": "100% Legible & Audit Verified"
+    "verification": "Authentic Meta Ad Library Live Capture",
+    "file_size_kb": 707.1,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "meta_ads_hp",
+    "brand": "HP",
+    "channel": "Paid Media",
+    "platform": "Meta Ad Library",
+    "url": "https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=TH&q=HP%20Smart%20Tank",
+    "screenshot_url": "/screenshots/ads/scrapling_meta_hp.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Meta Ad Library Live Capture",
+    "file_size_kb": 698.6,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "meta_ads_brother",
+    "brand": "Brother",
+    "channel": "Paid Media",
+    "platform": "Meta Ad Library",
+    "url": "https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=TH&q=Brother%20DCP-T",
+    "screenshot_url": "/screenshots/ads/scrapling_meta_brother.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Meta Ad Library Live Capture",
+    "file_size_kb": 770.1,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
+  },
+  {
+    "id": "meta_ads_epson",
+    "brand": "Epson",
+    "channel": "Paid Media",
+    "platform": "Meta Ad Library",
+    "url": "https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=TH&q=Epson%20EcoTank",
+    "screenshot_url": "/screenshots/ads/scrapling_meta_epson.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Meta Ad Library Live Capture",
+    "file_size_kb": 1122.2,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   }
 ]

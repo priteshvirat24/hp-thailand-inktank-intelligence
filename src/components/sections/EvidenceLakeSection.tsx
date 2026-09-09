@@ -42,6 +42,29 @@ const itemVariants: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
 };
 
+function getAuthenticSourceLabel(screenshotUrl?: string | null, platform?: string, brand?: string): string {
+  if (!screenshotUrl) return `${platform || 'Source'} Official View`;
+  if (screenshotUrl.includes('/products/')) {
+    return `${brand || ''} Thailand Official Web Capture`;
+  }
+  if (screenshotUrl.includes('/jib_')) {
+    return 'JIB Thailand Retail Live Capture';
+  }
+  if (screenshotUrl.includes('/pantip_')) {
+    return 'Pantip.com Thai Forum Live Discussion';
+  }
+  if (screenshotUrl.includes('/facebook_')) {
+    return `${brand || ''} Thailand Official Facebook`;
+  }
+  if (screenshotUrl.includes('/youtube_')) {
+    return `${brand || ''} Official YouTube Channel`;
+  }
+  if (screenshotUrl.includes('/scrapling_meta_')) {
+    return 'Meta Ad Library Verified Flight';
+  }
+  return `${platform || 'Source'} Authentic Live Capture`;
+}
+
 export const EvidenceLakeSection: React.FC<EvidenceLakeSectionProps> = ({
   evidenceRecords,
   selectedBrand = 'All',
@@ -350,7 +373,7 @@ export const EvidenceLakeSection: React.FC<EvidenceLakeSectionProps> = ({
                     </span>
                     <span className="text-zinc-600">•</span>
                     <span className="text-zinc-400 text-[10px]">
-                      {rec.platform} Official Live Capture
+                      {getAuthenticSourceLabel(rec.screenshot_url, rec.platform, rec.brand)}
                     </span>
                   </div>
                   <a

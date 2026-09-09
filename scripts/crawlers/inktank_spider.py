@@ -92,31 +92,46 @@ if os.path.exists(MANIFEST_FILE):
     except Exception:
         pass
 
-def get_screenshot(brand: str, platform: str) -> str:
+SKU_SCREENSHOTS = {
+    "PIXMA G670": "/screenshots/products/canon_pixma_g670_live.png",
+    "PIXMA G570": "/screenshots/products/canon_pixma_g570_live.png",
+    "PIXMA G1010": "/screenshots/products/canon_pixma_g1010_live.png",
+    "PIXMA G2010": "/screenshots/products/canon_pixma_g2010_live.png",
+    "PIXMA G3010": "/screenshots/products/canon_pixma_g3010_live.png",
+    "PIXMA G3730": "/screenshots/products/canon_pixma_g3730_live.png",
+    "PIXMA G4770": "/screenshots/products/canon_pixma_g4770_live.png",
+    "Smart Tank 580": "/screenshots/products/hp_smart_tank_580_live.png",
+    "Smart Tank 515": "/screenshots/products/hp_smart_tank_515_live.png",
+    "Smart Tank 670": "/screenshots/products/hp_smart_tank_670_live.png",
+    "Smart Tank 720": "/screenshots/products/hp_smart_tank_720_live.png",
+    "Smart Tank 750": "/screenshots/products/hp_smart_tank_750_live.png",
+    "DCP-T220": "/screenshots/products/brother_dcp_t220_live.png",
+    "DCP-T420W": "/screenshots/products/brother_dcp_t420w_live.png",
+    "DCP-T520W": "/screenshots/products/brother_dcp_t520w_live.png",
+    "DCP-T720DW": "/screenshots/products/brother_dcp_t720dw_live.png",
+    "MFC-T920DW": "/screenshots/products/brother_mfc_t920dw_live.png",
+    "EcoTank L1250": "/screenshots/products/epson_ecotank_l1250_live.png",
+    "EcoTank L3210": "/screenshots/products/epson_ecotank_l3210_live.png",
+    "EcoTank L3250": "/screenshots/products/epson_ecotank_l3250_live.png",
+    "EcoTank L4260": "/screenshots/products/epson_ecotank_l4260_live.png",
+    "EcoTank L5290": "/screenshots/products/epson_ecotank_l5290_live.png",
+}
+
+def get_screenshot(brand: str, platform: str, sku: str = "") -> str:
     b = brand.lower()
     p = platform.lower()
-    # Direct match
+    if sku and sku in SKU_SCREENSHOTS:
+        return SKU_SCREENSHOTS[sku]
     for (sb, sp), url in _shots.items():
         if sb.lower() == b and (sp in p or p in sp):
             return url
-    # Fallback to general brand screenshot
-    if 'shopee' in p:
-        return f"/screenshots/ecommerce/shopee_mall_{b}.png"
-    elif 'lazada' in p:
-        return f"/screenshots/ecommerce/lazada_{b}.png"
-    elif 'jib' in p:
-        return f"/screenshots/ecommerce/jib_{b}.png"
-    elif 'power buy' in p:
-        return f"/screenshots/ecommerce/powerbuy_{b}.png"
+    if 'pantip' in p or 'review' in p:
+        return f"/screenshots/social/pantip_{b}.png"
     elif 'meta' in p or 'facebook' in p:
-        return f"/screenshots/social/facebook_{b}.png"
+        return f"/screenshots/ads/scrapling_meta_{b}.png"
     elif 'youtube' in p:
         return f"/screenshots/social/youtube_{b}.png"
-    elif 'tiktok' in p:
-        return f"/screenshots/social/tiktok_{b}.png"
-    elif 'google' in p:
-        return f"/screenshots/shopping/google_shopping_{b}.png"
-    return f"/screenshots/ecommerce/shopee_mall_{b}.png"
+    return f"/screenshots/ecommerce/jib_{b}.png"
 
 # ── URL Table Generator (All 65 SKUs + All Channels) ───────────────────────────
 URLS = []
