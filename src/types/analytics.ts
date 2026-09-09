@@ -151,6 +151,7 @@ export interface ExecutiveOverviewData {
       ecom_sov_pct: number | null;
       avg_price_thb: number | null;
       avg_discount_pct: number | null;
+      avg_consumer_rating?: number | null;
       top_promoted_sku: string | null;
       evidence_count: number;
     }
@@ -163,5 +164,6 @@ export interface ExecutiveOverviewData {
     ecommerce: number;
     consumer_review: number;
   };
+  readonly avg_consumer_rating?: number | null;
   readonly generated_at: string;
 }

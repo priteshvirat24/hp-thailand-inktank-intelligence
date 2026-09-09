@@ -27,6 +27,7 @@ export type DashboardSection =
   | 'ecommerce'
   | 'skus'
   | 'sentiment'
+  | 'insights'
   | 'signals'
   | 'evidence'
   | 'social'
@@ -46,7 +47,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'ecommerce',    label: '4. Promotions & Pricing',icon: <ShoppingCart className="w-3.5 h-3.5" /> },
   { id: 'skus',         label: '5. Product / SKU Push',  icon: <Layers className="w-3.5 h-3.5" />, badge: 65 },
   { id: 'sentiment',    label: '6. Consumer Sentiment',  icon: <MessageSquare className="w-3.5 h-3.5" /> },
-  { id: 'signals',      label: '7. Signals & Actions',   icon: <Target className="w-3.5 h-3.5" /> },
+  { id: 'insights',     label: '7. Insights & Recommendations', icon: <Target className="w-3.5 h-3.5" /> },
   { id: 'evidence',     label: '8. Evidence & Sources',  icon: <ShieldCheck className="w-3.5 h-3.5" /> },
   { id: 'social',       label: 'Social Channels',        icon: <Users className="w-3.5 h-3.5" /> },
   { id: 'web',          label: 'Web Intelligence',       icon: <Globe className="w-3.5 h-3.5" />, badge: 'LIVE' },

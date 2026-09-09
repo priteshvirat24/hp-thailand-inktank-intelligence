@@ -53,6 +53,15 @@ export interface EvidenceApiResponse {
   evidence: RawEvidenceRecord[];
 }
 
+export interface InsightsApiResponse {
+  month: AnalyticalMonth;
+  brand: TargetBrand | 'All';
+  count: number;
+  total: number;
+  insights: import('@/services/insights/insightTypes').Insight[];
+  timestamp: string;
+}
+
 export interface ApiError {
   error: string;
   message?: string;
@@ -294,6 +303,21 @@ export async function sendRagQuery(ragQuery: RagQuery): Promise<RagAnswer> {
   }
 
   return res.json();
+}
+
+// ─── Authoritative Insights Operations ──────────────────────────────────────
+
+export async function fetchInsights(
+  month: AnalyticalMonth = 'ALL',
+  brand: TargetBrand | 'All' = 'All',
+  limit = 5
+): Promise<InsightsApiResponse> {
+  const params = new URLSearchParams({
+    month,
+    brand,
+    limit: String(limit),
+  });
+  return apiFetch<InsightsApiResponse>(`/api/insights?${params.toString()}`);
 }
 
 

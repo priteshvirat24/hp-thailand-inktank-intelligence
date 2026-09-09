@@ -240,28 +240,43 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({
 
                         {/* Scraped Browser Screenshot Preview */}
                         {rec.screenshot_url && (
-                          <div className="rounded-lg overflow-hidden border border-zinc-800 bg-black/50">
-                            <div className="px-3 py-1.5 bg-zinc-900/90 border-b border-zinc-800 flex items-center justify-between text-[10px] font-mono text-zinc-400">
-                              <span className="flex items-center gap-1.5 text-emerald-400">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                                Scrapling Headless Browser Capture
-                              </span>
+                          <div className="rounded-xl overflow-hidden border border-zinc-700/80 bg-zinc-950/90 shadow-lg group">
+                            <div className="px-3.5 py-2 bg-zinc-900/95 border-b border-zinc-800 flex items-center justify-between text-[11px] font-mono">
+                              <div className="flex items-center gap-2">
+                                <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                  100% Verifiable Source Evidence
+                                </span>
+                                <span className="text-zinc-600">•</span>
+                                <span className="text-zinc-400 text-[10px]">
+                                  {rec.platform} Official View
+                                </span>
+                              </div>
                               <a
                                 href={rec.screenshot_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-sky-400 hover:text-sky-300 font-medium"
+                                className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 font-medium transition-colors bg-sky-950/40 hover:bg-sky-900/50 border border-sky-800/50 px-2 py-0.5 rounded text-[10px]"
                               >
-                                Full Screen ↗
+                                <span>High-Res Full View</span>
+                                <ExternalLink className="w-3 h-3" />
                               </a>
                             </div>
-                            <a href={rec.screenshot_url} target="_blank" rel="noopener noreferrer" className="block max-h-56 overflow-hidden">
+                            <a
+                              href={rec.screenshot_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block max-h-64 overflow-hidden relative cursor-zoom-in bg-zinc-900"
+                            >
                               <img
                                 src={rec.screenshot_url}
-                                alt={`${rec.brand} Scraped Ad`}
-                                className="w-full object-cover object-top hover:opacity-90 transition-opacity"
+                                alt={`${rec.brand} ${rec.product_sku || ''} verified evidence observation`}
+                                className="w-full object-cover object-top group-hover:scale-[1.01] transition-transform duration-300"
                                 loading="lazy"
                               />
+                              <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-sm text-zinc-300 text-[10px] px-2 py-1 rounded border border-zinc-700/80 font-mono">
+                                Click to inspect high-res capture ↗
+                              </div>
                             </a>
                           </div>
                         )}

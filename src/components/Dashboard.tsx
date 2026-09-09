@@ -24,7 +24,7 @@ import { SocialActivitySection } from '@/components/sections/SocialActivitySecti
 import { EcommercePricingSection } from '@/components/sections/EcommercePricingSection';
 import { SkuExplorerSection } from '@/components/sections/SkuExplorerSection';
 import { ConsumerSentimentSection } from '@/components/sections/ConsumerSentimentSection';
-import { CompetitiveSignalsSection } from '@/components/sections/CompetitiveSignalsSection';
+import { InsightsRecommendationsSection } from '@/components/sections/InsightsRecommendationsSection';
 import { EvidenceLakeSection } from '@/components/sections/EvidenceLakeSection';
 import { WebIntelligenceSection } from '@/components/sections/WebIntelligenceSection';
 import { Card } from '@/components/ui/Card';
@@ -35,9 +35,11 @@ import {
   fetchBrands,
   fetchSkus,
   fetchEvidence,
+  fetchInsights,
   fetchIngestionHealth,
   IngestionHealthResponse,
 } from '@/lib/apiClient';
+import { Insight } from '@/services/insights/insightTypes';
 
 import {
   ExecutiveOverviewData,
@@ -91,6 +93,7 @@ interface DashboardData {
   engagement: BrandComparisonRecord[];
   listings: BrandComparisonRecord[];
   skus: SkuComparisonRecord[];
+  insights: Insight[];
   allEvidence: RawEvidenceRecord[];
 }
 
@@ -108,6 +111,7 @@ const EMPTY_DATA: DashboardData = {
   engagement: [],
   listings: [],
   skus: [],
+  insights: [],
   allEvidence: [],
 };
 
@@ -163,6 +167,7 @@ export const Dashboard: React.FC = () => {
         engagementRes,
         listingsRes,
         skusRes,
+        insightsRes,
       ] = await Promise.all([
         fetchSummary(month).catch(() => null),
         fetchBrands('TOTAL_VISIBILITY_TOUCHPOINTS', month).catch(() => null),
@@ -177,6 +182,7 @@ export const Dashboard: React.FC = () => {
         fetchBrands('TOTAL_SOCIAL_ENGAGEMENT', month).catch(() => null),
         fetchBrands('ECOMMERCE_LISTINGS_COUNT', month).catch(() => null),
         fetchSkus(null, month).catch(() => null),
+        fetchInsights(month, 'All', 5).catch(() => null),
       ]);
 
       setData({
@@ -193,6 +199,7 @@ export const Dashboard: React.FC = () => {
         engagement: engagementRes?.comparison ?? [],
         listings: listingsRes?.comparison ?? [],
         skus: skusRes?.skus ?? [],
+        insights: insightsRes?.insights ?? [],
         allEvidence: [], // Evidence Lake loaded separately on section activation
       });
     } catch (err) {
@@ -228,7 +235,12 @@ export const Dashboard: React.FC = () => {
   }, [selectedMonth, fetchAllData, loadIngestionHealth]);
 
   useEffect(() => {
-    if (activeSection === 'evidence' || activeSection === 'sentiment') {
+    if (
+      activeSection === 'evidence' ||
+      activeSection === 'sentiment' ||
+      activeSection === 'insights' ||
+      activeSection === 'signals'
+    ) {
       void fetchEvidenceLake(selectedMonth);
     }
   }, [activeSection, selectedMonth, fetchEvidenceLake]);
@@ -352,6 +364,7 @@ export const Dashboard: React.FC = () => {
         return (
           <ExecutiveOverview
             data={data.summary}
+            insights={data.insights}
             selectedMonth={selectedMonth}
             selectedBrand={selectedBrand}
             onOpenEvidence={openEvidence}
@@ -424,12 +437,14 @@ export const Dashboard: React.FC = () => {
             onOpenEvidence={openEvidence}
           />
         );
+      case 'insights':
       case 'signals':
         return (
-          <CompetitiveSignalsSection
-            summary={data.summary}
+          <InsightsRecommendationsSection
+            insights={data.insights}
             selectedMonth={selectedMonth}
             selectedBrand={selectedBrand}
+            isLoading={isLoading}
             onOpenEvidence={openEvidence}
           />
         );

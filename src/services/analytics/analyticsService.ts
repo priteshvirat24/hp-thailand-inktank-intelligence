@@ -215,6 +215,11 @@ export class AnalyticsService {
     const allEvidence = globalEvidenceStore.getAll();
     const brandSummaries = {} as ExecutiveOverviewData['brands'];
 
+    // Calculate verified observations for the active window
+    const activeRecords = allEvidence.filter(
+      (r) => month === 'ALL' || (r.published_at && r.published_at.startsWith(month))
+    );
+
     for (const brand of TARGET_BRANDS) {
       const touchpointRow = this.getMetricValue('TOTAL_VISIBILITY_TOUCHPOINTS', { brand, month, sku_id: 'All' });
       const paidSovRow = this.getMetricValue('PAID_MEDIA_SOV', { brand, month, sku_id: 'All' });
@@ -227,6 +232,13 @@ export class AnalyticsService {
       const brandSkus = this.getSkuComparison(brand, month);
       const topPromoted = brandSkus.sort((a, b) => (b.promo_penetration_pct || 0) - (a.promo_penetration_pct || 0))[0];
 
+      const brandRated = activeRecords.filter(
+        (r) => r.brand === brand && typeof r.rating === 'number' && r.rating > 0
+      );
+      const brandAvgRating = brandRated.length > 0
+        ? Number((brandRated.reduce((acc, r) => acc + (r.rating || 0), 0) / brandRated.length).toFixed(1))
+        : null;
+
       brandSummaries[brand] = {
         total_visibility_touchpoints: touchpointRow?.metric_value ?? 0,
         paid_sov_pct: paidSovRow?.metric_value ?? null,
@@ -234,15 +246,18 @@ export class AnalyticsService {
         ecom_sov_pct: ecomSovRow?.metric_value ?? null,
         avg_price_thb: priceRow?.metric_value ?? null,
         avg_discount_pct: discountRow?.metric_value ?? null,
+        avg_consumer_rating: brandAvgRating,
         top_promoted_sku: topPromoted?.promo_penetration_pct ? topPromoted.model_name : null,
         evidence_count: touchpointRow?.observation_count ?? 0,
       };
     }
 
-    // Calculate verified observations for the active window
-    const activeRecords = allEvidence.filter(
-      (r) => month === 'ALL' || (r.published_at && r.published_at.startsWith(month))
+    const ratedRecords = activeRecords.filter(
+      (r) => typeof r.rating === 'number' && r.rating > 0
     );
+    const overallAvgRating = ratedRecords.length > 0
+      ? Number((ratedRecords.reduce((acc, r) => acc + (r.rating || 0), 0) / ratedRecords.length).toFixed(1))
+      : null;
 
     const channelObservations = {
       paid_media: activeRecords.filter((r) => r.channel === 'Paid Media').length,
@@ -257,6 +272,7 @@ export class AnalyticsService {
       total_evidence_observations: activeRecords.length,
       total_lake_observations: allEvidence.length,
       channel_observations: channelObservations,
+      avg_consumer_rating: overallAvgRating,
       generated_at: new Date().toISOString(),
     };
   }

@@ -39,6 +39,7 @@ import { motion, type Variants } from 'framer-motion';
 
 interface ExecutiveOverviewProps {
   data: ExecutiveOverviewData | null;
+  insights?: readonly import('@/services/insights/insightTypes').Insight[];
   selectedMonth: AnalyticalMonth;
   selectedBrand?: TargetBrand | 'All';
   onOpenEvidence?: (metricId: string, metricName: string, brand: TargetBrand | 'All') => void;
@@ -80,6 +81,7 @@ const itemVariants: Variants = {
 
 export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
   data,
+  insights,
   selectedMonth,
   selectedBrand = 'All',
   onOpenEvidence,
@@ -117,6 +119,9 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
   const socialObs = data?.channel_observations?.social ?? 0;
   const ecomObs = data?.channel_observations?.ecommerce ?? 0;
   const reviewObs = data?.channel_observations?.consumer_review ?? 0;
+  const displayRating = selectedBrand === 'All'
+    ? data?.avg_consumer_rating
+    : (activeBrandData?.avg_consumer_rating ?? data?.avg_consumer_rating);
 
   // Dynamic calculations for Key Insights
   const rankedBrandsByTouchpoints = TARGET_BRANDS.slice().sort(
@@ -190,120 +195,216 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
         ))}
       </motion.div>
 
-      {/* ── Priority 1: 4 Dynamic Key Insights Cards ("What Matters?") ──────── */}
+      {/* ── Priority 1: Dynamic Key Insights Cards ("What Matters?") ──────── */}
       <motion.div variants={itemVariants} className="space-y-2.5">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-300 flex items-center gap-2">
             <TrendingUp className="w-3.5 h-3.5 text-sky-400" />
-            Executive Takeaways — 4 Key Strategic Findings ({monthInfo.label})
+            Executive Takeaways — Strategic Findings ({monthInfo.label})
           </h3>
-          <span className="text-[10px] font-mono text-zinc-500 uppercase">Derived from Verified Cube Metrics</span>
+          <button
+            type="button"
+            onClick={() => onNavigateSection?.('insights')}
+            className="text-[11px] font-mono text-sky-400 hover:text-sky-300 flex items-center gap-1 uppercase transition-colors"
+          >
+            <span>Full Insights &amp; Recommendations</span>
+            <ArrowRight className="w-3 h-3" />
+          </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
-          {/* Card 1: Visibility Leadership */}
-          <div className="p-4 rounded-xl bg-[#121214] border border-[#222226] space-y-2.5 relative overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-all">
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-[10px] font-mono">
-                <span className="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 uppercase font-semibold">
-                  Visibility &amp; SOV
-                </span>
-                <span className="text-zinc-400">{leaderTouchpoints} pts</span>
-              </div>
-              <h4 className="text-xs font-bold text-white leading-snug">
-                {touchpointLeader} leads online presence; HP captures {hpTouchpoints} touchpoints
-              </h4>
-              <p className="text-[11px] text-zinc-400 leading-relaxed">
-                {touchpointLeader} maintains the highest combined volume across search ads and marketplace listings. HP holds a strong paid ad share ({hp?.paid_sov_pct ?? '—'}% paid SOV) but has headroom on marketplace listings.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => onOpenEvidence?.('TOTAL_VISIBILITY_TOUCHPOINTS', 'Total Online Visibility Touchpoints', 'HP')}
-              className="text-[10px] font-mono text-sky-400 hover:text-sky-300 flex items-center gap-1 pt-1"
-            >
-              <span>Inspect visibility evidence</span>
-              <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
+          {insights && insights.length > 0 ? (
+            insights.slice(0, 4).map((insight) => {
+              const isMultiCut = insight.confidence === 'MULTI-CUT';
+              const isCorroborated = insight.confidence === 'CORROBORATED';
+              const primaryMetric = insight.supportingMetrics[0];
 
-          {/* Card 2: E-Commerce Shelf Dominance */}
-          <div className="p-4 rounded-xl bg-[#121214] border border-[#222226] space-y-2.5 relative overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-all">
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-[10px] font-mono">
-                <span className="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 uppercase font-semibold">
-                  E-Commerce SOV
-                </span>
-                <span className="text-zinc-400">{leaderEcomSov}% vs {hpEcomSov}%</span>
-              </div>
-              <h4 className="text-xs font-bold text-white leading-snug">
-                {ecomLeader} anchors marketplace shelf share on Shopee &amp; LazMall
-              </h4>
-              <p className="text-[11px] text-zinc-400 leading-relaxed">
-                {ecomLeader} holds {leaderEcomSov}% of observed product listings, leveraging high listing density for entry models. HP at {hpEcomSov}% focuses on official store bundles.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => onOpenEvidence?.('ECOMMERCE_SOV', 'E-Commerce Share of Voice %', 'HP')}
-              className="text-[10px] font-mono text-amber-400 hover:text-amber-300 flex items-center gap-1 pt-1"
-            >
-              <span>Inspect e-commerce listings</span>
-              <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
+              return (
+                <div
+                  key={insight.id}
+                  className="p-4 rounded-xl bg-[#121214] border border-[#222226] space-y-2.5 relative overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-all"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-[10px] font-mono">
+                      <div className="flex items-center gap-1.5">
+                        <span className="px-1.5 py-0.5 rounded bg-sky-950/80 text-sky-300 border border-sky-800/80 uppercase font-semibold text-[10px]">
+                          {insight.category}
+                        </span>
+                        <span
+                          className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold ${
+                            insight.priority === 'HIGH'
+                              ? 'bg-rose-950/80 text-rose-300 border border-rose-800'
+                              : 'bg-zinc-800 text-zinc-300'
+                          }`}
+                        >
+                          {insight.priority}
+                        </span>
+                      </div>
+                      <span className="text-zinc-400 text-[10px] font-mono uppercase">
+                        {isMultiCut ? '3+ Cuts' : isCorroborated ? '2 Cuts' : '1 Cut'}
+                      </span>
+                    </div>
 
-          {/* Card 3: Pricing Gap & Margin Anchor */}
-          <div className="p-4 rounded-xl bg-[#121214] border border-[#222226] space-y-2.5 relative overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-all">
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-[10px] font-mono">
-                <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 uppercase font-semibold">
-                  Pricing Anchor
-                </span>
-                <span className="text-zinc-400">{hpAvgPrice ? formatTHB(hpAvgPrice) : '—'}</span>
-              </div>
-              <h4 className="text-xs font-bold text-white leading-snug">
-                HP maintains premium positioning vs Canon entry price
-              </h4>
-              <p className="text-[11px] text-zinc-400 leading-relaxed">
-                HP average selling price ({hpAvgPrice ? formatTHB(hpAvgPrice) : '—'}) reflects bundled value and connectivity features, while Canon ({canonAvgPrice ? formatTHB(canonAvgPrice) : '—'}) targets price-sensitive students.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => onOpenEvidence?.('AVG_SELLING_PRICE_THB', 'Average Selling Price', 'HP')}
-              className="text-[10px] font-mono text-emerald-400 hover:text-emerald-300 flex items-center gap-1 pt-1"
-            >
-              <span>Inspect pricing evidence</span>
-              <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
+                    <h4 className="text-xs font-bold text-white leading-snug line-clamp-2">
+                      {insight.title}
+                    </h4>
 
-          {/* Card 4: Service Warranty Moat */}
-          <div className="p-4 rounded-xl bg-[#121214] border border-[#222226] space-y-2.5 relative overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-all">
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-[10px] font-mono">
-                <span className="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 uppercase font-semibold">
-                  Strategic Moat
-                </span>
-                <span className="text-zinc-400">Proven Moat</span>
+                    <p className="text-[11px] text-zinc-400 leading-relaxed line-clamp-3">
+                      {insight.finding}
+                    </p>
+
+                    <div className="pt-1.5 p-2 rounded bg-[#0e1610] border border-emerald-900/40 text-[10px] text-emerald-300/90 font-mono">
+                      <span className="text-zinc-500 uppercase tracking-wider block text-[9px] font-semibold mb-0.5">
+                        HP Recommendation
+                      </span>
+                      <p className="line-clamp-2">{insight.recommendation}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-[#1e1e22] text-[10px] font-mono">
+                    {primaryMetric ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          onOpenEvidence?.(
+                            primaryMetric.metric_id,
+                            primaryMetric.metric_name,
+                            insight.affectedBrands[0] || 'HP'
+                          )
+                        }
+                        className="text-sky-400 hover:text-sky-300 flex items-center gap-1"
+                      >
+                        <span>Inspect Evidence</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onNavigateSection?.('insights')}
+                        className="text-sky-400 hover:text-sky-300 flex items-center gap-1"
+                      >
+                        <span>Evidence Details</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => onNavigateSection?.('insights')}
+                      className="text-zinc-500 hover:text-zinc-300"
+                    >
+                      View Lineage →
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <>
+              {/* Card 1: Visibility Leadership */}
+              <div className="p-4 rounded-xl bg-[#121214] border border-[#222226] space-y-2.5 relative overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-all">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-[10px] font-mono">
+                    <span className="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 uppercase font-semibold">
+                      Visibility &amp; SOV
+                    </span>
+                    <span className="text-zinc-400">{leaderTouchpoints} pts</span>
+                  </div>
+                  <h4 className="text-xs font-bold text-white leading-snug">
+                    {touchpointLeader} leads online presence; HP captures {hpTouchpoints} touchpoints
+                  </h4>
+                  <p className="text-[11px] text-zinc-400 leading-relaxed">
+                    {touchpointLeader} maintains the highest combined volume across search ads and marketplace listings. HP holds a strong paid ad share ({hp?.paid_sov_pct ?? '—'}% paid SOV) but has headroom on marketplace listings.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onOpenEvidence?.('TOTAL_VISIBILITY_TOUCHPOINTS', 'Total Online Visibility Touchpoints', 'HP')}
+                  className="text-[10px] font-mono text-sky-400 hover:text-sky-300 flex items-center gap-1 pt-1"
+                >
+                  <span>Inspect visibility evidence</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
               </div>
-              <h4 className="text-xs font-bold text-white leading-snug">
-                2-Year Onsite Service is HP&apos;s strongest uncopied differentiator
-              </h4>
-              <p className="text-[11px] text-zinc-400 leading-relaxed">
-                Door-to-door technician repair across all 77 Thai provinces remains HP&apos;s primary value moat against competitor carry-in depot service requirements.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => onNavigateSection?.('signals')}
-              className="text-[10px] font-mono text-purple-400 hover:text-purple-300 flex items-center gap-1 pt-1"
-            >
-              <span>View strategic action plan</span>
-              <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
+
+              {/* Card 2: E-Commerce Shelf Dominance */}
+              <div className="p-4 rounded-xl bg-[#121214] border border-[#222226] space-y-2.5 relative overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-all">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-[10px] font-mono">
+                    <span className="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 uppercase font-semibold">
+                      E-Commerce SOV
+                    </span>
+                    <span className="text-zinc-400">{leaderEcomSov}% vs {hpEcomSov}%</span>
+                  </div>
+                  <h4 className="text-xs font-bold text-white leading-snug">
+                    {ecomLeader} anchors marketplace shelf share on Shopee &amp; LazMall
+                  </h4>
+                  <p className="text-[11px] text-zinc-400 leading-relaxed">
+                    {ecomLeader} holds {leaderEcomSov}% of observed product listings, leveraging high listing density for entry models. HP at {hpEcomSov}% focuses on official store bundles.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onOpenEvidence?.('ECOMMERCE_SOV', 'E-Commerce Share of Voice %', 'HP')}
+                  className="text-[10px] font-mono text-amber-400 hover:text-amber-300 flex items-center gap-1 pt-1"
+                >
+                  <span>Inspect e-commerce listings</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
+
+              {/* Card 3: Pricing Gap & Margin Anchor */}
+              <div className="p-4 rounded-xl bg-[#121214] border border-[#222226] space-y-2.5 relative overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-all">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-[10px] font-mono">
+                    <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 uppercase font-semibold">
+                      Pricing Anchor
+                    </span>
+                    <span className="text-zinc-400">{hpAvgPrice ? formatTHB(hpAvgPrice) : '—'}</span>
+                  </div>
+                  <h4 className="text-xs font-bold text-white leading-snug">
+                    HP maintains premium positioning vs Canon entry price
+                  </h4>
+                  <p className="text-[11px] text-zinc-400 leading-relaxed">
+                    HP average selling price ({hpAvgPrice ? formatTHB(hpAvgPrice) : '—'}) reflects bundled value and connectivity features, while Canon ({canonAvgPrice ? formatTHB(canonAvgPrice) : '—'}) targets price-sensitive students.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onOpenEvidence?.('AVG_SELLING_PRICE_THB', 'Average Selling Price', 'HP')}
+                  className="text-[10px] font-mono text-emerald-400 hover:text-emerald-300 flex items-center gap-1 pt-1"
+                >
+                  <span>Inspect pricing evidence</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
+
+              {/* Card 4: Service Warranty Moat */}
+              <div className="p-4 rounded-xl bg-[#121214] border border-[#222226] space-y-2.5 relative overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-all">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-[10px] font-mono">
+                    <span className="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 uppercase font-semibold">
+                      Strategic Moat
+                    </span>
+                    <span className="text-zinc-400">Proven Moat</span>
+                  </div>
+                  <h4 className="text-xs font-bold text-white leading-snug">
+                    2-Year Onsite Service is HP&apos;s strongest uncopied differentiator
+                  </h4>
+                  <p className="text-[11px] text-zinc-400 leading-relaxed">
+                    Door-to-door technician repair across all 77 Thai provinces remains HP&apos;s primary value moat against competitor carry-in depot service requirements.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onNavigateSection?.('insights')}
+                  className="text-[10px] font-mono text-purple-400 hover:text-purple-300 flex items-center gap-1 pt-1"
+                >
+                  <span>View strategic action plan</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </motion.div>
 
@@ -380,9 +481,9 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
           icon={<Star className="w-4 h-4" />}
           label1="AVG CONSUMER"
           label2="RATING"
-          value={reviewObs > 0 ? '4.8' : null}
+          value={displayRating !== null && displayRating !== undefined ? `${displayRating.toFixed(1)}` : null}
           suffix="/ 5"
-          isObserved={reviewObs > 0}
+          isObserved={displayRating !== null && displayRating !== undefined}
           comparison={reviewObs > 0 ? `${reviewObs} Reviews` : 'No reviews'}
         />
       </motion.div>

@@ -39,4 +39,6 @@ Thumbs.db
 .venv/
 Scrapling/
 .crawl_checkpoints/
-.vercel
+__pycache__/
+*.pyc
+tsconfig.tsbuildinfo
