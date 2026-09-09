@@ -51,15 +51,11 @@ const MONTH_LABELS: Record<AnalyticalMonth, { label: string; range: string }> = 
 
 const VISIBILITY_SOURCES = [
   'Meta Ad Library',
-  'Google Ads Transparency',
-  'Facebook',
-  'Instagram',
-  'YouTube',
-  'TikTok',
-  'Shopee Mall',
-  'LazMall',
-  'TikTok Shop',
+  'Shopee Official Stores',
   'JIB Thailand',
+  'Pantip.com Community',
+  'Facebook Official',
+  'YouTube Official (HP, Canon, Brother)',
 ] as const;
 
 const MONOCHROME_BRAND_SHADES: Record<TargetBrand, string> = {

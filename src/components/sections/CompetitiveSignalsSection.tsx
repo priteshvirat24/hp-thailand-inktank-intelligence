@@ -403,7 +403,7 @@ export const CompetitiveSignalsSection: React.FC<CompetitiveSignalsSectionProps>
                 </div>
                 <h4 className="text-xs font-bold text-white">Baseline Market Launch</h4>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  Brands maintained baseline pricing with moderate 6.6 early-bird promotional flights (7.5%–9.0% discount). Epson initiated initial Heat-Free awareness push across Google Ads Transparency.
+                  Brands maintained baseline pricing with moderate 6.6 early-bird promotional flights (7.5%–9.0% discount). Epson initiated initial Heat-Free awareness push across Meta Ad Library verified flights.
                 </p>
               </div>
 

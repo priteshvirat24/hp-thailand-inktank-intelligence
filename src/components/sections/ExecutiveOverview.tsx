@@ -55,15 +55,11 @@ const MONTH_LABELS: Record<AnalyticalMonth, { label: string; full: string }> = {
 
 const VERIFIED_SOURCES = [
   'Meta Ad Library',
-  'Google Ads Transparency',
-  'Shopee Mall',
-  'LazMall',
-  'TikTok Shop',
+  'Shopee Official Stores',
   'JIB Thailand',
-  'Facebook',
-  'Instagram',
-  'YouTube',
-  'TikTok',
+  'Pantip.com Community',
+  'Facebook Official',
+  'YouTube Official (HP, Canon, Brother)',
 ] as const;
 
 const containerVariants: Variants = {

@@ -168,6 +168,7 @@ export const Dashboard: React.FC = () => {
         listingsRes,
         skusRes,
         insightsRes,
+        evidenceRes,
       ] = await Promise.all([
         fetchSummary(month).catch(() => null),
         fetchBrands('TOTAL_VISIBILITY_TOUCHPOINTS', month).catch(() => null),
@@ -183,9 +184,10 @@ export const Dashboard: React.FC = () => {
         fetchBrands('ECOMMERCE_LISTINGS_COUNT', month).catch(() => null),
         fetchSkus(null, month).catch(() => null),
         fetchInsights(month, 'All', 5).catch(() => null),
+        fetchEvidence('ALL' as unknown as MetricId, 'All', month).catch(() => null),
       ]);
 
-      setData({
+      setData((prev) => ({
         summary,
         touchpoints: touchpointsRes?.comparison ?? [],
         paidSov: paidSovRes?.comparison ?? [],
@@ -200,8 +202,8 @@ export const Dashboard: React.FC = () => {
         listings: listingsRes?.comparison ?? [],
         skus: skusRes?.skus ?? [],
         insights: insightsRes?.insights ?? [],
-        allEvidence: [], // Evidence Lake loaded separately on section activation
-      });
+        allEvidence: evidenceRes?.evidence ?? prev.allEvidence,
+      }));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to synchronize analytical data from server.');
     } finally {

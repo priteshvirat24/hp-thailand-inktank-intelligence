@@ -58,7 +58,7 @@ export class GroundingEngine {
       return {
         query: query.query,
         answer:
-          'No verified evidence is currently available in the Evidence Lake. Please execute a targeted crawl (e.g. Meta Ads, Google Ads, Shopee, Lazada, TikTok Shop, JIB) to populate real Thai market observations before generating strategic insights.',
+          'No verified evidence is currently available in the Evidence Lake. Please execute a targeted crawl (e.g. Meta Ad Library, Shopee, JIB Thailand, Pantip) to populate real Thai market observations before generating strategic insights.',
         supporting_evidence: [],
         supporting_metrics: supportingMetrics.map((m) => ({ ...m })),
         implication_for_hp:
@@ -283,14 +283,14 @@ STRICT INVARIANTS:
       const staticCount = adChunks.filter((r) => r.chunk.metadata.creative_format === 'Static Image').length;
       const carouselCount = adChunks.filter((r) => r.chunk.metadata.creative_format === 'Carousel').length;
 
-      answerText = `Observed ${adChunks.length} active ad creatives targeting Thailand across Meta Ad Library and Google Ads Transparency Center. Format distribution: ${videoCount} Video, ${staticCount} Static Image, ${carouselCount} Carousel.`;
+      answerText = `Observed ${adChunks.length} active ad creatives targeting Thailand across Meta Ad Library verified campaign flights. Format distribution: ${videoCount} Video, ${staticCount} Static Image, ${carouselCount} Carousel.`;
       implicationText =
         'Competitors leveraging dynamic video formats achieve higher thumb-stopping power on Thai feeds. HP should align Smart Tank creatives around localized value hooks (e.g. low cost-per-page, easy self-refill).';
     }
     // ─── Capability 5 & 6: Social Activity & Engagement ───────────────────────
     else if (qLower.includes('social') || qLower.includes('engagement') || qLower.includes('post')) {
       const socialChunks = retrievedResults.filter((r) => r.chunk.channel === 'Social');
-      answerText = `Identified ${socialChunks.length} official brand social media posts across Thai Facebook, Instagram, YouTube, and TikTok channels.`;
+      answerText = `Identified ${socialChunks.length} official brand social media posts across Thai Facebook and verified YouTube brand channels.`;
       implicationText =
         'Engaged customer discussions on official social channels highlight student and home-office printing demands. HP can amplify user-generated proof of Smart Tank reliability.';
     }

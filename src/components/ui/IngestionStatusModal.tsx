@@ -145,7 +145,7 @@ export const IngestionStatusModal: React.FC<IngestionStatusModalProps> = ({
                       </span>
                     </div>
                     <p className="text-[11px] text-zinc-400 leading-relaxed font-normal">
-                      Meta Ad Library, Google Ads, YouTube, Facebook, Instagram, TikTok Shop
+                      Meta Ad Library, YouTube (HP, Canon, Brother), Facebook Official Brand Pages
                     </p>
                   </div>
 
@@ -158,7 +158,7 @@ export const IngestionStatusModal: React.FC<IngestionStatusModalProps> = ({
                       </span>
                     </div>
                     <p className="text-[11px] text-zinc-400 leading-relaxed font-normal">
-                      Shopee Mall, LazMall, JIB Thailand Web Unlocker sessions
+                      Shopee Mall, JIB Thailand, Pantip.com Web Unlocker sessions
                     </p>
                   </div>
                 </div>

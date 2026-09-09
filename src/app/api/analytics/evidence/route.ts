@@ -40,7 +40,8 @@ export async function GET(req: NextRequest) {
       if (brand && brand !== 'All') {
         evidence = evidence.filter((r) => r.brand === brand);
       }
-      if (month && month !== 'All') {
+      const isAllMonths = !month || month.toUpperCase() === 'ALL' || month === 'All';
+      if (!isAllMonths) {
         evidence = evidence.filter((r) => r.published_at.startsWith(month));
       }
       if (channel && channel !== 'All') {
@@ -71,7 +72,7 @@ export async function GET(req: NextRequest) {
         const allEv = globalEvidenceStore.getAll();
         evidence = allEv.filter((r) => {
           const matchBrand = !brand || brand === 'All' || r.brand === brand;
-          const matchMonth = !month || month === 'All' || r.published_at.startsWith(month);
+          const matchMonth = !month || month.toUpperCase() === 'ALL' || r.published_at.startsWith(month);
           const matchSku =
             r.product_sku?.toLowerCase() === targetSku.model_name.toLowerCase() ||
             r.product_sku?.toLowerCase() === targetSku.sku_id.toLowerCase();

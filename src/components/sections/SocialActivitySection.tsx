@@ -47,11 +47,8 @@ const MONTH_LABELS: Record<AnalyticalMonth, { label: string; range: string }> = 
 };
 
 const SOCIAL_PLATFORMS = [
-  'Facebook (Official Thailand Pages)',
-  'Instagram (@hpthailand, @epsonthailand, etc.)',
-  'YouTube (Official Brand Channels)',
-  'TikTok Thailand',
-  'LinkedIn Thailand',
+  'Facebook (Official Thailand Brand Pages)',
+  'YouTube (Official Verified Channels: HP, Canon, Brother)',
 ] as const;
 
 const MONOCHROME_BRAND_SHADES: Record<TargetBrand, string> = {
@@ -113,7 +110,7 @@ export const SocialActivitySection: React.FC<SocialActivitySectionProps> = ({
         />
         <EmptyState
           title="NO SOCIAL MEDIA OBSERVATIONS FOR THIS PERIOD"
-          message={`No official brand posts captured from Facebook, Instagram, YouTube, TikTok, or LinkedIn for ${monthInfo.label} (${monthInfo.range}).`}
+          message={`No official brand posts captured from Facebook or verified YouTube channels for ${monthInfo.label} (${monthInfo.range}).`}
           actionText="Open Crawler Operations"
         />
       </div>

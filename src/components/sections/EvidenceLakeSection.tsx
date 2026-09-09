@@ -126,7 +126,7 @@ export const EvidenceLakeSection: React.FC<EvidenceLakeSectionProps> = ({
         />
         <EmptyState
           title="EVIDENCE LAKE IS EMPTY"
-          message="No raw evidence records have been ingested yet. Run ingestion crawlers (Meta Ads, Google Ads, Shopee, Lazada, TikTok Shop, JIB) to populate the Evidence Store."
+          message="No raw evidence records have been ingested yet. Run ingestion crawlers (Meta Ads, Shopee, JIB Thailand, Pantip) to populate the Evidence Store."
           actionText="Open Crawler Operations"
         />
       </div>
@@ -148,62 +148,7 @@ export const EvidenceLakeSection: React.FC<EvidenceLakeSectionProps> = ({
         filteredEvidence={filtered.length}
       />
 
-      {/* Live Scrapling Browser Captures Gallery */}
-      <motion.div variants={itemVariants}>
-        <LiveCapturesGallery />
-      </motion.div>
-
-      {/* Visual 3-Step Lineage Architecture Banner */}
-      <motion.div variants={itemVariants}>
-        <Card className="p-5 bg-[#0c0c0e]/90 border-zinc-800 rounded-xl shadow-sm">
-          <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80 mb-3.5">
-            <span className="text-xs uppercase font-bold text-zinc-300 font-mono tracking-wider">
-              End-to-End Data Lineage &amp; Verification Flow
-            </span>
-            <InfoTooltip
-              title="Evidence Lineage Guarantee"
-              content="Every single number in the dashboard traces back through the Analytical Metric Cube directly to one or more of these immutable raw records."
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs">
-            {/* Step 1 */}
-            <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1.5 shadow-sm">
-              <div className="flex items-center gap-2 text-white font-semibold">
-                <Database className="w-4 h-4 text-zinc-300" />
-                <span>1. Raw Web Observations</span>
-              </div>
-              <p className="text-xs text-zinc-400 font-sans leading-relaxed font-normal">
-                Crawled from Meta Ads, Google Ads, Shopee, Lazada, and Social profiles. Stored with immutable SHA-256 hashes.
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1.5 shadow-sm">
-              <div className="flex items-center gap-2 text-white font-semibold">
-                <Layers className="w-4 h-4 text-zinc-300" />
-                <span>2. Analytical Metric Cube</span>
-              </div>
-              <p className="text-xs text-zinc-400 font-sans leading-relaxed font-normal">
-                Deterministic monthly aggregation across 18 analytical metrics. Computes SOVs, pricing averages, and traction indexes.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1.5 shadow-sm">
-              <div className="flex items-center gap-2 text-white font-semibold">
-                <LayoutDashboard className="w-4 h-4 text-zinc-300" />
-                <span>3. Dashboard &amp; RAG Assistant</span>
-              </div>
-              <p className="text-xs text-zinc-400 font-sans leading-relaxed font-normal">
-                Strategic visual workspaces and evidence-grounded competitive Q&amp;A with deep source drilldowns.
-              </p>
-            </div>
-          </div>
-        </Card>
-      </motion.div>
-
-      {/* Filter Toolbar */}
+      {/* Filter Toolbar — Positioned at Top for Optimal Usability */}
       <motion.div variants={itemVariants}>
         <Card className="p-4 flex flex-wrap gap-3.5 items-center bg-[#0c0c0e]/90 border-zinc-800 rounded-xl shadow-sm">
           {/* Text Search */}
@@ -267,6 +212,61 @@ export const EvidenceLakeSection: React.FC<EvidenceLakeSectionProps> = ({
           </select>
 
           <span className="text-xs text-zinc-400 ml-auto font-mono tabular-nums">{filtered.length} records</span>
+        </Card>
+      </motion.div>
+
+      {/* Live Scrapling Browser Captures Gallery */}
+      <motion.div variants={itemVariants}>
+        <LiveCapturesGallery />
+      </motion.div>
+
+      {/* Visual 3-Step Lineage Architecture Banner */}
+      <motion.div variants={itemVariants}>
+        <Card className="p-5 bg-[#0c0c0e]/90 border-zinc-800 rounded-xl shadow-sm">
+          <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80 mb-3.5">
+            <span className="text-xs uppercase font-bold text-zinc-300 font-mono tracking-wider">
+              End-to-End Data Lineage &amp; Verification Flow
+            </span>
+            <InfoTooltip
+              title="Evidence Lineage Guarantee"
+              content="Every single number in the dashboard traces back through the Analytical Metric Cube directly to one or more of these immutable raw records."
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs">
+            {/* Step 1 */}
+            <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1.5 shadow-sm">
+              <div className="flex items-center gap-2 text-white font-semibold">
+                <Database className="w-4 h-4 text-zinc-300" />
+                <span>1. Raw Web Observations</span>
+              </div>
+              <p className="text-xs text-zinc-400 font-sans leading-relaxed font-normal">
+                Crawled from Meta Ad Library, Shopee, JIB Thailand, Pantip, and Brand Official profiles. Stored with immutable SHA-256 hashes.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1.5 shadow-sm">
+              <div className="flex items-center gap-2 text-white font-semibold">
+                <Layers className="w-4 h-4 text-zinc-300" />
+                <span>2. Analytical Metric Cube</span>
+              </div>
+              <p className="text-xs text-zinc-400 font-sans leading-relaxed font-normal">
+                Deterministic monthly aggregation across 18 analytical metrics. Computes SOVs, pricing averages, and traction indexes.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1.5 shadow-sm">
+              <div className="flex items-center gap-2 text-white font-semibold">
+                <LayoutDashboard className="w-4 h-4 text-zinc-300" />
+                <span>3. Dashboard &amp; RAG Assistant</span>
+              </div>
+              <p className="text-xs text-zinc-400 font-sans leading-relaxed font-normal">
+                Strategic visual workspaces and evidence-grounded competitive Q&amp;A with deep source drilldowns.
+              </p>
+            </div>
+          </div>
         </Card>
       </motion.div>
 

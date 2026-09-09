@@ -183,9 +183,9 @@ export const ConsumerSentimentSection: React.FC<ConsumerSentimentSectionProps> =
       <div className="space-y-6 font-sans">
         <SectionHeader
           title="6. Consumer Sentiment & Customer Voice Intelligence"
-          subtitle="Audited buyer reviews, ratings, and recurring satisfaction themes across Shopee and Lazada Thailand."
+          subtitle="Audited buyer reviews, ratings, and recurring satisfaction themes across Shopee Verified Purchases, Pantip.com, and JIB Thailand."
           period={selectedMonth}
-          sources={['Shopee Verified Purchases', 'Lazada Customer Reviews']}
+          sources={['Shopee Verified Purchases', 'Pantip.com Community', 'JIB Customer Feedback']}
           totalEvidence={0}
         />
         <EmptyState
@@ -205,9 +205,9 @@ export const ConsumerSentimentSection: React.FC<ConsumerSentimentSectionProps> =
     >
       <SectionHeader
         title="6. Consumer Sentiment & Customer Voice Intelligence"
-        subtitle="Audited buyer reviews, ratings, and recurring satisfaction themes across Shopee and Lazada Thailand."
+        subtitle="Audited buyer reviews, ratings, and recurring satisfaction themes across Shopee Verified Purchases, Pantip.com, and JIB Thailand."
         period={selectedMonth}
-        sources={['Shopee Verified Purchases', 'Lazada Customer Reviews']}
+        sources={['Shopee Verified Purchases', 'Pantip.com Community', 'JIB Customer Feedback']}
         totalEvidence={reviews.length}
         filteredEvidence={filteredReviews.length}
       />

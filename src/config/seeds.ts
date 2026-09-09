@@ -406,17 +406,6 @@ export const CRAWL_SEEDS: readonly CrawlTarget[] = [
     status: 'PENDING_VERIFICATION', // Brief marked HP YouTube as KIV
   },
   {
-    target_id: 'SEED-YT-EPSON',
-    source_id: 'src-youtube-th',
-    brand: 'Epson',
-    platform: 'YouTube',
-    channel: 'Social',
-    seed_url: 'https://www.youtube.com/@EpsonThailandOfficial',
-    country: 'Thailand',
-    locale: 'th-TH',
-    status: 'ACTIVE_SEED',
-  },
-  {
     target_id: 'SEED-YT-CANON',
     source_id: 'src-youtube-th',
     brand: 'Canon',

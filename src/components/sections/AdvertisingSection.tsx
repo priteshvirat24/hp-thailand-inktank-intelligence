@@ -78,8 +78,7 @@ const MONTH_LABELS: Record<AnalyticalMonth, { label: string; range: string }> = 
 };
 
 const AD_SOURCES = [
-  'Meta Ad Library API Thailand (Facebook & Instagram)',
-  'Google Ads Transparency Center (Search & YouTube)',
+  'Meta Ad Library API Thailand (Search & Display Flights)',
   'Certified Retailer Co-Op Networks (BaNANA, IT CITY, Power Buy)',
 ] as const;
 
@@ -162,14 +161,14 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
       <div className="space-y-6">
         <SectionHeader
           title="Paid Advertising & Creatives Intelligence"
-          subtitle={`Observable ad campaigns captured from Meta Ad Library Thailand and Google Ads Transparency Center — ${monthInfo.label}.`}
+          subtitle={`Observable ad campaigns captured from Meta Ad Library Thailand — ${monthInfo.label}.`}
           period={monthInfo.label}
           sources={AD_SOURCES}
           totalEvidence={0}
         />
         <EmptyState
           title="NO PAID ADVERTISING OBSERVATIONS FOR THIS PERIOD"
-          message={`No active ad creatives captured from Meta Ad Library Thailand or Google Ads Transparency Center for ${monthInfo.label} (${monthInfo.range}).`}
+          message={`No active ad creatives captured from Meta Ad Library Thailand for ${monthInfo.label} (${monthInfo.range}).`}
           actionText="Open Crawler Operations"
         />
       </div>
@@ -289,7 +288,7 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
                   />
                 </div>
                 <p className="text-xs text-zinc-400 font-sans mt-0.5">
-                  Total unique commercial creatives in market across Meta Ad Library and Google Ads
+                  Total unique commercial creatives in market across Meta Ad Library verified flights
                 </p>
               </div>
               <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800">
@@ -964,7 +963,7 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
       <motion.div variants={itemVariants}>
         <MethodologyDisclosure
           title="Advertising Ingestion & Deduplication Methodology"
-          description="Ad creatives are ingested from the public Meta Ad Library API and Google Ads Transparency Center targeting Thailand. Ads are deduplicated by creative hash so identical ads running concurrently across multiple ad sets are counted as a single unique creative presence."
+          description="Ad creatives are ingested from the public Meta Ad Library API targeting Thailand with verified visual creatives. Ads are deduplicated by creative hash so identical ads running concurrently across multiple ad sets are counted as a single unique creative presence."
           rules={[
             {
               label: 'Geographic Filter',

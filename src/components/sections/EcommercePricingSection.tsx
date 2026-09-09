@@ -40,12 +40,8 @@ const MONTH_LABELS: Record<AnalyticalMonth, { label: string; range: string }> = 
 };
 
 const ECOM_PLATFORMS = [
-  'Shopee Mall (Official Stores & Certified Resellers)',
-  'LazMall Thailand (Brand Flagships)',
-  'TikTok Shop Thailand',
-  'JIB Thailand',
-  'Advice IT',
-  'Power Buy',
+  'Shopee Mall (Official Stores & Verified Listings)',
+  'JIB Thailand (jib.co.th)',
 ] as const;
 
 const containerVariants: Variants = {
@@ -109,7 +105,7 @@ export const EcommercePricingSection: React.FC<EcommercePricingSectionProps> = (
         />
         <EmptyState
           title="NO E-COMMERCE OBSERVATIONS FOR THIS PERIOD"
-          message={`No marketplace listings or pricing records ingested for ${monthInfo.label} (${monthInfo.range}). Run the Shopee, Lazada, TikTok Shop, and JIB adapters to populate pricing intelligence.`}
+          message={`No marketplace listings or pricing records ingested for ${monthInfo.label} (${monthInfo.range}). Run the Shopee and JIB adapters to populate pricing intelligence.`}
           actionText="Open Crawler Operations"
         />
       </div>

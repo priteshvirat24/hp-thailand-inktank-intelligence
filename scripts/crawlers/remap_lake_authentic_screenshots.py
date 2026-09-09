@@ -633,17 +633,6 @@ def update_manifest():
             "viewport": [1440, 900],
             "verification": "Authentic Official YouTube Channel Capture"
         },
-        {
-            "id": "youtube_epson",
-            "brand": "Epson",
-            "channel": "Social",
-            "platform": "YouTube Official",
-            "url": "https://www.youtube.com/@EpsonThailand",
-            "screenshot_url": "/screenshots/social/youtube_epson.png",
-            "status": "captured",
-            "viewport": [1440, 900],
-            "verification": "Authentic Official YouTube Channel Capture"
-        },
 
         # Paid Media (Meta Ad Library Flights)
         {
