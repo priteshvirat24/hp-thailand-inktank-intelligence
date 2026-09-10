@@ -12,6 +12,7 @@ import { buildAllEvidenceChunks } from './evidenceDocumentBuilder';
 import { retrievalEngine } from './retrievalEngine';
 import { serverEmbeddingProvider } from './embeddings/provider';
 import { groundingEngine } from './groundingEngine';
+import { queryUnderstandingEngine } from './queryUnderstanding';
 
 export class RagService {
   /**
@@ -20,22 +21,40 @@ export class RagService {
   public async query(ragQuery: RagQuery): Promise<RagAnswer> {
     const startTimeMs = Date.now();
 
-    // 1. Fetch all raw evidence records from the Evidence Store
+    // 1. Perform conversational query understanding and reference resolution
+    const plan = queryUnderstandingEngine.analyzeQuery(ragQuery);
+
+    // 2. If query is ambiguous and requires conversational clarification, is unsupported scope, or is a greeting, handle immediately
+    if (plan.context.requiresClarification || plan.unsupportedScope?.isUnsupported || plan.intent === 'GREETING') {
+      return await groundingEngine.synthesizeAnswer({
+        query: ragQuery,
+        plan,
+        retrievedResults: [],
+        supportingMetrics: [],
+        totalEvidenceCount: 1,
+        documentsIndexed: 0,
+        retrievalMethod: 'KEYWORD',
+        embeddingAvailable: false,
+        startTimeMs,
+      });
+    }
+
+    // 3. Fetch all raw evidence records from the Evidence Store
     const allRecords = globalEvidenceStore.getAll();
     const totalEvidenceCount = allRecords.length;
 
-    // 2. Build structured RAG documents / chunks
+    // 4. Build structured RAG documents / chunks
     const allChunks = buildAllEvidenceChunks(allRecords);
     const documentsIndexed = allChunks.length;
 
-    // 3. Check embedding provider health
+    // 5. Check embedding provider health
     const embeddingHealth = await serverEmbeddingProvider.healthCheck();
 
-    // 4. Retrieve supporting analytical metrics from the Analytical Cube
-    const supportingMetrics = retrievalEngine.retrieveRelevantMetrics(ragQuery);
+    // 6. Retrieve supporting analytical metrics from the Analytical Cube
+    const supportingMetrics = retrievalEngine.retrieveRelevantMetrics(ragQuery, plan);
 
-    // 5. Retrieve supporting evidence chunks using Hybrid Retrieval
-    const retrievedResults = await retrievalEngine.retrieveRelevantChunks(ragQuery, allChunks, 8);
+    // 7. Retrieve supporting evidence chunks using Hybrid Retrieval
+    const retrievedResults = await retrievalEngine.retrieveRelevantChunks(ragQuery, allChunks, 8, plan);
 
     // Determine effective retrieval method
     const retrievalMethod =
@@ -45,9 +64,10 @@ export class RagService {
         ? 'HYBRID'
         : 'KEYWORD';
 
-    // 6. Synthesize grounded answer adhering strictly to 4-part Answer Contract
+    // 8. Synthesize grounded answer adhering strictly to 4-part Answer Contract
     return await groundingEngine.synthesizeAnswer({
       query: ragQuery,
+      plan,
       retrievedResults,
       supportingMetrics,
       totalEvidenceCount,

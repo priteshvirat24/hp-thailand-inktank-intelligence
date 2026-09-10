@@ -33,6 +33,12 @@ export async function GET() {
         mistral_configured: Boolean(env.MISTRAL_API_KEY),
         auth_protection_configured: Boolean(env.DASHBOARD_ACCESS_PASSWORD),
       },
+      mistral: {
+        configured: Boolean(env.MISTRAL_API_KEY),
+        primary_model: 'ministral-14b-latest',
+        fallback_model: 'ministral-8b-latest',
+        embedding_model: 'mistral-embed',
+      },
       services: {
         classification_engine: 'READY',
         evidence_store: 'INITIALIZED (0 Records)',

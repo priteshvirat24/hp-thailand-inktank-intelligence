@@ -14,6 +14,7 @@ import {
   RagRetrievalResult,
   RagSupportingMetric,
   RetrievalMethod,
+  StructuredQueryPlan,
 } from '@/types/rag';
 import { MetricId, AnalyticalMonth } from '@/types/analytics';
 import { TargetBrand } from '@/types/brands';
@@ -22,6 +23,7 @@ import { CANONICAL_SKUS } from '@/config/skus';
 import { analyticsService } from '@/services/analytics/analyticsService';
 import { METRIC_DEFINITIONS } from '@/services/analytics/metricRegistry';
 import { serverEmbeddingProvider } from './embeddings/provider';
+import { queryUnderstandingEngine } from './queryUnderstanding';
 
 function cosineSimilarity(a: readonly number[], b: readonly number[]): number {
   if (a.length === 0 || b.length === 0 || a.length !== b.length) return 0;
@@ -53,49 +55,83 @@ function isAllOrEmpty(val?: string | null): boolean {
 
 export class RetrievalEngine {
   /**
-   * Retrieves supporting analytical metrics from the Analytical Cube based on query intent.
+   * Retrieves supporting analytical metrics from the Analytical Cube based on structured query intent.
    */
-  public retrieveRelevantMetrics(query: RagQuery): RagSupportingMetric[] {
-    const qLower = query.query.toLowerCase();
+  public retrieveRelevantMetrics(
+    query: RagQuery,
+    plan?: StructuredQueryPlan
+  ): RagSupportingMetric[] {
+    const effectivePlan = plan || queryUnderstandingEngine.analyzeQuery(query);
     const metricsToFetch: MetricId[] = [];
 
-    // Intent routing for quantitative metrics
-    if (qLower.includes('sov') || qLower.includes('share of voice') || qLower.includes('visibility share')) {
-      metricsToFetch.push('PAID_MEDIA_SOV', 'SOCIAL_SOV', 'ECOMMERCE_SOV');
-    }
-    if (qLower.includes('price') || qLower.includes('pricing') || qLower.includes('cost') || qLower.includes('ราคา') || qLower.includes('บาท')) {
-      metricsToFetch.push('AVG_SELLING_PRICE_THB', 'MEDIAN_SELLING_PRICE_THB', 'AVG_DISCOUNT_PCT');
-    }
-    if (qLower.includes('discount') || qLower.includes('promo') || qLower.includes('promotion') || qLower.includes('ส่วนลด') || qLower.includes('โปร')) {
-      metricsToFetch.push('AVG_DISCOUNT_PCT', 'PROMO_PENETRATION_PCT');
-    }
-    if (qLower.includes('ad') || qLower.includes('advertising') || qLower.includes('creative') || qLower.includes('โฆษณา')) {
-      metricsToFetch.push(
-        'AD_PRESENCE_COUNT',
-        'CREATIVE_FORMAT_VIDEO_COUNT',
-        'CREATIVE_FORMAT_STATIC_COUNT',
-        'CREATIVE_FORMAT_CAROUSEL_COUNT'
-      );
-    }
-    if (qLower.includes('social') || qLower.includes('post') || qLower.includes('engagement') || qLower.includes('โพสต์')) {
-      metricsToFetch.push('SOCIAL_POSTS_COUNT', 'TOTAL_SOCIAL_ENGAGEMENT');
-    }
-    if (qLower.includes('sales') || qLower.includes('traction') || qLower.includes('sold') || qLower.includes('ยอดขาย')) {
-      metricsToFetch.push('OBSERVABLE_SALES_TRACTION_INDEX');
-    }
-    if (qLower.includes('touchpoint') || qLower.includes('visibility') || qLower.includes('presence')) {
-      metricsToFetch.push('TOTAL_VISIBILITY_TOUCHPOINTS');
+    // 1. Primary path: Use Structured Query Plan metrics
+    if (effectivePlan.entities.metrics && effectivePlan.entities.metrics.length > 0) {
+      metricsToFetch.push(...effectivePlan.entities.metrics);
     }
 
-    // Default fallback: total touchpoints and ecom presence
+    // 2. Deterministic helper fallback (preserves safety if plan has no metrics)
+    if (metricsToFetch.length === 0) {
+      const qLower = query.query.toLowerCase();
+      if (qLower.includes('sov') || qLower.includes('share of voice') || qLower.includes('visibility share')) {
+        metricsToFetch.push('PAID_MEDIA_SOV', 'SOCIAL_SOV', 'ECOMMERCE_SOV');
+      }
+      if (qLower.includes('price') || qLower.includes('pricing') || qLower.includes('cost') || qLower.includes('ราคา') || qLower.includes('บาท')) {
+        metricsToFetch.push('AVG_SELLING_PRICE_THB', 'MEDIAN_SELLING_PRICE_THB', 'AVG_DISCOUNT_PCT');
+      }
+      if (qLower.includes('discount') || qLower.includes('promo') || qLower.includes('promotion') || qLower.includes('ส่วนลด') || qLower.includes('โปร')) {
+        metricsToFetch.push('AVG_DISCOUNT_PCT', 'PROMO_PENETRATION_PCT');
+      }
+      if (qLower.includes('ad') || qLower.includes('advertising') || qLower.includes('creative') || qLower.includes('โฆษณา')) {
+        metricsToFetch.push(
+          'AD_PRESENCE_COUNT',
+          'CREATIVE_FORMAT_VIDEO_COUNT',
+          'CREATIVE_FORMAT_STATIC_COUNT',
+          'CREATIVE_FORMAT_CAROUSEL_COUNT'
+        );
+      }
+      if (qLower.includes('social') || qLower.includes('post') || qLower.includes('engagement') || qLower.includes('โพสต์')) {
+        metricsToFetch.push('SOCIAL_POSTS_COUNT', 'TOTAL_SOCIAL_ENGAGEMENT');
+      }
+      if (qLower.includes('sales') || qLower.includes('traction') || qLower.includes('sold') || qLower.includes('ยอดขาย')) {
+        metricsToFetch.push('OBSERVABLE_SALES_TRACTION_INDEX');
+      }
+      if (qLower.includes('touchpoint') || qLower.includes('visibility') || qLower.includes('presence')) {
+        metricsToFetch.push('TOTAL_VISIBILITY_TOUCHPOINTS');
+      }
+    }
+
+    // Final fallback
     if (metricsToFetch.length === 0) {
       metricsToFetch.push('TOTAL_VISIBILITY_TOUCHPOINTS', 'ECOMMERCE_SOV', 'AVG_SELLING_PRICE_THB');
     }
 
     const uniqueMetrics = Array.from(new Set(metricsToFetch));
-    const targetMonth = (!isAllOrEmpty(query.monthFilter) ? query.monthFilter : '2026-08') as AnalyticalMonth;
-    const targetBrands: readonly TargetBrand[] =
-      !isAllOrEmpty(query.brandFilter) ? [query.brandFilter as TargetBrand] : TARGET_BRANDS;
+    // Query-level explicit month entity takes precedence over UI dashboard filter (RAG-BUG-003)
+    const targetMonth = (effectivePlan.entities.month 
+      ? effectivePlan.entities.month 
+      : (!isAllOrEmpty(query.monthFilter) ? query.monthFilter : '2026-08')) as AnalyticalMonth;
+
+    // Resolve target brands: Query-level explicit brand entity takes precedence over UI dashboard filter (RAG-BUG-003)
+    let targetBrands: readonly TargetBrand[];
+    if (effectivePlan.entities.brands.length > 0 && effectivePlan.entities.brands.length < TARGET_BRANDS.length) {
+      const combined = new Set<TargetBrand>(effectivePlan.entities.brands);
+      for (const cb of effectivePlan.entities.comparisonBrands) {
+        combined.add(cb);
+      }
+      // For strategic recommendations, always include HP to evaluate competitive gap against target competitor
+      if (effectivePlan.intent === 'RECOMMENDATION' || effectivePlan.subIntents.includes('RECOMMENDATION')) {
+        combined.add('HP');
+      }
+      targetBrands = Array.from(combined);
+    } else if (!isAllOrEmpty(query.brandFilter)) {
+      const bSet = new Set<TargetBrand>([query.brandFilter as TargetBrand]);
+      if (effectivePlan.intent === 'RECOMMENDATION' || effectivePlan.subIntents.includes('RECOMMENDATION')) {
+        bSet.add('HP');
+      }
+      targetBrands = Array.from(bSet);
+    } else {
+      targetBrands = TARGET_BRANDS;
+    }
 
     const results: RagSupportingMetric[] = [];
 
@@ -133,30 +169,65 @@ export class RetrievalEngine {
   public async retrieveRelevantChunks(
     query: RagQuery,
     allChunks: readonly RagEvidenceChunk[],
-    topK = 8
+    topK = 8,
+    plan?: StructuredQueryPlan
   ): Promise<RagRetrievalResult[]> {
     if (allChunks.length === 0) return [];
 
-    // 1. Structured metadata filtering
+    const effectivePlan = plan || queryUnderstandingEngine.analyzeQuery(query);
+
+    // 1. Structured metadata filtering with query entity precedence (RAG-BUG-003)
     let candidateChunks = [...allChunks];
 
-    if (!isAllOrEmpty(query.brandFilter)) {
-      const brandLower = query.brandFilter!.toLowerCase();
-      candidateChunks = candidateChunks.filter((c) => c.brand.toLowerCase() === brandLower);
+    // Priority 1: Query-level brand entities override UI filter
+    const effectiveBrands = (effectivePlan.entities.brands.length > 0 && effectivePlan.entities.brands.length < TARGET_BRANDS.length)
+      ? effectivePlan.entities.brands
+      : (!isAllOrEmpty(query.brandFilter) ? [query.brandFilter as TargetBrand] : []);
+
+    if (effectiveBrands.length > 0) {
+      const targetBrandSet = new Set<string>(effectiveBrands.map((b) => b.toLowerCase()));
+      for (const cb of effectivePlan.entities.comparisonBrands) {
+        targetBrandSet.add(cb.toLowerCase());
+      }
+      candidateChunks = candidateChunks.filter((c) => targetBrandSet.has(c.brand.toLowerCase()));
     }
-    if (!isAllOrEmpty(query.monthFilter)) {
-      candidateChunks = candidateChunks.filter((c) => c.analytical_month === query.monthFilter);
+
+    // Priority 2: Query-level month entities override UI filter (RAG-BUG-003, RAG-BUG-008)
+    const effectiveMonth = effectivePlan.entities.month
+      ? effectivePlan.entities.month
+      : (!isAllOrEmpty(query.monthFilter) ? query.monthFilter : undefined);
+
+    if (effectiveMonth && effectiveMonth !== 'ALL' && effectiveMonth !== 'All') {
+      candidateChunks = candidateChunks.filter((c) => c.analytical_month === effectiveMonth);
     }
-    if (!isAllOrEmpty(query.channelFilter)) {
-      const channelLower = query.channelFilter!.toLowerCase();
+
+    // Priority 3: Channel filter (RAG-BUG-004, RAG-BUG-014: Pure Consumer Review routing for customer voice)
+    const isSentimentQuery =
+      effectivePlan.intent === 'CONSUMER_SENTIMENT' ||
+      effectivePlan.intent === 'CUSTOMER_REVIEWS' ||
+      effectivePlan.subIntents.includes('CONSUMER_SENTIMENT') ||
+      effectivePlan.subIntents.includes('CUSTOMER_REVIEWS');
+
+    const effectiveChannel = isSentimentQuery
+      ? 'Consumer Review'
+      : (effectivePlan.entities.channel || query.channelFilter);
+
+    if (!isAllOrEmpty(effectiveChannel)) {
+      const channelLower = effectiveChannel!.toLowerCase();
       candidateChunks = candidateChunks.filter((c) => c.channel.toLowerCase() === channelLower);
     }
-    if (!isAllOrEmpty(query.platformFilter)) {
-      const platformLower = query.platformFilter!.toLowerCase();
+
+    // Priority 4: Platform filter
+    const effectivePlatform = effectivePlan.entities.platform || query.platformFilter;
+    if (!isAllOrEmpty(effectivePlatform)) {
+      const platformLower = effectivePlatform!.toLowerCase();
       candidateChunks = candidateChunks.filter((c) => c.platform.toLowerCase() === platformLower);
     }
-    if (!isAllOrEmpty(query.skuFilter)) {
-      const skuLower = query.skuFilter!.toLowerCase();
+
+    // Priority 5: SKU filter
+    const effectiveSku = effectivePlan.entities.sku || query.skuFilter;
+    if (!isAllOrEmpty(effectiveSku)) {
+      const skuLower = effectiveSku!.toLowerCase();
       candidateChunks = candidateChunks.filter(
         (c) =>
           c.sku_id?.toLowerCase() === skuLower ||
@@ -165,6 +236,7 @@ export class RetrievalEngine {
     }
 
     // Strict Filtering: If filter combination produces 0 candidates, return 0 candidates (NO EVIDENCE = NO BUSINESS CLAIM)
+    // Never fall back to allChunks or silent nearest month!
     if (candidateChunks.length === 0) {
       return [];
     }
@@ -200,10 +272,37 @@ export class RetrievalEngine {
         }
       }
 
-      // Bonus: Exact Brand Match
-      if (qLower.includes(chunk.brand.toLowerCase())) {
+      // Bonus: Exact Brand Match from Query or Structured Plan
+      const isBrandMentioned =
+        qLower.includes(chunk.brand.toLowerCase()) ||
+        effectivePlan.entities.brands.includes(chunk.brand) ||
+        effectivePlan.entities.comparisonBrands.includes(chunk.brand);
+
+      if (isBrandMentioned) {
         keywordScore += 2.5;
         matchedTerms.push(chunk.brand);
+      }
+
+      // Bonus: Intent-Specific Evidence Alignment
+      if (effectivePlan.intent === 'PRICING' || effectivePlan.subIntents.includes('PRICING')) {
+        if (chunk.metadata.price_current_thb !== null && chunk.metadata.price_current_thb !== undefined) {
+          keywordScore += 2.0;
+        }
+      }
+      if (effectivePlan.intent === 'CONSUMER_SENTIMENT' || effectivePlan.subIntents.includes('CONSUMER_SENTIMENT')) {
+        if (chunk.channel === 'Consumer Review' || chunk.metadata.rating !== undefined) {
+          keywordScore += 2.5;
+        }
+      }
+      if (effectivePlan.intent === 'ADVERTISING' || effectivePlan.subIntents.includes('ADVERTISING')) {
+        if (chunk.channel === 'Paid Media') {
+          keywordScore += 2.5;
+        }
+      }
+      if (effectivePlan.intent === 'SOCIAL_ACTIVITY' || effectivePlan.subIntents.includes('SOCIAL_ACTIVITY')) {
+        if (chunk.channel === 'Social') {
+          keywordScore += 2.5;
+        }
       }
 
       // Bonus: Exact SKU Model Match

@@ -301,10 +301,14 @@ export async function sendRagQuery(ragQuery: RagQuery): Promise<RagAnswer> {
     body: JSON.stringify({
       query: ragQuery.query,
       brand: ragQuery.brandFilter,
+      brandFilter: ragQuery.brandFilter,
       month: ragQuery.monthFilter,
+      monthFilter: ragQuery.monthFilter,
       channel: ragQuery.channelFilter,
+      channelFilter: ragQuery.channelFilter,
       platform: ragQuery.platformFilter,
       sku_id: ragQuery.skuFilter,
+      history: ragQuery.history,
     }),
   });
 

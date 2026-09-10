@@ -13,7 +13,7 @@
 
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { sendRagQuery } from '@/lib/apiClient';
 import { RagAnswer, RagQuery } from '@/types/rag';
 import { TargetBrand } from '@/types/brands';
@@ -88,6 +88,7 @@ export const RagAssistant: React.FC<RagAssistantProps> = ({
   const [activeMonth, setActiveMonth] = useState<AnalyticalMonth>(currentMonth);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -98,17 +99,42 @@ export const RagAssistant: React.FC<RagAssistantProps> = ({
     setActiveMonth(currentMonth);
   }, [currentMonth]);
 
-  // Auto-scroll to bottom of messages
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
+  const lastAssistantAnswer = [...messages]
+    .reverse()
+    .find((m) => m.sender === 'assistant' && m.answer)?.answer;
 
+  const headerBadge = useMemo(() => {
+    if (!lastAssistantAnswer?.generation) {
+      return {
+        label: 'Mistral AI • 1024-dim RAG',
+        className: 'bg-emerald-950/60 border-emerald-800/60 text-emerald-400',
+      };
+    }
+    const gen = lastAssistantAnswer.generation;
+    if (gen.provider === 'mistral') {
+      if (gen.status === 'fallback_model_generated') {
+        return {
+          label: `Mistral AI (${gen.model || 'ministral-8b'} fallback)`,
+          className: 'bg-amber-950/60 border-amber-800/60 text-amber-400',
+        };
+      }
+      return {
+        label: `Mistral AI (${gen.model || 'ministral-14b'})`,
+        className: 'bg-emerald-950/60 border-emerald-800/60 text-emerald-400',
+      };
+    }
+    return {
+      label: 'Analytical Baseline (Non-LLM)',
+      className: 'bg-zinc-800/80 border-zinc-700/80 text-zinc-300',
+    };
+  }, [lastAssistantAnswer]);
+
+  // Focus input on dialog open without forcibly auto-scrolling to the bottom of previous content
   useEffect(() => {
     if (isOpen) {
-      scrollToBottom();
       setTimeout(() => inputRef.current?.focus(), 150);
     }
-  }, [isOpen, messages, scrollToBottom]);
+  }, [isOpen]);
 
   // Keyboard shortcut: Escape to close
   useEffect(() => {
@@ -143,15 +169,36 @@ export const RagAssistant: React.FC<RagAssistantProps> = ({
       queryText: text,
     };
 
+    // Serialize bounded recent conversational turns (last 6-8 relevant natural-language turns)
+    const recentHistory = messages
+      .filter((m) => !m.error && ((m.sender === 'user' && m.queryText) || (m.sender === 'assistant' && m.answer?.answer)))
+      .slice(-8)
+      .map((m) => ({
+        role: m.sender === 'user' ? ('user' as const) : ('assistant' as const),
+        content: m.sender === 'user' ? m.queryText!.trim() : m.answer!.answer.trim(),
+      }))
+      .filter((m) => m.content.length > 0);
+
     setMessages((prev) => [...prev, userMessage]);
     setInputQuery('');
     setIsLoading(true);
+
+    // Smoothly scroll to bring the newly submitted question and incoming answer start into view
+    setTimeout(() => {
+      if (messagesContainerRef.current) {
+        messagesContainerRef.current.scrollTo({
+          top: messagesContainerRef.current.scrollHeight,
+          behavior: 'smooth',
+        });
+      }
+    }, 60);
 
     try {
       const payload: RagQuery = {
         query: text,
         brandFilter: activeBrand,
         monthFilter: activeMonth,
+        history: recentHistory.length > 0 ? recentHistory : undefined,
       };
 
       const result = await sendRagQuery(payload);
@@ -262,9 +309,14 @@ export const RagAssistant: React.FC<RagAssistantProps> = ({
                     <h3 className="text-xs font-bold uppercase tracking-wider text-white font-mono">
                       Intelligence Assistant
                     </h3>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-[4px] bg-emerald-950/60 border border-emerald-800/60 text-emerald-400 font-mono flex items-center gap-1">
+                    <span
+                      className={cn(
+                        'text-[10px] font-semibold px-2 py-0.5 rounded-[4px] border font-mono flex items-center gap-1 transition-colors',
+                        headerBadge.className
+                      )}
+                    >
                       <Cpu className="w-3 h-3" />
-                      Mistral AI &bull; 1024-dim RAG
+                      {headerBadge.label}
                     </span>
                   </div>
                   <p className="text-[11px] text-zinc-400 font-sans mt-0.5">
@@ -353,7 +405,7 @@ export const RagAssistant: React.FC<RagAssistantProps> = ({
             </div>
 
             {/* Messages Scroll Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 font-sans text-xs">
+            <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 font-sans text-xs">
               {/* First Open / Welcome Empty State */}
               {messages.length === 0 && (
                 <div className="space-y-4 pt-2">
@@ -438,11 +490,27 @@ export const RagAssistant: React.FC<RagAssistantProps> = ({
                         <span className="font-semibold uppercase tracking-wider text-zinc-200 flex items-center gap-1.5 font-mono text-[11px]">
                           <FileText className="w-3.5 h-3.5 text-zinc-400" />
                           <span>Grounded Answer</span>
+                          {ans.generation && (
+                            <span
+                              className={cn(
+                                'text-[9px] font-mono px-1.5 py-0.5 rounded tracking-normal normal-case font-normal border ml-1',
+                                ans.generation.provider === 'mistral'
+                                  ? ans.generation.status === 'fallback_model_generated'
+                                    ? 'bg-amber-950/50 text-amber-300 border-amber-800/50'
+                                    : 'bg-emerald-950/40 text-emerald-300 border-emerald-800/50'
+                                  : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                              )}
+                            >
+                              {ans.generation.provider === 'mistral'
+                                ? `${ans.generation.model || 'Mistral'}${ans.generation.latency_ms ? ` • ${ans.generation.latency_ms}ms` : ''}`
+                                : 'Analytical Cube Baseline'}
+                            </span>
+                          )}
                         </span>
                         <div className="flex items-center gap-2 font-mono text-[11px]">
                           <button
                             type="button"
-                            onClick={() => void handleCopyAnswer(ans.answer, msg.id)}
+                            onClick={() => void handleCopyAnswer(ans.answer || '', msg.id)}
                             className="text-zinc-400 hover:text-white flex items-center gap-1 transition-colors px-1.5 py-0.5 rounded hover:bg-[#1f1f1f]"
                             title="Copy Grounded Answer"
                           >
@@ -463,7 +531,7 @@ export const RagAssistant: React.FC<RagAssistantProps> = ({
                         </div>
                       </div>
                       <div className="text-xs text-zinc-100 leading-relaxed whitespace-pre-line font-normal">
-                        {ans.answer}
+                        {ans.answer || 'No narrative text returned for this slice.'}
                       </div>
                     </div>
 
