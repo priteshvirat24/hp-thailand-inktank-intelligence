@@ -13,7 +13,7 @@ describe('Friday Presentation Evidentiary Compliance & Regression Suite', () => 
     const epsonYT = lake.filter((r: { brand: string; platform: string; source_url: string; screenshot_url: string }) => r.brand === 'Epson' && r.platform === 'YouTube');
     expect(epsonYT.length).toBe(25);
     for (const r of epsonYT) {
-      expect(r.source_url).toBe('https://www.youtube.com/@EpsonThailandOfficial/featured');
+      expect(r.source_url).toBe('https://www.youtube.com/@EpsonThailandOfficial');
       expect(r.screenshot_url).toBe('/screenshots/social/youtube_epson.png');
     }
 
@@ -21,7 +21,7 @@ describe('Friday Presentation Evidentiary Compliance & Regression Suite', () => 
     const manifest = JSON.parse(rawManifest);
     const epsonManifest = manifest.find((item: { id: string }) => item.id === 'youtube_epson');
     expect(epsonManifest).toBeDefined();
-    expect(epsonManifest.url).toBe('https://www.youtube.com/@EpsonThailandOfficial/featured');
+    expect(epsonManifest.url).toBe('https://www.youtube.com/@EpsonThailandOfficial');
   });
 
   it('verifies Google Ads and TikTok are dropped from Evidence Lake to prevent claiming unevidenced sources', () => {

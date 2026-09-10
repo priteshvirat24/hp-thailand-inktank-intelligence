@@ -411,7 +411,7 @@ export const CRAWL_SEEDS: readonly CrawlTarget[] = [
     brand: 'Epson',
     platform: 'YouTube',
     channel: 'Social',
-    seed_url: 'https://www.youtube.com/@EpsonThailandOfficial/featured',
+    seed_url: 'https://www.youtube.com/@EpsonThailandOfficial',
     country: 'Thailand',
     locale: 'th-TH',
     status: 'ACTIVE_SEED',

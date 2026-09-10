@@ -119,7 +119,7 @@ for brand, query, slug in [
 # 5. YouTube official channels
 for brand, url, slug in [
     ("HP",      "https://www.youtube.com/@HPThailand/videos",        "youtube_hp"),
-    ("Epson",   "https://www.youtube.com/@EpsonThailand/videos",     "youtube_epson"),
+    ("Epson",   "https://www.youtube.com/@EpsonThailandOfficial",     "youtube_epson"),
     ("Canon",   "https://www.youtube.com/@CanonThailandTH/videos",   "youtube_canon"),
     ("Brother", "https://www.youtube.com/@brotherthailand/videos",   "youtube_brother"),
 ]:
