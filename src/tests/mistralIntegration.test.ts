@@ -34,7 +34,7 @@ const MOCK_RESULTS: readonly RagRetrievalResult[] = [
       evidence_id: 'EVD-HP-001',
       content: 'Brand: HP\nTitle: HP Smart Tank 580 All-in-One Printer\nPrice: ฿4,190 on Shopee Thailand',
       brand: 'HP',
-      channel: 'E-Commerce',
+      channel: 'E-commerce',
       platform: 'Shopee',
       sku_id: 'sku-hp-580',
       canonical_model: 'Smart Tank 580',
@@ -54,7 +54,7 @@ const MOCK_RESULTS: readonly RagRetrievalResult[] = [
       evidence_id: 'EVD-EPSON-001',
       content: 'Brand: Epson\nTitle: Epson EcoTank L3250 Printer\nPrice: ฿4,490 on Shopee Thailand',
       brand: 'Epson',
-      channel: 'E-Commerce',
+      channel: 'E-commerce',
       platform: 'Shopee',
       sku_id: 'sku-epson-l3250',
       canonical_model: 'EcoTank L3250',
@@ -72,7 +72,7 @@ const MOCK_RESULTS: readonly RagRetrievalResult[] = [
 
 const MOCK_METRICS: readonly RagSupportingMetric[] = [
   {
-    metric_id: 'AVG_PRICE_CURRENT_THB',
+    metric_id: 'AVG_SELLING_PRICE_THB',
     metric_name: 'Average Street Price',
     brand: 'HP',
     month: '2026-08',
@@ -83,7 +83,7 @@ const MOCK_METRICS: readonly RagSupportingMetric[] = [
     evidence_ids: ['EVD-HP-001'],
   },
   {
-    metric_id: 'AVG_PRICE_CURRENT_THB',
+    metric_id: 'AVG_SELLING_PRICE_THB',
     metric_name: 'Average Street Price',
     brand: 'Epson',
     month: '2026-08',

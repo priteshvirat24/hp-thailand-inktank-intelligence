@@ -20,6 +20,7 @@ import { TargetBrand } from '@/types/brands';
 import { AnalyticalMonth } from '@/types/analytics';
 import { BrandPill } from '@/components/ui/BrandPill';
 import { DataStateBadge } from '@/components/ui/DataStateBadge';
+import { FormattedMarkdown } from '@/components/ui/FormattedMarkdown';
 import {
   Sparkles,
   X,
@@ -530,9 +531,10 @@ export const RagAssistant: React.FC<RagAssistantProps> = ({
                           <span>Confidence: {(ans.confidence * 100).toFixed(0)}%</span>
                         </div>
                       </div>
-                      <div className="text-xs text-zinc-100 leading-relaxed whitespace-pre-line font-normal">
-                        {ans.answer || 'No narrative text returned for this slice.'}
-                      </div>
+                      <FormattedMarkdown
+                        content={ans.answer || 'No narrative text returned for this slice.'}
+                        className="text-xs text-zinc-100"
+                      />
                     </div>
 
                     {/* 2. Strategic Implication for HP */}
@@ -542,9 +544,10 @@ export const RagAssistant: React.FC<RagAssistantProps> = ({
                           <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
                           <span>Strategic Implication for HP</span>
                         </span>
-                        <p className="text-xs text-zinc-400 leading-relaxed">
-                          {ans.implication_for_hp}
-                        </p>
+                        <FormattedMarkdown
+                          content={ans.implication_for_hp}
+                          className="text-xs text-zinc-300"
+                        />
                       </div>
                     )}
 

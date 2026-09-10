@@ -16,6 +16,7 @@ import { RagAnswer } from '@/types/rag';
 import { AnalyticalMonth } from '@/types/analytics';
 import { TargetBrand } from '@/types/brands';
 import { getVerifiedWorkingSourceUrl } from '@/lib/urlHelpers';
+import { FormattedMarkdown } from '@/components/ui/FormattedMarkdown';
 
 interface AskIntelligenceBannerProps {
   currentMonth: AnalyticalMonth;
@@ -156,9 +157,10 @@ export const AskIntelligenceBanner: React.FC<AskIntelligenceBannerProps> = ({
                       <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
                       1. Evidence-Backed Strategic Answer
                     </div>
-                    <p className="text-xs text-zinc-200 leading-relaxed font-sans">
-                      {answer.answer}
-                    </p>
+                    <FormattedMarkdown
+                      content={answer.answer}
+                      className="text-xs text-zinc-200 leading-relaxed font-sans"
+                    />
                   </div>
 
                   {/* Part 2: Supporting Metrics & Observations */}
@@ -187,9 +189,10 @@ export const AskIntelligenceBanner: React.FC<AskIntelligenceBannerProps> = ({
                         <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
                         3. Strategic Implication for HP
                       </div>
-                      <p className="text-xs text-amber-200/90 leading-relaxed">
-                        {answer.implication_for_hp}
-                      </p>
+                      <FormattedMarkdown
+                        content={answer.implication_for_hp}
+                        className="text-xs text-amber-200/90 leading-relaxed"
+                      />
                     </div>
                   )}
 
