@@ -125,7 +125,12 @@ export const ExecutiveVisualAnalytics: React.FC<ExecutiveVisualAnalyticsProps> =
         if (radarMode === 'INDEXED') {
           point[b] = dim.scores[b] ?? 0;
         } else {
-          point[b] = dim.rawValues[b] ?? 0;
+          // In Raw % mode, scale 5-star rating to 0-100% equivalent (e.g. 4.78/5 = 95.6%) so radar axis remains proportional
+          if (dim.key === 'user_rating' && typeof dim.rawValues[b] === 'number') {
+            point[b] = Number((((dim.rawValues[b] as number) / 5) * 100).toFixed(1));
+          } else {
+            point[b] = dim.rawValues[b] ?? 0;
+          }
         }
         point[`${b}_raw`] = dim.formattedValues[b] ?? '—';
       }
@@ -316,8 +321,8 @@ export const ExecutiveVisualAnalytics: React.FC<ExecutiveVisualAnalyticsProps> =
             </div>
 
             {/* Radar Visual */}
-            <div className="w-full h-[260px] flex items-center justify-center relative my-1">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="w-full h-[260px] flex items-center justify-center relative my-1 min-w-0 min-h-[260px]">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={260}>
                 <RadarChart cx="50%" cy="50%" outerRadius="72%" data={radarChartData}>
                   <PolarGrid stroke="#27272e" strokeWidth={1} />
                   <PolarAngleAxis
@@ -508,8 +513,8 @@ export const ExecutiveVisualAnalytics: React.FC<ExecutiveVisualAnalyticsProps> =
             </div>
 
             {/* Area Chart Visual */}
-            <div className="w-full h-[260px] relative my-1">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="w-full h-[260px] relative my-1 min-w-0 min-h-[260px]">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={260}>
                 <AreaChart
                   data={formattedTrendPoints}
                   margin={{ top: 10, right: 12, left: -18, bottom: 0 }}
