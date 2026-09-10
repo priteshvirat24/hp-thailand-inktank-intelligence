@@ -168,5 +168,38 @@ export interface ExecutiveOverviewData {
     consumer_review: number;
   };
   readonly avg_consumer_rating?: number | null;
+  readonly visual_analytics?: VisualAnalyticsPayload;
   readonly generated_at: string;
+}
+
+export interface VisualRadarDimension {
+  readonly dimension: string;
+  readonly key: string;
+  readonly unit: string;
+  readonly description: string;
+  readonly scores: Record<TargetBrand, number>;
+  readonly rawValues: Record<TargetBrand, number | null>;
+  readonly formattedValues: Record<TargetBrand, string>;
+}
+
+export interface VisualTrendPoint {
+  readonly date: string;
+  readonly displayDate: string;
+  readonly totalObservations: number;
+  readonly shares: Record<TargetBrand, number>;
+}
+
+export interface VisualAnalyticsPayload {
+  readonly radarDimensions: readonly VisualRadarDimension[];
+  readonly timeline: {
+    readonly allChannels: readonly VisualTrendPoint[];
+    readonly ecommerce: readonly VisualTrendPoint[];
+    readonly paidMedia: readonly VisualTrendPoint[];
+    readonly social: readonly VisualTrendPoint[];
+  };
+  readonly latestBenchmark: {
+    readonly brand: TargetBrand;
+    readonly sharePct: number;
+    readonly periodLabel: string;
+  };
 }

@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { formatTHB, formatPercent } from '@/lib/utils';
 import { motion, type Variants } from 'framer-motion';
+import { ExecutiveVisualAnalytics } from './ExecutiveVisualAnalytics';
 
 interface ExecutiveOverviewProps {
   data: ExecutiveOverviewData | null;
@@ -384,6 +385,17 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
           suffix="/ 5"
           isObserved={displayRating !== null && displayRating !== undefined}
           comparison={reviewObs > 0 ? `${reviewObs} Reviews` : 'No reviews'}
+        />
+      </motion.div>
+
+      {/* ── Visual Analytics: Competitor War Room & Shelf Share Trend ──────── */}
+      <motion.div variants={itemVariants}>
+        <ExecutiveVisualAnalytics
+          data={data}
+          selectedMonth={selectedMonth}
+          selectedBrand={selectedBrand}
+          isLoading={isLoading}
+          onOpenEvidence={onOpenEvidence}
         />
       </motion.div>
 
