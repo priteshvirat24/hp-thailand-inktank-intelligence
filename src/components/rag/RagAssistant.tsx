@@ -13,7 +13,7 @@
 
 'use client';
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { sendRagQuery } from '@/lib/apiClient';
 import { RagAnswer, RagQuery } from '@/types/rag';
 import { TargetBrand } from '@/types/brands';
@@ -36,7 +36,6 @@ import {
   Minimize2,
   Copy,
   Check,
-  Cpu,
 } from 'lucide-react';
 import { cn, formatTHB } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -99,36 +98,6 @@ export const RagAssistant: React.FC<RagAssistantProps> = ({
   useEffect(() => {
     setActiveMonth(currentMonth);
   }, [currentMonth]);
-
-  const lastAssistantAnswer = [...messages]
-    .reverse()
-    .find((m) => m.sender === 'assistant' && m.answer)?.answer;
-
-  const headerBadge = useMemo(() => {
-    if (!lastAssistantAnswer?.generation) {
-      return {
-        label: 'Mistral AI • 1024-dim RAG',
-        className: 'bg-emerald-950/60 border-emerald-800/60 text-emerald-400',
-      };
-    }
-    const gen = lastAssistantAnswer.generation;
-    if (gen.provider === 'mistral') {
-      if (gen.status === 'fallback_model_generated') {
-        return {
-          label: `Mistral AI (${gen.model || 'ministral-8b'} fallback)`,
-          className: 'bg-amber-950/60 border-amber-800/60 text-amber-400',
-        };
-      }
-      return {
-        label: `Mistral AI (${gen.model || 'ministral-14b'})`,
-        className: 'bg-emerald-950/60 border-emerald-800/60 text-emerald-400',
-      };
-    }
-    return {
-      label: 'Analytical Baseline (Non-LLM)',
-      className: 'bg-zinc-800/80 border-zinc-700/80 text-zinc-300',
-    };
-  }, [lastAssistantAnswer]);
 
   // Focus input on dialog open without forcibly auto-scrolling to the bottom of previous content
   useEffect(() => {
@@ -306,20 +275,9 @@ export const RagAssistant: React.FC<RagAssistantProps> = ({
                   <Sparkles className="w-4 h-4 text-emerald-400" />
                 </span>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-white font-mono">
-                      Intelligence Assistant
-                    </h3>
-                    <span
-                      className={cn(
-                        'text-[10px] font-semibold px-2 py-0.5 rounded-[4px] border font-mono flex items-center gap-1 transition-colors',
-                        headerBadge.className
-                      )}
-                    >
-                      <Cpu className="w-3 h-3" />
-                      {headerBadge.label}
-                    </span>
-                  </div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-white font-mono">
+                    Intelligence Assistant
+                  </h3>
                   <p className="text-[11px] text-zinc-400 font-sans mt-0.5">
                     Grounded in 3,855 verified observations &amp; Analytical Metric Cube
                   </p>
@@ -491,22 +449,6 @@ export const RagAssistant: React.FC<RagAssistantProps> = ({
                         <span className="font-semibold uppercase tracking-wider text-zinc-200 flex items-center gap-1.5 font-mono text-[11px]">
                           <FileText className="w-3.5 h-3.5 text-zinc-400" />
                           <span>Grounded Answer</span>
-                          {ans.generation && (
-                            <span
-                              className={cn(
-                                'text-[9px] font-mono px-1.5 py-0.5 rounded tracking-normal normal-case font-normal border ml-1',
-                                ans.generation.provider === 'mistral'
-                                  ? ans.generation.status === 'fallback_model_generated'
-                                    ? 'bg-amber-950/50 text-amber-300 border-amber-800/50'
-                                    : 'bg-emerald-950/40 text-emerald-300 border-emerald-800/50'
-                                  : 'bg-zinc-800 text-zinc-400 border-zinc-700'
-                              )}
-                            >
-                              {ans.generation.provider === 'mistral'
-                                ? `${ans.generation.model || 'Mistral'}${ans.generation.latency_ms ? ` • ${ans.generation.latency_ms}ms` : ''}`
-                                : 'Analytical Cube Baseline'}
-                            </span>
-                          )}
                         </span>
                         <div className="flex items-center gap-2 font-mono text-[11px]">
                           <button
