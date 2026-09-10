@@ -3,11 +3,14 @@
 [![Framework: Next.js 15](https://img.shields.io/badge/framework-Next.js_15-black.svg)](https://nextjs.org/)
 [![Language: TypeScript](https://img.shields.io/badge/language-TypeScript_5.8-blue.svg)](https://www.typescriptlang.org/)
 [![Styling: Tailwind CSS](https://img.shields.io/badge/styling-Tailwind_CSS-38bdf8.svg)](https://tailwindcss.com/)
-[![Tests: Vitest](https://img.shields.io/badge/tests-Vitest-yellow.svg)](https://vitest.dev/)
-[![Status: Phase 3A Dashboard](https://img.shields.io/badge/status-Phase_3A_Executive_Dashboard-emerald.svg)](#current-state--data-baseline)
+[![Tests: Vitest (261 Passed)](https://img.shields.io/badge/tests-261%20passing-emerald.svg)](https://vitest.dev/)
+[![Status: Phase 7 Verified](https://img.shields.io/badge/status-Phase_7_Verified-emerald.svg)](#project-overview)
+[![Live Demo](https://img.shields.io/badge/deployment-Vercel_Live-blue.svg)](https://hp-thailand-inktank-intelligence.vercel.app)
 
 ## Project Overview
-Production-grade competitive intelligence platform providing automated tracking, multi-dimensional analytics, and RAG retrieval across HP, Epson, Canon, and Brother Ink Tank printers in Thailand for the 90-day window (28 May 2026 – 28 August 2026).
+Production-grade competitive intelligence platform providing automated tracking, multi-dimensional analytics, verified evidence lineage, and RAG retrieval across HP, Epson, Canon, and Brother Ink Tank printers in Thailand for the 90-day window (28 May 2026 – 28 August 2026).
+
+**Live Production URL:** [https://hp-thailand-inktank-intelligence.vercel.app](https://hp-thailand-inktank-intelligence.vercel.app)
 
 ## Key Architecture Layers
 * **Phase 2A (Canonical SKU Master):** 28 Canonical SKUs, deterministic 4-stage SKU normalizer, 6-gate category filter.
@@ -52,7 +55,7 @@ Production-grade competitive intelligence platform providing automated tracking,
 # 1. Run local Next.js development server
 npm run dev
 
-# 2. Run test suites (171 tests across 22 files)
+# 2. Run test suites (261 tests across 28 files)
 npm test
 
 # 3. Validate TypeScript type safety
