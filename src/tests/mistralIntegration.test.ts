@@ -171,7 +171,7 @@ describe('Mistral AI Runtime Integration & Fallback Contracts', () => {
     const body = JSON.parse((options?.body as string) || '{}');
     expect(body.model).toBe(PRIMARY_MISTRAL_MODEL);
     expect(body.response_format.type).toBe('json_schema');
-    expect(body.max_tokens).toBe(1500);
+    expect(body.max_tokens).toBe(2500);
   });
 
   it('fails over to secondary model ministral-8b-latest when primary model encounters an error', async () => {
