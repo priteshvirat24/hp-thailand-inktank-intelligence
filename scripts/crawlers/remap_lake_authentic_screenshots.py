@@ -181,6 +181,8 @@ def remap_evidence_lake():
         elif channel == "Social":
             if "youtube" in platform.lower():
                 rec["screenshot_url"] = f"/screenshots/social/youtube_{brand.lower()}.png"
+                if brand == "Epson":
+                    rec["source_url"] = "https://www.youtube.com/@EpsonThailandOfficial"
             else:
                 rec["screenshot_url"] = BRAND_SOCIAL_FALLBACK.get(brand, "/screenshots/social/facebook_hp.png")
             channel_matched += 1
@@ -629,6 +631,17 @@ def update_manifest():
             "platform": "YouTube Official",
             "url": "https://www.youtube.com/@BrotherThailand",
             "screenshot_url": "/screenshots/social/youtube_brother.png",
+            "status": "captured",
+            "viewport": [1440, 900],
+            "verification": "Authentic Official YouTube Channel Capture"
+        },
+        {
+            "id": "youtube_epson",
+            "brand": "Epson",
+            "channel": "Social",
+            "platform": "YouTube Official",
+            "url": "https://www.youtube.com/@EpsonThailandOfficial",
+            "screenshot_url": "/screenshots/social/youtube_epson.png",
             "status": "captured",
             "viewport": [1440, 900],
             "verification": "Authentic Official YouTube Channel Capture"
