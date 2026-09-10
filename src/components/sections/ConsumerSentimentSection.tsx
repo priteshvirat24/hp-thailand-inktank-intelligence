@@ -18,7 +18,7 @@ import { DataStateBadge } from '@/components/ui/DataStateBadge';
 import { TARGET_BRANDS } from '@/config/brands';
 import { TargetBrand } from '@/types/brands';
 import { RawEvidenceRecord } from '@/types/evidence';
-import { AnalyticalMonth } from '@/types/analytics';
+import { AnalyticalMonth, BrandComparisonRecord } from '@/types/analytics';
 import { getVerifiedWorkingSourceUrl } from '@/lib/urlHelpers';
 import {
   MessageSquare,
@@ -39,6 +39,9 @@ interface ConsumerSentimentSectionProps {
   selectedMonth: AnalyticalMonth;
   selectedBrand?: TargetBrand | 'All';
   evidenceRecords: RawEvidenceRecord[];
+  ratingComparisons?: BrandComparisonRecord[];
+  sentimentComparisons?: BrandComparisonRecord[];
+  reviewsCountComparisons?: BrandComparisonRecord[];
   onOpenEvidence?: (metricId: string, metricName: string, brand: TargetBrand | 'All') => void;
 }
 
@@ -70,6 +73,9 @@ export const ConsumerSentimentSection: React.FC<ConsumerSentimentSectionProps> =
   selectedMonth,
   selectedBrand = 'All',
   evidenceRecords,
+  ratingComparisons,
+  sentimentComparisons,
+  reviewsCountComparisons,
   onOpenEvidence: _onOpenEvidence,
 }) => {
   const [selectedBrandFilter, setSelectedBrandFilter] = useState<TargetBrand | 'All'>(selectedBrand);
@@ -89,13 +95,17 @@ export const ConsumerSentimentSection: React.FC<ConsumerSentimentSectionProps> =
     );
   }, [evidenceRecords, selectedMonth]);
 
-  // Authentic Brand Stats derived solely from verified observations
+  // Authentic Brand Stats derived directly from the Analytical Metric Cube
   const brandStats = useMemo(() => {
     return TARGET_BRANDS.map((brand) => {
       const brandReviews = reviews.filter((r) => r.brand === brand);
-      const reviewCount = brandReviews.length;
+      const sentimentRec = sentimentComparisons?.find((c) => c.brand === brand);
+      const ratingRec = ratingComparisons?.find((c) => c.brand === brand);
+      const reviewsCountRec = reviewsCountComparisons?.find((c) => c.brand === brand);
 
-      if (reviewCount === 0) {
+      const reviewCount = reviewsCountRec?.value ?? brandReviews.length;
+
+      if (reviewCount === 0 && (!ratingRec || ratingRec.value === null)) {
         return {
           brand,
           reviewCount: 0,
@@ -108,12 +118,19 @@ export const ConsumerSentimentSection: React.FC<ConsumerSentimentSectionProps> =
       const totalRating = brandReviews.reduce((acc, r) => acc + (r.rating || 0), 0);
       const validRatingReviews = brandReviews.filter((r) => r.rating !== undefined && r.rating !== null);
       const avgRating =
-        validRatingReviews.length > 0
+        ratingRec?.value !== undefined && ratingRec.value !== null
+          ? ratingRec.value
+          : validRatingReviews.length > 0
           ? Number((totalRating / validRatingReviews.length).toFixed(1))
           : null;
 
       const positiveReviews = brandReviews.filter((r) => (r.rating || 0) >= 4).length;
-      const positivePct = Math.round((positiveReviews / reviewCount) * 100);
+      const positivePct =
+        sentimentRec?.value !== undefined && sentimentRec.value !== null
+          ? sentimentRec.value
+          : brandReviews.length > 0
+          ? Math.round((positiveReviews / brandReviews.length) * 100)
+          : null;
 
       return {
         brand,
@@ -123,7 +140,7 @@ export const ConsumerSentimentSection: React.FC<ConsumerSentimentSectionProps> =
         isObserved: true,
       };
     });
-  }, [reviews]);
+  }, [reviews, ratingComparisons, sentimentComparisons, reviewsCountComparisons]);
 
   // Authentic Thematic analysis mapped to observed tags and content
   const themes = useMemo(() => {

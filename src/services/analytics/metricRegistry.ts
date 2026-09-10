@@ -608,7 +608,7 @@ export const METRIC_DEFINITIONS: Record<MetricId, MetricDefinition> = {
     aggregation_type: 'SUM',
     description: 'Normalized index derived from public cumulative sales counters (e.g. "1.2k sold").',
     methodology:
-      'Sum of parsed cumulative sales badges. Explicitly treated as a traction signal, NOT monthly POS volume.',
+      'Sum of parsed cumulative sales badges across unique deduplicated product listings. Explicitly treated as a traction signal, NOT monthly POS volume.',
     calculate: (records) => {
       const withSales = records.filter((r) => r.channel === 'E-commerce' && Boolean(r.displayed_sales));
       if (withSales.length === 0) {
@@ -622,8 +622,19 @@ export const METRIC_DEFINITIONS: Record<MetricId, MetricDefinition> = {
         };
       }
 
-      let totalTraction = 0;
+      // Deduplicate listings by source_url (or platform + brand + product_sku) to avoid compounding cumulative lifetime badges across multi-snapshot crawls
+      const listingMap = new Map<string, typeof withSales[0]>();
       for (const rec of withSales) {
+        const key = rec.source_url || `${rec.platform}_${rec.brand}_${rec.product_sku || rec.raw_title}`;
+        const existing = listingMap.get(key);
+        if (!existing || (rec.captured_at || rec.published_at) > (existing.captured_at || existing.published_at)) {
+          listingMap.set(key, rec);
+        }
+      }
+      const uniqueListings = Array.from(listingMap.values());
+
+      let totalTraction = 0;
+      for (const rec of uniqueListings) {
         const text = (rec.displayed_sales || '').toLowerCase().replace(/[^0-9.k+]/g, '');
         let num = 0;
         if (text.includes('k')) {
@@ -637,10 +648,10 @@ export const METRIC_DEFINITIONS: Record<MetricId, MetricDefinition> = {
       return {
         value: Math.round(totalTraction),
         unit: 'Index',
-        observation_count: withSales.length,
-        evidence_ids: withSales.map((r) => r.evidence_id),
+        observation_count: uniqueListings.length,
+        evidence_ids: uniqueListings.map((r) => r.evidence_id),
         data_state: 'OBSERVED',
-        methodology_note: `Cumulative marketplace traction index aggregated across ${withSales.length} listings.`,
+        methodology_note: `Cumulative marketplace traction index aggregated across ${uniqueListings.length} unique deduplicated listings.`,
       };
     },
   },
@@ -651,14 +662,19 @@ export const METRIC_DEFINITIONS: Record<MetricId, MetricDefinition> = {
   AVG_CONSUMER_RATING: {
     metric_id: 'AVG_CONSUMER_RATING',
     name: 'Average Star Rating (out of 5)',
-    channel: 'E-commerce',
-    applicable_platforms: ['Shopee', 'Lazada', 'TikTok Shop', 'All'],
+    channel: 'Consumer Review',
+    applicable_platforms: ['Shopee', 'Lazada', 'TikTok Shop', 'JIB', 'Advice', 'Power Buy', 'All'],
     unit: 'Score',
     aggregation_type: 'AVERAGE',
-    description: 'Mean star rating from verified buyer reviews on marketplace flagships.',
-    methodology: 'Average of rating observations across product listings.',
+    description: 'Mean star rating from verified buyer reviews across e-commerce marketplaces.',
+    methodology: 'Average of star ratings across verified consumer review records.',
     calculate: (records) => {
-      const rated = records.filter((r) => typeof r.rating === 'number' && r.rating > 0);
+      const rated = records.filter(
+        (r) =>
+          r.channel === 'Consumer Review' &&
+          typeof r.rating === 'number' &&
+          r.rating > 0
+      );
       if (rated.length === 0) {
         return {
           value: null,
@@ -666,7 +682,7 @@ export const METRIC_DEFINITIONS: Record<MetricId, MetricDefinition> = {
           observation_count: 0,
           evidence_ids: [],
           data_state: 'MISSING',
-          methodology_note: 'No buyer ratings recorded for this segment.',
+          methodology_note: 'No verified consumer review ratings recorded for this segment.',
         };
       }
       const sum = rated.reduce((acc, r) => acc + (r.rating || 0), 0);
@@ -677,7 +693,7 @@ export const METRIC_DEFINITIONS: Record<MetricId, MetricDefinition> = {
         observation_count: rated.length,
         evidence_ids: rated.map((r) => r.evidence_id),
         data_state: 'OBSERVED',
-        methodology_note: `Average star rating from ${rated.length} verified listings.`,
+        methodology_note: `Average star rating from ${rated.length} verified consumer reviews.`,
       };
     },
   },
@@ -685,34 +701,72 @@ export const METRIC_DEFINITIONS: Record<MetricId, MetricDefinition> = {
   TOTAL_CONSUMER_REVIEWS_COUNT: {
     metric_id: 'TOTAL_CONSUMER_REVIEWS_COUNT',
     name: 'Total Verified Customer Reviews',
-    channel: 'E-commerce',
-    applicable_platforms: ['Shopee', 'Lazada', 'TikTok Shop', 'All'],
+    channel: 'Consumer Review',
+    applicable_platforms: ['Shopee', 'Lazada', 'TikTok Shop', 'JIB', 'Advice', 'Power Buy', 'All'],
     unit: 'Count',
     aggregation_type: 'SUM',
-    description: 'Cumulative count of verified customer reviews captured across listings.',
-    methodology: 'Sum of review_count observations across e-commerce records.',
+    description: 'Cumulative count of verified customer reviews captured across platforms.',
+    methodology: 'Count of verified consumer review records.',
     calculate: (records) => {
-      const withReviews = records.filter(
-        (r) => r.channel === 'E-commerce' && typeof r.review_count === 'number' && r.review_count > 0
-      );
-      if (withReviews.length === 0) {
+      const reviewRecords = records.filter((r) => r.channel === 'Consumer Review');
+
+      if (reviewRecords.length === 0) {
         return {
           value: null,
           unit: 'Count',
           observation_count: 0,
           evidence_ids: [],
           data_state: 'MISSING',
-          methodology_note: 'No customer review counts recorded.',
+          methodology_note: 'No verified consumer review records recorded for this segment.',
         };
       }
-      const total = withReviews.reduce((acc, r) => acc + (r.review_count || 0), 0);
+
       return {
-        value: total,
+        value: reviewRecords.length,
         unit: 'Count',
-        observation_count: withReviews.length,
-        evidence_ids: withReviews.map((r) => r.evidence_id),
+        observation_count: reviewRecords.length,
+        evidence_ids: reviewRecords.map((r) => r.evidence_id),
         data_state: 'OBSERVED',
-        methodology_note: `Summed from ${withReviews.length} listings.`,
+        methodology_note: `Count of ${reviewRecords.length} verified customer review records.`,
+      };
+    },
+  },
+
+  POSITIVE_SENTIMENT_PCT: {
+    metric_id: 'POSITIVE_SENTIMENT_PCT',
+    name: 'Positive Consumer Sentiment %',
+    channel: 'Consumer Review',
+    applicable_platforms: ['Shopee', 'Lazada', 'TikTok Shop', 'JIB', 'Advice', 'Power Buy', 'All'],
+    unit: 'Percentage',
+    aggregation_type: 'PERCENTAGE',
+    description: 'Percentage of verified customer reviews expressing positive sentiment (star rating >= 4).',
+    methodology: '(Count of positive reviews [rating >= 4] / Total rated consumer reviews) * 100.',
+    calculate: (records) => {
+      const ratedReviews = records.filter(
+        (r) =>
+          r.channel === 'Consumer Review' &&
+          typeof r.rating === 'number' &&
+          r.rating > 0
+      );
+      if (ratedReviews.length === 0) {
+        return {
+          value: null,
+          unit: 'Percentage',
+          observation_count: 0,
+          evidence_ids: [],
+          data_state: 'MISSING',
+          methodology_note: 'No verified consumer reviews with ratings recorded to compute positive sentiment share.',
+        };
+      }
+      const positiveCount = ratedReviews.filter((r) => (r.rating || 0) >= 4).length;
+      const pct = Number(((positiveCount / ratedReviews.length) * 100).toFixed(1));
+      return {
+        value: pct,
+        unit: 'Percentage',
+        observation_count: ratedReviews.length,
+        evidence_ids: ratedReviews.map((r) => r.evidence_id),
+        data_state: 'OBSERVED',
+        methodology_note: `Calculated as ${positiveCount} positive reviews (>=4★) / ${ratedReviews.length} total reviews * 100.`,
       };
     },
   },

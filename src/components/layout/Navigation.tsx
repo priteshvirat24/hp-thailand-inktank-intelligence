@@ -19,6 +19,7 @@ import {
   Target,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { ALL_MARKET_SKUS } from '@/config/skus';
 
 export type DashboardSection =
   | 'overview'
@@ -45,7 +46,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'visibility',   label: '2. Visibility & SOV',    icon: <Clock className="w-3.5 h-3.5" /> },
   { id: 'advertising',  label: '3. Creative & Messaging',icon: <Megaphone className="w-3.5 h-3.5" /> },
   { id: 'ecommerce',    label: '4. Promotions & Pricing',icon: <ShoppingCart className="w-3.5 h-3.5" /> },
-  { id: 'skus',         label: '5. Product / SKU Push',  icon: <Layers className="w-3.5 h-3.5" />, badge: 65 },
+  { id: 'skus',         label: '5. Product / SKU Push',  icon: <Layers className="w-3.5 h-3.5" />, badge: ALL_MARKET_SKUS.length },
   { id: 'sentiment',    label: '6. Consumer Sentiment',  icon: <MessageSquare className="w-3.5 h-3.5" /> },
   { id: 'insights',     label: '7. Insights & Recommendations', icon: <Target className="w-3.5 h-3.5" /> },
   { id: 'evidence',     label: '8. Evidence & Sources',  icon: <ShieldCheck className="w-3.5 h-3.5" /> },

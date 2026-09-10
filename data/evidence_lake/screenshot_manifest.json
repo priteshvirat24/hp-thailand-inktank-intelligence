@@ -695,5 +695,22 @@
     "file_size_kb": 1122.2,
     "captured_at": "2026-09-09T08:00:00Z",
     "device_scale_factor": 2
+  },
+  {
+    "id": "youtube_epson",
+    "brand": "Epson",
+    "channel": "Social",
+    "platform": "YouTube Official",
+    "url": "https://www.youtube.com/@EpsonThailandOfficial/featured",
+    "screenshot_url": "/screenshots/social/youtube_epson.png",
+    "status": "captured",
+    "viewport": [
+      1440,
+      900
+    ],
+    "verification": "Authentic Official YouTube Channel Capture",
+    "file_size_kb": 1104.0,
+    "captured_at": "2026-09-09T08:00:00Z",
+    "device_scale_factor": 2
   }
 ]

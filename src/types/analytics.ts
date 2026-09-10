@@ -37,7 +37,8 @@ export type MetricId =
   | 'OBSERVABLE_SALES_TRACTION_INDEX'
   // Data Cut 5: Consumer Sentiment
   | 'AVG_CONSUMER_RATING'
-  | 'TOTAL_CONSUMER_REVIEWS_COUNT';
+  | 'TOTAL_CONSUMER_REVIEWS_COUNT'
+  | 'POSITIVE_SENTIMENT_PCT';
 
 export type MetricName =
   | 'Unique Active Ads'
@@ -61,7 +62,8 @@ export type MetricName =
   | 'Active Official Store Listings'
   | 'Observable Cumulative Sales Traction Index'
   | 'Average Star Rating (out of 5)'
-  | 'Total Verified Customer Reviews';
+  | 'Total Verified Customer Reviews'
+  | 'Positive Consumer Sentiment %';
 
 export type MetricUnit = 'THB' | 'Count' | 'Percentage' | 'Score' | 'Ratio' | 'Index';
 
@@ -142,10 +144,11 @@ export interface PlatformBreakdownRecord {
 
 export interface ExecutiveOverviewData {
   readonly month: AnalyticalMonth | 'All';
+  readonly brand?: TargetBrand | 'All';
   readonly brands: Record<
     TargetBrand,
     {
-      total_visibility_touchpoints: number;
+      total_visibility_touchpoints: number | null;
       paid_sov_pct: number | null;
       social_sov_pct: number | null;
       ecom_sov_pct: number | null;

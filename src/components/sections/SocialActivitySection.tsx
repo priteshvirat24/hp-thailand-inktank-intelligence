@@ -48,7 +48,7 @@ const MONTH_LABELS: Record<AnalyticalMonth, { label: string; range: string }> = 
 
 const SOCIAL_PLATFORMS = [
   'Facebook (Official Thailand Brand Pages)',
-  'YouTube (Official Verified Channels: HP, Canon, Brother)',
+  'YouTube (Official Verified Channels: HP, Canon, Brother, Epson)',
 ] as const;
 
 const MONOCHROME_BRAND_SHADES: Record<TargetBrand, string> = {
@@ -117,11 +117,14 @@ export const SocialActivitySection: React.FC<SocialActivitySectionProps> = ({
     );
   }
 
-  const postData = TARGET_BRANDS.map((brand) => ({
-    brand,
-    value: postComparisons.find((c) => c.brand === brand)?.value ?? 0,
-    fill: brand === selectedBrand ? '#38bdf8' : MONOCHROME_BRAND_SHADES[brand],
-  }));
+  const postData = TARGET_BRANDS.map((brand) => {
+    const postComp = postComparisons.find((c) => c.brand === brand);
+    return {
+      brand,
+      value: postComp?.value !== undefined && postComp?.value !== null ? postComp.value : null,
+      fill: brand === selectedBrand ? '#38bdf8' : MONOCHROME_BRAND_SHADES[brand],
+    };
+  });
 
   return (
     <motion.div
@@ -246,7 +249,7 @@ export const SocialActivitySection: React.FC<SocialActivitySectionProps> = ({
                 <CartesianGrid stroke="#222228" vertical={false} strokeDasharray="3 3" />
                 <XAxis dataKey="brand" stroke="#71717a" fontSize={11} tickLine={false} fontFamily="system-ui, sans-serif" />
                 <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} fontFamily="monospace" />
-                <Tooltip {...TOOLTIP_STYLE} formatter={(v: number) => [v.toLocaleString(), 'Posts']} />
+                <Tooltip {...TOOLTIP_STYLE} formatter={(v: unknown) => [v !== null && v !== undefined ? Number(v).toLocaleString() : 'UNOBSERVED', 'Posts']} />
                 <Bar dataKey="value" name="Posts" radius={[4, 4, 0, 0]} maxBarSize={48}>
                   {postData.map((d) => (
                     <Cell key={d.brand} fill={d.fill} />

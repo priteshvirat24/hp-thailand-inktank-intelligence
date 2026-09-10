@@ -28,6 +28,9 @@ interface EvidenceModalProps {
 
 function getAuthenticSourceLabel(screenshotUrl?: string | null, platform?: string, brand?: string): string {
   if (!screenshotUrl) return `${platform || 'Source'} Official View`;
+  if (screenshotUrl.includes('/reviews/')) {
+    return `${brand || ''} ${platform || 'Verified'} Customer Review Capture`;
+  }
   if (screenshotUrl.includes('/products/')) {
     return `${brand || ''} Thailand Official Web Capture`;
   }

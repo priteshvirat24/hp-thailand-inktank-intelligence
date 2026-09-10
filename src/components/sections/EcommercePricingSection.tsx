@@ -116,17 +116,27 @@ export const EcommercePricingSection: React.FC<EcommercePricingSectionProps> = (
   const brandAggregates = TARGET_BRANDS.map((brand) => {
     const brandSummary = summary?.brands?.[brand];
     const brandSkus = skus.filter((s) => s.brand === brand && s.avg_price_thb !== null);
-    const avgPrice =
-      brandSummary?.avg_price_thb ??
-      (brandSkus.length > 0
-        ? Math.round(brandSkus.reduce((a, b) => a + (b.avg_price_thb ?? 0), 0) / brandSkus.length)
-        : null);
-    const avgDiscount =
-      brandSummary?.avg_discount_pct ??
-      (brandSkus.length > 0
-        ? Math.round(brandSkus.reduce((a, b) => a + (b.avg_discount_pct ?? 0), 0) / brandSkus.length)
-        : null);
-    const totalTraction = brandSkus.reduce((a, b) => a + (b.sales_traction_index ?? 0), 0);
+
+    // Observation-weighted average price calculation to eliminate unweighted average-of-averages
+    const totalPricedObs = brandSkus.reduce((acc, s) => acc + s.observation_count, 0);
+    const weightedPriceSum = brandSkus.reduce((acc, s) => acc + (s.avg_price_thb ?? 0) * s.observation_count, 0);
+    const avgPriceFallback = totalPricedObs > 0 ? Math.round(weightedPriceSum / totalPricedObs) : null;
+    const avgPrice = brandSummary?.avg_price_thb ?? avgPriceFallback;
+
+    // Filter strictly to listings with active discounts (discount > 0) to avoid discount deflation
+    const discountedSkus = brandSkus.filter((s) => typeof s.avg_discount_pct === 'number' && s.avg_discount_pct > 0);
+    const totalDiscountObs = discountedSkus.reduce((acc, s) => acc + s.observation_count, 0);
+    const weightedDiscountSum = discountedSkus.reduce(
+      (acc, s) => acc + (s.avg_discount_pct ?? 0) * s.observation_count,
+      0
+    );
+    const avgDiscountFallback = totalDiscountObs > 0 ? Number((weightedDiscountSum / totalDiscountObs).toFixed(1)) : null;
+    const avgDiscount = brandSummary?.avg_discount_pct ?? avgDiscountFallback;
+
+    const hasAnyTraction = brandSkus.some((s) => typeof s.sales_traction_index === 'number');
+    const totalTraction = hasAnyTraction
+      ? brandSkus.reduce((a, b) => a + (b.sales_traction_index ?? 0), 0)
+      : null;
     const listComp = listingComparisons.find((c) => c.brand === brand);
     const sovComp = ecomSovComparisons.find((c) => c.brand === brand);
 
@@ -236,8 +246,8 @@ export const EcommercePricingSection: React.FC<EcommercePricingSectionProps> = (
                       notMeaning="Monthly sales, monthly revenue, or POS sell-through."
                     />
                   </dt>
-                  <dd className={totalTraction > 0 ? 'font-bold text-white font-mono tabular-nums' : 'text-zinc-600 italic font-mono'}>
-                    {totalTraction > 0 ? totalTraction.toLocaleString() : 'NO DATA'}
+                  <dd className={totalTraction !== null && totalTraction > 0 ? 'font-bold text-white font-mono tabular-nums' : 'text-zinc-600 italic font-mono'}>
+                    {totalTraction !== null && totalTraction > 0 ? totalTraction.toLocaleString() : 'NO DATA'}
                   </dd>
                 </div>
               </dl>

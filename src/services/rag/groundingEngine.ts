@@ -54,7 +54,7 @@ export class GroundingEngine {
     const executionTimeMs = Date.now() - startTimeMs;
 
     // ─── Case 1: Empty Evidence Store ──────────────────────────────────────────
-    if (totalEvidenceCount === 0 || retrievedResults.length === 0) {
+    if (totalEvidenceCount === 0) {
       return {
         query: query.query,
         answer:
@@ -207,11 +207,16 @@ STRICT INVARIANTS:
 
     // Compute transparent confidence score
     const avgRetrievalScore =
-      retrievedResults.reduce((acc, r) => acc + r.retrieval_score, 0) / (retrievedResults.length || 1);
+      retrievedResults.length > 0
+        ? retrievedResults.reduce((acc, r) => acc + r.retrieval_score, 0) / retrievedResults.length
+        : 0;
     const evidenceVolumeFactor = Math.min(1.0, retrievedResults.length / 5.0);
-    const confidenceScore = Number(
-      Math.min(0.98, Math.max(0.3, 0.5 * avgRetrievalScore + 0.5 * evidenceVolumeFactor)).toFixed(2)
-    );
+    const confidenceScore =
+      retrievedResults.length === 0
+        ? 0.0
+        : Number(
+            Math.min(0.98, Math.max(0.3, 0.5 * avgRetrievalScore + 0.5 * evidenceVolumeFactor)).toFixed(2)
+          );
 
     return {
       query: query.query,
@@ -256,6 +261,15 @@ STRICT INVARIANTS:
 
     // Extract key metrics from cube
     const observedMetrics = supportingMetrics.filter((m) => m.data_state === 'OBSERVED' && m.value !== null);
+
+    // Strict zero-evidence handling (NO EVIDENCE = NO BUSINESS CLAIM)
+    if (retrievedResults.length === 0 && observedMetrics.length === 0) {
+      return {
+        answerText: 'Insufficient evidence: No verified observations were found matching the specified filter criteria in the Evidence Lake or Analytical Cube.',
+        implicationText: 'No actionable strategic recommendation can be formulated without verified observations. Maintain monitoring or expand query scope.',
+        limitations: ['Zero evidence records or quantitative metrics observed for this specific brand, period, or platform slice.'],
+      };
+    }
 
     let answerText = '';
     let implicationText = '';
@@ -316,7 +330,53 @@ STRICT INVARIANTS:
       implicationText =
         'Competitor promotional discounting narrows the price gap against HP Smart Tank entry-level models (e.g. Smart Tank 580). Targeted marketplace vouchers during double-digit campaigns (8.8, 9.9) are recommended to maintain sales velocity.';
     }
-    // ─── Capability 9 & 10: General Competitive Comparison & Strategy ─────────
+    // ─── Capability 9: Consumer Sentiment, Reviews & Ratings ──────────────────
+    else if (
+      qLower.includes('sentiment') ||
+      qLower.includes('review') ||
+      qLower.includes('rating') ||
+      qLower.includes('satisfaction') ||
+      qLower.includes('feedback') ||
+      qLower.includes('pantip') ||
+      qLower.includes('รีวิว') ||
+      qLower.includes('ความพึงพอใจ') ||
+      qLower.includes('คะแนน')
+    ) {
+      const sentimentMetrics = observedMetrics.filter(
+        (m) =>
+          m.metric_id === 'AVG_CONSUMER_RATING' ||
+          m.metric_id === 'TOTAL_CONSUMER_REVIEWS_COUNT' ||
+          m.metric_id === 'POSITIVE_SENTIMENT_PCT'
+      );
+      const reviewChunks = retrievedResults.filter(
+        (r) => r.chunk.channel === 'Consumer Review' || r.chunk.metadata.rating !== undefined
+      );
+
+      if (sentimentMetrics.length > 0) {
+        const lines = sentimentMetrics.map(
+          (m) =>
+            `${m.brand} ${m.metric_name}: ${m.value}${
+              m.unit === 'Percentage' ? '%' : m.unit === 'Score' ? ' / 5.0' : ''
+            } (${m.observation_count} verified observations)`
+        );
+        answerText = `Consumer sentiment and customer review intelligence reveals the following verified metrics:\n• ${lines.join('\n• ')}`;
+      } else if (reviewChunks.length > 0) {
+        const sampleQuotes = reviewChunks.slice(0, 3).map((c) => {
+          const trans =
+            (c.chunk.metadata.content_en_translation as string) ||
+            c.chunk.content.split('\n')[2] ||
+            '';
+          return `[${c.chunk.brand} ${c.chunk.canonical_model || ''} (${c.chunk.metadata.rating ? c.chunk.metadata.rating + '★' : 'Review'})]: "${trans.slice(0, 120)}..."`;
+        });
+        answerText = `Analyzed ${reviewChunks.length} verified customer reviews across Shopee, Pantip, and retailer portals:\n${sampleQuotes.join('\n')}`;
+      } else {
+        answerText = `Identified ${retrievedResults.length} consumer sentiment signals in the evidence lake for the selected criteria.`;
+      }
+
+      implicationText =
+        'Customer voice underscores high appreciation for HP 2-year onsite warranty and mobile app ease-of-use. Counter-messaging should address competitor refill cost perceptions by emphasizing HP printhead durability and low cost-per-page.';
+    }
+    // ─── Capability 10: General Competitive Comparison & Strategy ────────────
     else {
       const topEvidence = retrievedResults.slice(0, 3).map((r) => `"${r.chunk.content.split('\n')[1] || r.chunk.brand}" (${r.chunk.platform})`);
       answerText = `Grounded analysis across ${retrievedResults.length} verified evidence records: ${topEvidence.join('; ')}.`;

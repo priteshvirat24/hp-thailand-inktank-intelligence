@@ -45,12 +45,12 @@ export class MetricAggregator {
     // 2. Precompute category-wide monthly totals for SOV denominators
     const monthlyCategoryTotals: Record<
       AnalyticalMonth,
-      { paidAds: number; socialPosts: number; ecomListings: number }
+      { paidAds: number; socialPosts: number; ecomListings: number; consumerReviews: number }
     > = {
-      '2026-06': { paidAds: 0, socialPosts: 0, ecomListings: 0 },
-      '2026-07': { paidAds: 0, socialPosts: 0, ecomListings: 0 },
-      '2026-08': { paidAds: 0, socialPosts: 0, ecomListings: 0 },
-      'ALL': { paidAds: 0, socialPosts: 0, ecomListings: 0 },
+      '2026-06': { paidAds: 0, socialPosts: 0, ecomListings: 0, consumerReviews: 0 },
+      '2026-07': { paidAds: 0, socialPosts: 0, ecomListings: 0, consumerReviews: 0 },
+      '2026-08': { paidAds: 0, socialPosts: 0, ecomListings: 0, consumerReviews: 0 },
+      'ALL': { paidAds: 0, socialPosts: 0, ecomListings: 0, consumerReviews: 0 },
     };
 
     for (const item of taggedRecords) {
@@ -63,6 +63,9 @@ export class MetricAggregator {
       } else if (item.record.channel === 'E-commerce') {
         monthlyCategoryTotals[item.analyticalMonth].ecomListings++;
         monthlyCategoryTotals['ALL'].ecomListings++;
+      } else if (item.record.channel === 'Consumer Review') {
+        monthlyCategoryTotals[item.analyticalMonth].consumerReviews++;
+        monthlyCategoryTotals['ALL'].consumerReviews++;
       }
     }
 
@@ -122,6 +125,7 @@ export class MetricAggregator {
       'OBSERVABLE_SALES_TRACTION_INDEX',
       'AVG_CONSUMER_RATING',
       'TOTAL_CONSUMER_REVIEWS_COUNT',
+      'POSITIVE_SENTIMENT_PCT',
     ];
 
     for (const sku of ALL_MARKET_SKUS) {
@@ -131,7 +135,10 @@ export class MetricAggregator {
             (t) =>
               t.record.brand === sku.brand &&
               (month === 'ALL' || t.analyticalMonth === month) &&
-              t.record.product_sku?.toLowerCase() === sku.model_name.toLowerCase()
+              t.record.product_sku &&
+              (t.record.product_sku.toLowerCase() === sku.model_name.toLowerCase() ||
+                t.record.product_sku.toLowerCase() === sku.sku_id.toLowerCase() ||
+                (sku.aliases && sku.aliases.some((alias) => alias.toLowerCase() === t.record.product_sku?.toLowerCase())))
           )
           .map((t) => t.record);
 

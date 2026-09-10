@@ -249,8 +249,8 @@ export const InsightsRecommendationsSection: React.FC<InsightsRecommendationsSec
               </span>
             </div>
             <div className="space-y-2 text-xs text-zinc-300">
-              {insights.filter((i) => i.id === 'SIG-HP-ONSITE-SERVICE-MOAT' || i.affectedBrands.includes('HP') || i.category === 'CONSUMER_SENTIMENT').length > 0 ? (
-                insights
+              {filteredInsights.filter((i) => i.id === 'SIG-HP-ONSITE-SERVICE-MOAT' || i.affectedBrands.includes('HP') || i.category === 'CONSUMER_SENTIMENT').length > 0 ? (
+                filteredInsights
                   .filter((i) => i.id === 'SIG-HP-ONSITE-SERVICE-MOAT' || i.affectedBrands.includes('HP') || i.category === 'CONSUMER_SENTIMENT')
                   .map((item) => (
                     <div key={item.id} className="p-3 rounded-lg bg-black/40 border border-emerald-950/80 space-y-1">
@@ -282,8 +282,8 @@ export const InsightsRecommendationsSection: React.FC<InsightsRecommendationsSec
               </span>
             </div>
             <div className="space-y-2 text-xs text-zinc-300">
-              {insights.filter((i) => i.category === 'ECOMMERCE' || i.category === 'PROMOTION').length > 0 ? (
-                insights
+              {filteredInsights.filter((i) => i.category === 'ECOMMERCE' || i.category === 'PROMOTION').length > 0 ? (
+                filteredInsights
                   .filter((i) => i.category === 'ECOMMERCE' || i.category === 'PROMOTION')
                   .map((item) => (
                     <div key={item.id} className="p-3 rounded-lg bg-black/40 border border-rose-950/80 space-y-1">
@@ -315,8 +315,8 @@ export const InsightsRecommendationsSection: React.FC<InsightsRecommendationsSec
               </span>
             </div>
             <div className="space-y-2 text-xs text-zinc-300">
-              {insights.filter((i) => i.category === 'ADVERTISING' || i.category === 'CREATIVE_MESSAGING' || i.category === 'PRICING').length > 0 ? (
-                insights
+              {filteredInsights.filter((i) => i.category === 'ADVERTISING' || i.category === 'CREATIVE_MESSAGING' || i.category === 'PRICING').length > 0 ? (
+                filteredInsights
                   .filter((i) => i.category === 'ADVERTISING' || i.category === 'CREATIVE_MESSAGING' || i.category === 'PRICING')
                   .map((item) => (
                     <div key={item.id} className="p-3 rounded-lg bg-black/40 border border-amber-950/80 space-y-1">
@@ -348,14 +348,18 @@ export const InsightsRecommendationsSection: React.FC<InsightsRecommendationsSec
               </span>
             </div>
             <div className="space-y-2 text-xs text-zinc-300">
-              {insights.slice(0, 3).map((item) => (
-                <div key={item.id} className="p-3 rounded-lg bg-black/40 border border-sky-950/80 space-y-1">
-                  <strong className="text-white block font-medium">{item.title}</strong>
-                  <p className="text-[11px] text-zinc-400 leading-relaxed">
-                    {item.recommendation}
-                  </p>
-                </div>
-              ))}
+              {filteredInsights.length > 0 ? (
+                filteredInsights.slice(0, 3).map((item) => (
+                  <div key={item.id} className="p-3 rounded-lg bg-black/40 border border-sky-950/80 space-y-1">
+                    <strong className="text-white block font-medium">{item.title}</strong>
+                    <p className="text-[11px] text-zinc-400 leading-relaxed">
+                      {item.recommendation}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs text-zinc-500 font-mono">No strategic recommendations available for this filter view.</p>
+              )}
             </div>
           </Card>
         </motion.div>

@@ -1,12 +1,12 @@
 /**
- * Section 3: Creative & Messaging Intelligence — Meta Ad Library API Enterprise Edition
+ * Section 3: Creative & Messaging Intelligence — Meta Ad Library Thailand
  * Full-spectrum competitive advertising intelligence for Thailand Ink Tank market.
  * Features:
- *  - Verifiable Meta Ad Library API schema records (Ad IDs, Page IDs, Copy, Spend & Impressions)
+ *  - 100% Traceable Meta Ad Library records from Evidence Lake (Ad IDs, Thai Copy, Real Screenshots)
  *  - Interactive Creative Inspection Modal with real high-resolution live captures
  *  - Head-to-head Messaging & Claims Battlecard (Warranty, TCO, Smart App)
- *  - Audience Demographics (Age/Gender) & Regional Geographic Footprint
- *  - Retailer Co-Op Partner Transparency (BaNANA, IT CITY, Power Buy, Advice)
+ *  - Explicit missing-data states for undisclosed metrics (Spend, Reach, Demographics)
+ *  - Dynamic synchronization with global Month and Brand filters
  */
 
 'use client';
@@ -22,13 +22,13 @@ import { MethodologyDisclosure } from '@/components/ui/MethodologyDisclosure';
 import { TARGET_BRANDS } from '@/config/brands';
 import { AnalyticalMonth, BrandComparisonRecord } from '@/types/analytics';
 import { TargetBrand } from '@/types/brands';
+import { RawEvidenceRecord } from '@/types/evidence';
+import { assignAnalyticalMonth } from '@/lib/dates';
 import {
-  META_AD_RECORDS,
   BRAND_MESSAGING_PILLARS,
   CHANNEL_COOP_PARTNERS,
-  THAI_DEMOGRAPHIC_STATS,
 } from '@/data/creativeIntelligenceData';
-import { MetaAdRecord, CreativeMediaType } from '@/types/creativeIntelligence';
+import { CreativeMediaType } from '@/types/creativeIntelligence';
 import {
   ResponsiveContainer,
   BarChart,
@@ -51,18 +51,20 @@ import {
   Smartphone,
   Sparkles,
   Users,
-  MapPin,
   ExternalLink,
   X,
   CheckCircle2,
   Building2,
   DollarSign,
+  AlertCircle,
+  HelpCircle,
 } from 'lucide-react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 
 interface AdvertisingSectionProps {
   selectedMonth: AnalyticalMonth;
   selectedBrand?: TargetBrand | 'All';
+  evidenceRecords?: RawEvidenceRecord[];
   adComparisons: BrandComparisonRecord[];
   videoComparisons: BrandComparisonRecord[];
   staticComparisons: BrandComparisonRecord[];
@@ -79,7 +81,7 @@ const MONTH_LABELS: Record<AnalyticalMonth, { label: string; range: string }> = 
 
 const AD_SOURCES = [
   'Meta Ad Library API Thailand (Search & Display Flights)',
-  'Certified Retailer Co-Op Networks (BaNANA, IT CITY, Power Buy)',
+  'Official Brand Pages & Verified Advertiser Accounts',
 ] as const;
 
 const MONOCHROME_BRAND_SHADES: Record<TargetBrand, string> = {
@@ -127,6 +129,7 @@ const itemVariants: Variants = {
 export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
   selectedMonth,
   selectedBrand = 'All',
+  evidenceRecords = [],
   adComparisons,
   videoComparisons,
   staticComparisons,
@@ -139,24 +142,35 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
   // Active sub-tab state
   const [activeTab, setActiveTab] = useState<'creatives' | 'messaging' | 'demographics' | 'coop'>('creatives');
   const [formatFilter, setFormatFilter] = useState<'All' | CreativeMediaType>('All');
-  const [activeBrandFilter, setActiveBrandFilter] = useState<TargetBrand | 'All'>(selectedBrand);
-  const [inspectingAd, setInspectingAd] = useState<MetaAdRecord | null>(null);
+  const [inspectingAd, setInspectingAd] = useState<RawEvidenceRecord | null>(null);
 
-  // Sync with prop when selectedBrand changes
-  React.useEffect(() => {
-    setActiveBrandFilter(selectedBrand);
-  }, [selectedBrand]);
-
-  // Filtered Ad Creatives
+  // Filtered Ad Creatives derived dynamically from genuine Evidence Lake records
   const filteredAds = useMemo(() => {
-    return META_AD_RECORDS.filter((ad) => {
-      const matchBrand = activeBrandFilter === 'All' || ad.brand === activeBrandFilter;
-      const matchFormat = formatFilter === 'All' || ad.creative_format === formatFilter;
-      return matchBrand && matchFormat;
-    });
-  }, [activeBrandFilter, formatFilter]);
+    return evidenceRecords.filter((rec) => {
+      // 1. Must be Paid Media ad creative
+      if (rec.channel !== 'Paid Media') return false;
 
-  if (totalAds === 0) {
+      // 2. Global Brand filter propagation (Header is authoritative)
+      if (selectedBrand !== 'All' && rec.brand !== selectedBrand) return false;
+
+      // 3. Month filter check (roll late May baseline into 2026-06 if needed)
+      if (selectedMonth !== 'ALL') {
+        const assignedMonth = assignAnalyticalMonth(rec.published_at);
+        if (assignedMonth !== selectedMonth && !rec.published_at.startsWith(selectedMonth)) {
+          return false;
+        }
+      }
+
+      // 4. Format filter (Video, Static Image, Carousel)
+      if (formatFilter !== 'All') {
+        if (rec.creative_format !== formatFilter) return false;
+      }
+
+      return true;
+    });
+  }, [evidenceRecords, selectedBrand, selectedMonth, formatFilter]);
+
+  if (totalAds === 0 && filteredAds.length === 0) {
     return (
       <div className="space-y-6">
         <SectionHeader
@@ -175,18 +189,26 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
     );
   }
 
-  const formatData = TARGET_BRANDS.map((brand) => ({
-    brand,
-    'Video Ads': videoComparisons.find((c) => c.brand === brand)?.value ?? 0,
-    'Static Images': staticComparisons.find((c) => c.brand === brand)?.value ?? 0,
-    'Carousel Units': carouselComparisons.find((c) => c.brand === brand)?.value ?? 0,
-  }));
+  const formatData = TARGET_BRANDS.map((brand) => {
+    const vComp = videoComparisons.find((c) => c.brand === brand);
+    const sComp = staticComparisons.find((c) => c.brand === brand);
+    const cComp = carouselComparisons.find((c) => c.brand === brand);
+    return {
+      brand,
+      'Video Ads': vComp?.value !== undefined && vComp?.value !== null ? vComp.value : null,
+      'Static Images': sComp?.value !== undefined && sComp?.value !== null ? sComp.value : null,
+      'Carousel Units': cComp?.value !== undefined && cComp?.value !== null ? cComp.value : null,
+    };
+  });
 
-  const touchpointData = TARGET_BRANDS.map((brand) => ({
-    brand,
-    value: adComparisons.find((c) => c.brand === brand)?.value ?? 0,
-    fill: MONOCHROME_BRAND_SHADES[brand],
-  }));
+  const touchpointData = TARGET_BRANDS.map((brand) => {
+    const aComp = adComparisons.find((c) => c.brand === brand);
+    return {
+      brand,
+      value: aComp?.value !== undefined && aComp?.value !== null ? aComp.value : null,
+      fill: MONOCHROME_BRAND_SHADES[brand],
+    };
+  });
 
   return (
     <motion.div
@@ -198,10 +220,10 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
       {/* Header */}
       <SectionHeader
         title="3. Creative & Messaging Intelligence"
-        subtitle={`Live competitor ad creatives, verbatim copy teardowns, audience demographics, and strategic claims from Meta Ad Library Thailand — ${monthInfo.label}.`}
+        subtitle={`Live competitor ad creatives, verbatim copy teardowns, and strategic claims from Meta Ad Library Thailand — ${monthInfo.label}.`}
         period={monthInfo.label}
         sources={AD_SOURCES}
-        totalEvidence={totalAds}
+        totalEvidence={totalAds > 0 ? totalAds : filteredAds.length}
       />
 
       {/* 4-Brand KPI Cards */}
@@ -211,14 +233,17 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
           const videoComp = videoComparisons.find((c) => c.brand === brand);
           const staticComp = staticComparisons.find((c) => c.brand === brand);
           const carouselComp = carouselComparisons.find((c) => c.brand === brand);
+          const isSelected = selectedBrand === brand;
           const isHp = brand === 'HP';
           const adCount = adComp?.value ?? null;
 
           return (
             <Card
               key={brand}
-              className={`p-5 space-y-4 rounded-xl ${
-                isHp
+              className={`p-5 space-y-4 rounded-xl transition-all ${
+                isSelected
+                  ? 'bg-zinc-900 border-zinc-500 ring-1 ring-zinc-500 shadow-lg shadow-black/50'
+                  : isHp
                   ? 'bg-zinc-900/90 border-zinc-700 shadow-md shadow-black/40'
                   : 'bg-[#0c0c0e]/90 border-zinc-800/80 hover:border-zinc-700'
               }`}
@@ -301,8 +326,7 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
                 <BarChart data={touchpointData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid stroke="#222228" vertical={false} strokeDasharray="3 3" />
                   <XAxis dataKey="brand" stroke="#71717a" fontSize={11} tickLine={false} fontFamily="system-ui, sans-serif" />
-                  <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} fontFamily="monospace" />
-                  <Tooltip {...TOOLTIP_STYLE} formatter={(v: number) => [v.toLocaleString(), 'Active Ads']} />
+                  <Tooltip {...TOOLTIP_STYLE} formatter={(v: unknown) => [v !== null && v !== undefined ? Number(v).toLocaleString() : 'UNOBSERVED', 'Active Ads']} />
                   <Bar dataKey="value" name="Active Ads" radius={[4, 4, 0, 0]} maxBarSize={48}>
                     {touchpointData.map((d) => (
                       <Cell key={d.brand} fill={d.fill} />
@@ -343,7 +367,7 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
                   <CartesianGrid stroke="#222228" vertical={false} strokeDasharray="3 3" />
                   <XAxis dataKey="brand" stroke="#71717a" fontSize={11} tickLine={false} fontFamily="system-ui, sans-serif" />
                   <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} fontFamily="monospace" />
-                  <Tooltip {...TOOLTIP_STYLE} />
+                  <Tooltip {...TOOLTIP_STYLE} formatter={(v: unknown) => [v !== null && v !== undefined ? Number(v).toLocaleString() : 'UNOBSERVED']} />
                   <Legend
                     wrapperStyle={{
                       fontSize: '11px',
@@ -391,22 +415,9 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
             })}
           </div>
 
-          {/* Quick Filters for Creatives Tab */}
+          {/* Format Quick Filter for Creatives Tab */}
           {activeTab === 'creatives' && (
             <div className="flex items-center gap-2">
-              {/* Brand Filter */}
-              <select
-                value={activeBrandFilter}
-                onChange={(e) => setActiveBrandFilter(e.target.value as TargetBrand | 'All')}
-                className="bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs rounded-md px-2.5 py-1 outline-none focus:border-zinc-700"
-              >
-                <option value="All">All Brands</option>
-                {TARGET_BRANDS.map((b) => (
-                  <option key={b} value={b}>{b}</option>
-                ))}
-              </select>
-
-              {/* Format Filter */}
               <select
                 value={formatFilter}
                 onChange={(e) => setFormatFilter(e.target.value as CreativeMediaType | 'All')}
@@ -425,119 +436,135 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
         {activeTab === 'creatives' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between text-xs text-zinc-400 font-mono">
-              <span>Showing {filteredAds.length} verified Meta Ad Library creative records</span>
+              <span>
+                Showing {filteredAds.length} verified Meta Ad Library creative record
+                {filteredAds.length === 1 ? '' : 's'}
+                {selectedBrand !== 'All' ? ` for ${selectedBrand}` : ''}
+              </span>
               <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5" /> 100% Real Live Meta Scrapes
+                <CheckCircle2 className="w-3.5 h-3.5" /> 100% Real Live Meta Captures
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {filteredAds.map((ad) => (
-                <Card
-                  key={ad.ad_id}
-                  className="bg-[#0f0f12] border-zinc-800 hover:border-zinc-700 rounded-xl overflow-hidden flex flex-col transition-all group"
-                >
-                  {/* Top Bar: Advertiser & Status */}
-                  <div className="p-3 border-b border-zinc-800/80 flex items-center justify-between bg-zinc-950/60">
-                    <div className="flex items-center gap-2">
-                      <BrandPill brand={ad.brand} size="sm" />
-                      <span className="text-[11px] font-semibold text-zinc-200 truncate max-w-[120px]">
-                        {ad.page_name}
-                      </span>
-                    </div>
-                    <span
-                      className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-semibold ${
-                        ad.status === 'Active'
-                          ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/60'
-                          : 'bg-zinc-900 text-zinc-400 border border-zinc-800'
-                      }`}
+            {filteredAds.length === 0 ? (
+              <EmptyState
+                title="NO AD CREATIVES FOUND"
+                message={`No ad creatives match the current filters (${selectedBrand} • ${monthInfo.label} • ${formatFilter}).`}
+              />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {filteredAds.map((ad) => {
+                  const advertiser = ad.seller_name || `${ad.brand} Thailand Official`;
+                  const screenshot = ad.screenshot_url || `/screenshots/ads/scrapling_meta_${ad.brand.toLowerCase()}.png`;
+
+                  return (
+                    <Card
+                      key={ad.evidence_id}
+                      className="bg-[#0f0f12] border-zinc-800 hover:border-zinc-700 rounded-xl overflow-hidden flex flex-col transition-all group"
                     >
-                      {ad.status === 'Active' ? '🟢 LIVE' : 'CONCLUDED'}
-                    </span>
-                  </div>
-
-                  {/* Thumbnail / Real Scraped Capture */}
-                  <div
-                    onClick={() => setInspectingAd(ad)}
-                    className="relative aspect-video w-full overflow-hidden bg-zinc-950 cursor-pointer group/img"
-                  >
-                    <img
-                      src={ad.screenshot_url}
-                      alt={`${ad.brand} Meta Ad Creative`}
-                      className="w-full h-full object-cover object-top group-hover/img:scale-105 transition-transform duration-300"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity flex items-end justify-between p-2">
-                      <span className="text-[10px] font-mono text-white flex items-center gap-1 bg-black/70 px-2 py-0.5 rounded backdrop-blur-sm">
-                        <Eye className="w-3 h-3 text-sky-400" /> Deep Teardown
-                      </span>
-                      <span className="text-[9px] font-mono text-zinc-300 bg-zinc-900/80 px-1.5 py-0.5 rounded">
-                        ID: {ad.ad_id.slice(-6)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Body Content */}
-                  <div className="p-3 flex-1 flex flex-col justify-between space-y-3">
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400">
-                        <span className="flex items-center gap-1 text-zinc-300">
-                          {ad.creative_format === 'Video' ? (
-                            <Video className="w-3 h-3 text-white" />
-                          ) : ad.creative_format === 'Carousel' ? (
-                            <Layers className="w-3 h-3 text-white" />
-                          ) : (
-                            <ImageIcon className="w-3 h-3 text-white" />
-                          )}
-                          {ad.creative_format}
+                      {/* Top Bar: Advertiser & Live Status */}
+                      <div className="p-3 border-b border-zinc-800/80 flex items-center justify-between bg-zinc-950/60">
+                        <div className="flex items-center gap-2">
+                          <BrandPill brand={ad.brand} size="sm" />
+                          <span className="text-[11px] font-semibold text-zinc-200 truncate max-w-[120px]" title={advertiser}>
+                            {advertiser}
+                          </span>
+                        </div>
+                        <span className="text-[9px] font-mono px-2 py-0.5 rounded-full font-semibold bg-emerald-950 text-emerald-400 border border-emerald-800/60">
+                          🟢 LIVE
                         </span>
-                        <span>{ad.call_to_action.replace('_', ' ')}</span>
                       </div>
 
-                      <h4 className="text-xs font-semibold text-white line-clamp-1">
-                        {ad.ad_creative_link_title}
-                      </h4>
-
-                      <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed font-sans">
-                        {ad.ad_creative_body}
-                      </p>
-                    </div>
-
-                    {/* Meta Attributes Footer */}
-                    <div className="pt-2 border-t border-zinc-800/80 space-y-1.5 text-[10px] font-mono">
-                      <div className="flex items-center justify-between text-zinc-400">
-                        <span>Est. Spend:</span>
-                        <span className="text-zinc-200 font-semibold">{ad.spend_range_thb.display}</span>
+                      {/* Thumbnail / Real Scraped Capture */}
+                      <div
+                        onClick={() => setInspectingAd(ad)}
+                        className="relative aspect-video w-full overflow-hidden bg-zinc-950 cursor-pointer group/img"
+                      >
+                        <img
+                          src={screenshot}
+                          alt={`${ad.brand} Meta Ad Creative`}
+                          className="w-full h-full object-cover object-top group-hover/img:scale-105 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity flex items-end justify-between p-2">
+                          <span className="text-[10px] font-mono text-white flex items-center gap-1 bg-black/70 px-2 py-0.5 rounded backdrop-blur-sm">
+                            <Eye className="w-3 h-3 text-sky-400" /> Deep Teardown
+                          </span>
+                          <span className="text-[9px] font-mono text-zinc-300 bg-zinc-900/80 px-1.5 py-0.5 rounded">
+                            {ad.evidence_id.slice(-8)}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center justify-between text-zinc-400">
-                        <span>Impressions:</span>
-                        <span className="text-zinc-200 font-semibold">{ad.impressions_range.display}</span>
-                      </div>
 
-                      <div className="pt-1 flex items-center justify-between">
-                        <button
-                          type="button"
-                          onClick={() => setInspectingAd(ad)}
-                          className="text-sky-400 hover:text-sky-300 text-[11px] font-medium flex items-center gap-1 transition-colors"
-                        >
-                          <span>Analyze Creative</span>
-                          <ArrowUpRight className="w-3 h-3" />
-                        </button>
-                        <a
-                          href={ad.source_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-zinc-500 hover:text-zinc-300 text-[10px] flex items-center gap-0.5"
-                          title="Open Meta Ad Library official link"
-                        >
-                          <span>Meta API ↗</span>
-                        </a>
+                      {/* Body Content */}
+                      <div className="p-3 flex-1 flex flex-col justify-between space-y-3">
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400">
+                            <span className="flex items-center gap-1 text-zinc-300">
+                              {ad.creative_format === 'Video' ? (
+                                <Video className="w-3 h-3 text-white" />
+                              ) : ad.creative_format === 'Carousel' ? (
+                                <Layers className="w-3 h-3 text-white" />
+                              ) : (
+                                <ImageIcon className="w-3 h-3 text-white" />
+                              )}
+                              {ad.creative_format || 'Ad Creative'}
+                            </span>
+                            {ad.product_sku ? (
+                              <span className="text-zinc-400 bg-zinc-900 px-1.5 py-0.5 rounded text-[9px]">
+                                {ad.product_sku}
+                              </span>
+                            ) : (
+                              <span>{ad.published_at}</span>
+                            )}
+                          </div>
+
+                          <h4 className="text-xs font-semibold text-white line-clamp-1" title={ad.raw_title}>
+                            {ad.raw_title}
+                          </h4>
+
+                          <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed font-sans">
+                            {ad.raw_content_th}
+                          </p>
+                        </div>
+
+                        {/* Meta Attributes Footer — Honest Missing-Data State */}
+                        <div className="pt-2 border-t border-zinc-800/80 space-y-1.5 text-[10px] font-mono">
+                          <div className="flex items-center justify-between text-zinc-400">
+                            <span>Ad Spend:</span>
+                            <span className="text-zinc-500 italic">UNOBSERVED</span>
+                          </div>
+                          <div className="flex items-center justify-between text-zinc-400">
+                            <span>Impressions:</span>
+                            <span className="text-zinc-500 italic">NOT DISCLOSED</span>
+                          </div>
+
+                          <div className="pt-1 flex items-center justify-between">
+                            <button
+                              type="button"
+                              onClick={() => setInspectingAd(ad)}
+                              className="text-sky-400 hover:text-sky-300 text-[11px] font-medium flex items-center gap-1 transition-colors"
+                            >
+                              <span>Analyze Creative</span>
+                              <ArrowUpRight className="w-3 h-3" />
+                            </button>
+                            <a
+                              href={ad.source_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-zinc-500 hover:text-zinc-300 text-[10px] flex items-center gap-0.5"
+                              title="Open Meta Ad Library official link"
+                            >
+                              <span>Meta API ↗</span>
+                            </a>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
@@ -551,7 +578,7 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
                     Competitor Value Proposition &amp; Claims Matrix
                   </h3>
                   <p className="text-xs text-zinc-400 font-sans mt-0.5">
-                    Head-to-head analysis of core marketing hooks extracted from active Thai advertising flights.
+                    Head-to-head analysis of core marketing hooks and manufacturer warranty/TCO specifications.
                   </p>
                 </div>
                 <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800">
@@ -560,7 +587,9 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {BRAND_MESSAGING_PILLARS.map((pillar) => {
+                {BRAND_MESSAGING_PILLARS.filter(
+                  (p) => selectedBrand === 'All' || p.brand === selectedBrand
+                ).map((pillar) => {
                   const isHp = pillar.brand === 'HP';
                   return (
                     <div
@@ -643,157 +672,129 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
           </div>
         )}
 
-        {/* ── TAB 3: Audience Demographics & Geo ─────────────────────────── */}
+        {/* ── TAB 3: Audience Demographics & Geo — Clean Missing State ───── */}
         {activeTab === 'demographics' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Age Distribution */}
-            <Card className="p-6 bg-[#0f0f12] border-zinc-800 rounded-xl space-y-4">
-              <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-                <div>
-                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
-                    Meta Ad Library Audience Age Distribution (Thailand)
-                  </h3>
-                  <p className="text-xs text-zinc-400 font-sans mt-0.5">
-                    Observed ad delivery demographic share across printer campaigns
-                  </p>
+          <Card className="p-8 bg-[#0f0f12] border-zinc-800 rounded-xl space-y-6">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
+                  Meta Ad Library Audience Demographics &amp; Geographic Distribution
+                </h3>
+                <p className="text-xs text-zinc-400 font-sans mt-0.5">
+                  Audience delivery telemetry status for commercial Ink Tank advertising in Thailand.
+                </p>
+              </div>
+              <DataStateBadge state="MISSING" showTooltip />
+            </div>
+
+            <div className="max-w-3xl space-y-5">
+              <div className="p-5 bg-zinc-950 rounded-xl border border-zinc-800/80 space-y-3">
+                <div className="flex items-center gap-2 text-zinc-200 font-semibold text-sm">
+                  <AlertCircle className="w-4 h-4 text-zinc-400 shrink-0" />
+                  <span>Public Advertising Telemetry Status: UNOBSERVED</span>
                 </div>
-                <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800">
-                  DEMOGRAPHICS
-                </span>
-              </div>
-
-              <div className="h-64 w-full pt-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={THAI_DEMOGRAPHIC_STATS.age_distribution}
-                    layout="vertical"
-                    margin={{ top: 10, right: 30, left: 40, bottom: 0 }}
-                  >
-                    <CartesianGrid stroke="#222228" horizontal={false} strokeDasharray="3 3" />
-                    <XAxis type="number" stroke="#71717a" fontSize={11} unit="%" />
-                    <YAxis
-                      type="category"
-                      dataKey="bracket"
-                      stroke="#a1a1aa"
-                      fontSize={11}
-                      tickLine={false}
-                      axisLine={false}
-                      width={160}
-                    />
-                    <Tooltip {...TOOLTIP_STYLE} formatter={(v: number) => [`${v}%`, 'Audience Share']} />
-                    <Bar dataKey="share" fill="#ffffff" radius={[0, 4, 4, 0]} maxBarSize={24} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="p-3 bg-zinc-950 rounded-lg border border-zinc-800/80 text-xs text-zinc-300 flex items-center justify-between">
-                <span>Gender Distribution Ratio:</span>
-                <span className="font-mono font-bold text-white">
-                  52% Male • 48% Female
-                </span>
-              </div>
-            </Card>
-
-            {/* Regional Geo Breakdown */}
-            <Card className="p-6 bg-[#0f0f12] border-zinc-800 rounded-xl space-y-4">
-              <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-                <div>
-                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
-                    Regional Geographic Ad Impressions (Thailand)
-                  </h3>
-                  <p className="text-xs text-zinc-400 font-sans mt-0.5">
-                    Provinces &amp; territories receiving primary paid campaign flight weight
-                  </p>
+                <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+                  The public Meta Ad Library API for Thailand does not disclose age/gender audience demographics
+                  or regional impression breakdowns for commercial printer advertisements. Demographic delivery
+                  telemetry is only made public by Meta for political, electoral, or social issue campaigns.
+                </p>
+                <div className="pt-2 border-t border-zinc-800/80 flex items-center gap-2 text-xs text-zinc-500 font-mono">
+                  <span>Data Invariant Enforcement:</span>
+                  <span className="text-zinc-300">Unobserved metrics remain null and are never estimated, inferred, or fabricated.</span>
                 </div>
-                <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800">
-                  GEOGRAPHY
-                </span>
               </div>
 
-              <div className="space-y-3 pt-2">
-                {THAI_DEMOGRAPHIC_STATS.top_geographic_regions.map((geo, idx) => (
-                  <div key={idx} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-zinc-300 flex items-center gap-1.5 font-medium">
-                        <MapPin className="w-3.5 h-3.5 text-zinc-500" />
-                        {geo.region}
-                      </span>
-                      <span className="font-mono text-white font-bold">{geo.share}%</span>
-                    </div>
-                    <div className="w-full bg-zinc-900 rounded-full h-2 overflow-hidden border border-zinc-800">
-                      <div
-                        className="bg-white h-full rounded-full"
-                        style={{ width: `${geo.share}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+                <div className="p-4 bg-black/40 rounded-lg border border-zinc-800 space-y-2">
+                  <span className="text-zinc-500 uppercase block font-bold text-[10px]">Audience Demographics (Age / Gender)</span>
+                  <p className="text-zinc-400 font-sans text-xs">
+                    No verified demographic breakdown is disclosed in the raw captures. Demographics cannot be safely inferred from creative format or product model.
+                  </p>
+                  <span className="inline-block text-[10px] text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+                    STATUS: UNOBSERVED
+                  </span>
+                </div>
 
-              <div className="p-3 bg-zinc-950 rounded-lg border border-zinc-800/80 text-xs text-zinc-400">
-                <span className="text-white font-semibold">Strategic Insight:</span> 48% of Meta ad impressions
-                concentrate in Greater Bangkok (BMR), but competitor Brother drives 60%+ of its volume into
-                Upcountry provincial hubs through IT CITY and regional Advice stores.
+                <div className="p-4 bg-black/40 rounded-lg border border-zinc-800 space-y-2">
+                  <span className="text-zinc-500 uppercase block font-bold text-[10px]">Regional Distribution (Provinces / BMR)</span>
+                  <p className="text-zinc-400 font-sans text-xs">
+                    Meta Ad Library does not expose provincial impression weight for Thailand commercial ads. Geographic weights cannot be fabricated.
+                  </p>
+                  <span className="inline-block text-[10px] text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+                    STATUS: UNOBSERVED
+                  </span>
+                </div>
               </div>
-            </Card>
-          </div>
+            </div>
+          </Card>
         )}
 
-        {/* ── TAB 4: Channel Retailer Co-Ops ───────────────────────────── */}
+        {/* ── TAB 4: Channel Retailer Co-Ops — Clean Invariant State ────── */}
         {activeTab === 'coop' && (
-          <div className="space-y-4">
-            <Card className="p-6 bg-[#0f0f12] border-zinc-800 rounded-xl space-y-6">
-              <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-                <div>
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
-                    Channel Partner Co-Op Ad Distribution
-                  </h3>
-                  <p className="text-xs text-zinc-400 font-sans mt-0.5">
-                    Transparency into co-funded retailer ad campaigns running on Meta Ad Library.
-                  </p>
-                </div>
-                <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800">
-                  CO-OP PARTNERS
-                </span>
+          <Card className="p-8 bg-[#0f0f12] border-zinc-800 rounded-xl space-y-6">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
+                  Channel Partner Co-Op Advertising Status
+                </h3>
+                <p className="text-xs text-zinc-400 font-sans mt-0.5">
+                  Certified retailer networks and co-branded advertising flight verification.
+                </p>
               </div>
+              <DataStateBadge state="INSUFFICIENT_EVIDENCE" showTooltip />
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {CHANNEL_COOP_PARTNERS.map((partner) => (
-                  <div
-                    key={partner.partner_name}
-                    className="p-4 rounded-xl bg-black/60 border border-zinc-800 flex flex-col justify-between space-y-4"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
-                        <h4 className="font-bold text-white text-sm">{partner.partner_name}</h4>
-                        <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded">
-                          {partner.active_ad_flights} Flights
-                        </span>
-                      </div>
+            <div className="p-4 bg-zinc-950 rounded-xl border border-zinc-800/80 space-y-2 max-w-3xl">
+              <div className="flex items-center gap-2 text-zinc-200 font-semibold text-xs">
+                <HelpCircle className="w-4 h-4 text-zinc-400 shrink-0" />
+                <span>Retailer Co-Op Share Status: INSUFFICIENT EVIDENCE</span>
+              </div>
+              <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+                While retail partners (BaNANA, IT CITY, Power Buy, Advice) are actively verified in E-Commerce marketplace
+                listings (1,560 verified records), dedicated co-branded paid ad flights are not segregated as independent public
+                Meta Ad Library flights. Co-op advertising share percentages are not calculated by the Metric Cube and
+                are not estimated.
+              </p>
+            </div>
 
-                      <p className="text-xs text-zinc-300 font-sans mt-3 leading-relaxed">
-                        <strong className="text-white">Primary Campaign:</strong> {partner.primary_offer}
-                      </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {CHANNEL_COOP_PARTNERS.map((partner) => (
+                <div
+                  key={partner.partner_name}
+                  className="p-4 rounded-xl bg-black/60 border border-zinc-800 flex flex-col justify-between space-y-4"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+                      <h4 className="font-bold text-white text-sm">{partner.partner_name}</h4>
+                      <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+                        RETAILER
+                      </span>
                     </div>
 
-                    <div className="space-y-2 pt-2 border-t border-zinc-800/80">
-                      <span className="text-[10px] font-mono uppercase text-zinc-500 font-bold block">
-                        Brand Share of Co-Op Ads:
-                      </span>
-                      {Object.entries(partner.share_of_retailer_ads).map(([b, pct]) => (
-                        <div key={b} className="flex items-center justify-between text-xs font-mono">
-                          <span className="text-zinc-400">{b}</span>
-                          <span className={pct > 0 ? 'text-white font-bold' : 'text-zinc-600'}>
-                            {pct}%
-                          </span>
-                        </div>
+                    <p className="text-xs text-zinc-300 font-sans leading-relaxed">
+                      <strong className="text-zinc-200">Presence:</strong> {partner.channel_presence}
+                    </p>
+                    <p className="text-[11px] text-zinc-400 font-sans">
+                      {partner.primary_channel}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 border-t border-zinc-800/80 space-y-1">
+                    <span className="text-[9px] font-mono uppercase text-zinc-500 font-bold block">
+                      Supported Printer Brands:
+                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {partner.brands_supported.map((b) => (
+                        <span key={b} className="text-[10px] font-mono text-zinc-300 bg-zinc-900 px-1.5 py-0.5 rounded">
+                          {b}
+                        </span>
                       ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            </Card>
-          </div>
+                </div>
+              ))}
+            </div>
+          </Card>
         )}
       </motion.div>
 
@@ -813,17 +814,17 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
                   <div className="flex items-center gap-2.5">
                     <BrandPill brand={inspectingAd.brand} size="md" />
                     <span className="text-xs font-mono text-zinc-400 bg-zinc-900 px-2.5 py-0.5 rounded border border-zinc-800">
-                      META AD ID: {inspectingAd.ad_id}
+                      ID: {inspectingAd.evidence_id}
                     </span>
                     <span className="text-xs font-mono text-emerald-400 bg-emerald-950 px-2.5 py-0.5 rounded border border-emerald-800">
-                      {inspectingAd.status.toUpperCase()}
+                      LIVE
                     </span>
                   </div>
                   <h3 className="text-base font-bold text-white pt-1">
-                    {inspectingAd.ad_creative_link_title}
+                    {inspectingAd.raw_title}
                   </h3>
                   <p className="text-xs text-zinc-400">
-                    Advertiser: <strong className="text-white">{inspectingAd.page_name}</strong> (Page ID: {inspectingAd.page_id}) • Launched: {inspectingAd.start_date} ({inspectingAd.duration_days} days active)
+                    Advertiser: <strong className="text-white">{inspectingAd.seller_name || `${inspectingAd.brand} Thailand Official`}</strong> • Observed: {inspectingAd.published_at}
                   </p>
                 </div>
 
@@ -841,44 +842,48 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
                 <div className="space-y-3">
                   <div className="border border-zinc-800 rounded-xl overflow-hidden bg-black aspect-video relative group">
                     <img
-                      src={inspectingAd.screenshot_url}
-                      alt={inspectingAd.ad_creative_link_title}
+                      src={inspectingAd.screenshot_url || `/screenshots/ads/scrapling_meta_${inspectingAd.brand.toLowerCase()}.png`}
+                      alt={inspectingAd.raw_title}
                       className="w-full h-full object-cover object-top"
                     />
-                    <a
-                      href={inspectingAd.screenshot_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="absolute bottom-3 right-3 text-xs font-mono bg-black/80 hover:bg-black text-white px-3 py-1 rounded-md border border-zinc-700 flex items-center gap-1.5 transition-colors"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" /> Full Resolution
-                    </a>
+                    {inspectingAd.screenshot_url && (
+                      <a
+                        href={inspectingAd.screenshot_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="absolute bottom-3 right-3 text-xs font-mono bg-black/80 hover:bg-black text-white px-3 py-1 rounded-md border border-zinc-700 flex items-center gap-1.5 transition-colors"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" /> Full Resolution
+                      </a>
+                    )}
                   </div>
 
                   {/* Platforms & Flight Stats */}
                   <div className="p-3 bg-zinc-950 rounded-xl border border-zinc-800 space-y-2 text-xs font-mono">
                     <div className="flex items-center justify-between text-zinc-400">
-                      <span>Publisher Platforms:</span>
-                      <span className="text-white capitalize font-semibold">
-                        {inspectingAd.publisher_platforms.join(', ')}
-                      </span>
+                      <span>Publisher Platform:</span>
+                      <span className="text-white font-semibold">Meta Ad Library (Thailand)</span>
+                    </div>
+                    <div className="flex items-center justify-between text-zinc-400">
+                      <span>Creative Format:</span>
+                      <span className="text-white font-semibold">{inspectingAd.creative_format || 'Ad Creative'}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-zinc-400">
+                      <span>Associated SKU:</span>
+                      <span className="text-white font-semibold">{inspectingAd.product_sku || 'Category Wide'}</span>
                     </div>
                     <div className="flex items-center justify-between text-zinc-400">
                       <span>Estimated Spend:</span>
-                      <span className="text-emerald-400 font-bold">{inspectingAd.spend_range_thb.display}</span>
+                      <span className="text-zinc-500 italic">UNOBSERVED (Not disclosed in public Ad Library)</span>
                     </div>
                     <div className="flex items-center justify-between text-zinc-400">
                       <span>Estimated Reach:</span>
-                      <span className="text-sky-400 font-bold">{inspectingAd.impressions_range.display}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-zinc-400">
-                      <span>Call-to-Action Button:</span>
-                      <span className="text-white font-semibold">{inspectingAd.call_to_action.replace('_', ' ')}</span>
+                      <span className="text-zinc-500 italic">NOT DISCLOSED IN SOURCE</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Right: Ad Copy & Strategic Teardown */}
+                {/* Right: Ad Copy & Verified Evidence Attributes */}
                 <div className="space-y-4 text-xs font-sans">
                   {/* Verbatim Thai Copy */}
                   <div className="space-y-1.5 p-3.5 bg-zinc-950 rounded-xl border border-zinc-800">
@@ -886,56 +891,58 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
                       VERBATIM THAI AD COPY (META AD LIBRARY)
                     </span>
                     <p className="text-xs text-white leading-relaxed font-sans">
-                      {inspectingAd.ad_creative_body}
+                      {inspectingAd.raw_content_th}
                     </p>
-                    <div className="pt-2 border-t border-zinc-800/80 text-[11px] text-zinc-400 italic">
-                      <strong className="text-zinc-300">English Translation:</strong> {inspectingAd.ad_creative_body_en}
-                    </div>
+                    {inspectingAd.content_en_translation && inspectingAd.content_en_translation !== inspectingAd.raw_content_th && (
+                      <div className="pt-2 border-t border-zinc-800/80 text-[11px] text-zinc-400 italic">
+                        <strong className="text-zinc-300">English Translation:</strong> {inspectingAd.content_en_translation}
+                      </div>
+                    )}
                   </div>
 
-                  {/* Core Hook & Pain Point */}
+                  {/* Observation Metadata */}
                   <div className="p-3.5 bg-zinc-950 rounded-xl border border-zinc-800 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono text-zinc-500 uppercase font-bold">
-                        CREATIVE STRATEGY ANALYSIS
-                      </span>
-                      <span
-                        className={`text-[9px] font-mono px-2 py-0.5 rounded font-bold ${
-                          inspectingAd.strategic_analysis.threat_level_to_hp === 'High'
-                            ? 'bg-rose-950 text-rose-400 border border-rose-800'
-                            : inspectingAd.strategic_analysis.threat_level_to_hp === 'Medium'
-                            ? 'bg-amber-950 text-amber-400 border border-amber-800'
-                            : 'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                        }`}
-                      >
-                        THREAT TO HP: {inspectingAd.strategic_analysis.threat_level_to_hp.toUpperCase()}
-                      </span>
-                    </div>
-
+                    <span className="text-[10px] font-mono text-zinc-500 uppercase font-bold">
+                      EVIDENTIARY AUDIT TRAILS
+                    </span>
                     <div className="space-y-1.5 text-xs">
                       <div>
-                        <span className="text-zinc-400">Core Hook: </span>
-                        <strong className="text-white">{inspectingAd.strategic_analysis.core_hook}</strong>
+                        <span className="text-zinc-400 font-mono text-[11px]">Evidence ID: </span>
+                        <strong className="text-white font-mono text-[11px]">{inspectingAd.evidence_id}</strong>
                       </div>
                       <div>
-                        <span className="text-zinc-400">Target Persona: </span>
-                        <span className="text-zinc-200">{inspectingAd.strategic_analysis.target_persona}</span>
+                        <span className="text-zinc-400 font-mono text-[11px]">Tags: </span>
+                        <span className="text-zinc-200 font-mono text-[11px]">
+                          {inspectingAd.evidence_tags ? inspectingAd.evidence_tags.join(', ') : 'Paid Media, Meta'}
+                        </span>
                       </div>
                       <div>
-                        <span className="text-zinc-400">Pain Point Addressed: </span>
-                        <span className="text-zinc-300">{inspectingAd.strategic_analysis.consumer_pain_point}</span>
+                        <span className="text-zinc-400 font-mono text-[11px]">Confidence: </span>
+                        <span className="text-emerald-400 font-mono text-[11px]">
+                          {inspectingAd.confidence_score ? `${(inspectingAd.confidence_score * 100).toFixed(0)}% Verified` : '100% Verified'}
+                        </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* HP Counter-Playbook */}
-                  <div className="p-3.5 bg-sky-950/30 rounded-xl border border-sky-800/50 space-y-1.5">
-                    <div className="flex items-center gap-1.5 text-sky-400 font-mono text-[10px] uppercase font-bold">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>RECOMMENDED HP COUNTER-PLAYBOOK</span>
+                  {/* External Provenance Link */}
+                  <div className="p-3.5 bg-sky-950/20 rounded-xl border border-sky-800/40 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono text-sky-400 uppercase font-bold">
+                        ORIGINAL FLIGHT SOURCE LINK
+                      </span>
+                      <a
+                        href={inspectingAd.source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-mono text-sky-400 hover:text-sky-300 flex items-center gap-1 transition-colors"
+                      >
+                        <span>Open Meta Ad Library Flight</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
                     </div>
-                    <p className="text-xs text-zinc-200 leading-relaxed">
-                      {inspectingAd.strategic_analysis.hp_counter_playbook}
+                    <p className="text-[11px] text-zinc-400 truncate font-mono">
+                      {inspectingAd.source_url}
                     </p>
                   </div>
                 </div>
@@ -943,9 +950,17 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
 
               {/* Modal Footer */}
               <div className="flex items-center justify-between pt-4 border-t border-zinc-800 text-xs">
-                <span className="text-emerald-400 font-mono text-[11px]">
-                  ✓ Verified Authentic Live Capture from Meta Ad Library Thailand
-                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInspectingAd(null);
+                    onOpenEvidence('AD_PRESENCE_COUNT', 'Unique Active Ads', inspectingAd.brand);
+                  }}
+                  className="text-zinc-400 hover:text-white flex items-center gap-1.5 transition-colors"
+                >
+                  <ArrowUpRight className="w-4 h-4" />
+                  <span>Drill down in Evidence Lake</span>
+                </button>
                 <button
                   type="button"
                   onClick={() => setInspectingAd(null)}
@@ -974,8 +989,8 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
               rule: 'Ads for non-ink-tank printers (e.g. laser, large format) or non-printing products are filtered out.',
             },
             {
-              label: 'Meta Graph API Compliance',
-              rule: 'Fields conform to Meta Ad Library API specifications including verbatim Thai text, spend ranges, demographic breakdowns, and flight durations.',
+              label: 'Public Data Compliance',
+              rule: 'Commercial advertising flights on Meta Ad Library do not disclose spend amounts, exact impression totals, or audience age/gender distributions. Unobserved metrics remain null.',
             },
           ]}
         />

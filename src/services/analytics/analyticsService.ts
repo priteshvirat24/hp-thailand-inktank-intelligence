@@ -211,7 +211,10 @@ export class AnalyticsService {
   /**
    * Synthesizes Executive Overview summary.
    */
-  public getExecutiveOverview(month: AnalyticalMonth = '2026-08'): ExecutiveOverviewData {
+  public getExecutiveOverview(
+    month: AnalyticalMonth = '2026-08',
+    brand: TargetBrand | 'All' = 'All'
+  ): ExecutiveOverviewData {
     const allEvidence = globalEvidenceStore.getAll();
     const brandSummaries = {} as ExecutiveOverviewData['brands'];
 
@@ -220,27 +223,31 @@ export class AnalyticsService {
       (r) => month === 'ALL' || (r.published_at && r.published_at.startsWith(month))
     );
 
-    for (const brand of TARGET_BRANDS) {
-      const touchpointRow = this.getMetricValue('TOTAL_VISIBILITY_TOUCHPOINTS', { brand, month, sku_id: 'All' });
-      const paidSovRow = this.getMetricValue('PAID_MEDIA_SOV', { brand, month, sku_id: 'All' });
-      const socialSovRow = this.getMetricValue('SOCIAL_SOV', { brand, month, sku_id: 'All' });
-      const ecomSovRow = this.getMetricValue('ECOMMERCE_SOV', { brand, month, sku_id: 'All' });
-      const priceRow = this.getMetricValue('AVG_SELLING_PRICE_THB', { brand, month, sku_id: 'All' });
-      const discountRow = this.getMetricValue('AVG_DISCOUNT_PCT', { brand, month, sku_id: 'All' });
+    const relevantRecords = brand !== 'All'
+      ? activeRecords.filter((r) => r.brand === brand)
+      : activeRecords;
+
+    for (const b of TARGET_BRANDS) {
+      const touchpointRow = this.getMetricValue('TOTAL_VISIBILITY_TOUCHPOINTS', { brand: b, month, sku_id: 'All' });
+      const paidSovRow = this.getMetricValue('PAID_MEDIA_SOV', { brand: b, month, sku_id: 'All' });
+      const socialSovRow = this.getMetricValue('SOCIAL_SOV', { brand: b, month, sku_id: 'All' });
+      const ecomSovRow = this.getMetricValue('ECOMMERCE_SOV', { brand: b, month, sku_id: 'All' });
+      const priceRow = this.getMetricValue('AVG_SELLING_PRICE_THB', { brand: b, month, sku_id: 'All' });
+      const discountRow = this.getMetricValue('AVG_DISCOUNT_PCT', { brand: b, month, sku_id: 'All' });
 
       // Find top promoted SKU for this brand
-      const brandSkus = this.getSkuComparison(brand, month);
-      const topPromoted = brandSkus.sort((a, b) => (b.promo_penetration_pct || 0) - (a.promo_penetration_pct || 0))[0];
+      const brandSkus = this.getSkuComparison(b, month);
+      const topPromoted = brandSkus.sort((x, y) => (y.promo_penetration_pct || 0) - (x.promo_penetration_pct || 0))[0];
 
       const brandRated = activeRecords.filter(
-        (r) => r.brand === brand && typeof r.rating === 'number' && r.rating > 0
+        (r) => r.brand === b && r.channel === 'Consumer Review' && typeof r.rating === 'number' && r.rating > 0
       );
       const brandAvgRating = brandRated.length > 0
         ? Number((brandRated.reduce((acc, r) => acc + (r.rating || 0), 0) / brandRated.length).toFixed(1))
         : null;
 
-      brandSummaries[brand] = {
-        total_visibility_touchpoints: touchpointRow?.metric_value ?? 0,
+      brandSummaries[b] = {
+        total_visibility_touchpoints: touchpointRow?.metric_value ?? null,
         paid_sov_pct: paidSovRow?.metric_value ?? null,
         social_sov_pct: socialSovRow?.metric_value ?? null,
         ecom_sov_pct: ecomSovRow?.metric_value ?? null,
@@ -252,24 +259,25 @@ export class AnalyticsService {
       };
     }
 
-    const ratedRecords = activeRecords.filter(
-      (r) => typeof r.rating === 'number' && r.rating > 0
+    const ratedRecords = relevantRecords.filter(
+      (r) => r.channel === 'Consumer Review' && typeof r.rating === 'number' && r.rating > 0
     );
     const overallAvgRating = ratedRecords.length > 0
       ? Number((ratedRecords.reduce((acc, r) => acc + (r.rating || 0), 0) / ratedRecords.length).toFixed(1))
       : null;
 
     const channelObservations = {
-      paid_media: activeRecords.filter((r) => r.channel === 'Paid Media').length,
-      social: activeRecords.filter((r) => (r.channel as string) === 'Social' || (r.channel as string) === 'Social Channels').length,
-      ecommerce: activeRecords.filter((r) => (r.channel as string) === 'E-commerce' || (r.channel as string) === 'E-Commerce').length,
-      consumer_review: activeRecords.filter((r) => r.channel === 'Consumer Review').length,
+      paid_media: relevantRecords.filter((r) => r.channel === 'Paid Media').length,
+      social: relevantRecords.filter((r) => (r.channel as string) === 'Social' || (r.channel as string) === 'Social Channels').length,
+      ecommerce: relevantRecords.filter((r) => (r.channel as string) === 'E-commerce' || (r.channel as string) === 'E-Commerce').length,
+      consumer_review: relevantRecords.filter((r) => r.channel === 'Consumer Review').length,
     };
 
     return {
       month,
+      brand,
       brands: brandSummaries,
-      total_evidence_observations: activeRecords.length,
+      total_evidence_observations: relevantRecords.length,
       total_lake_observations: allEvidence.length,
       channel_observations: channelObservations,
       avg_consumer_rating: overallAvgRating,

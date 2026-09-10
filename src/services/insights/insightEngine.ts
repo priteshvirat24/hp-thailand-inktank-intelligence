@@ -152,7 +152,7 @@ export class InsightEngine {
   /**
    * Candidate Signal Detection across verified data
    */
-  private detectCandidateSignals(
+  public detectCandidateSignals(
     month: AnalyticalMonth,
     brandFilter: TargetBrand | 'All'
   ): CandidateSignal[] {
@@ -208,6 +208,24 @@ export class InsightEngine {
       'E-commerce Presence, Pricing, Promotions & Traction',
       month
     );
+
+    // Dynamic candidate scoring helper calculating scores from evidence density and observable gaps
+    const calculateDynamicScores = (params: {
+      evidenceCount: number;
+      deltaOrGap: number;
+      isMultiMonth: boolean;
+      hpImpactWeight: number;
+    }) => {
+      const magBase = 6.0;
+      const countBonus = Math.min(1.5, (params.evidenceCount / 25) * 1.5);
+      const deltaBonus = Math.min(2.0, (params.deltaOrGap / 15) * 2.0);
+      const magnitudeScore = Number(Math.min(9.5, Math.max(5.5, magBase + countBonus + deltaBonus)).toFixed(1));
+
+      const persistenceScore = params.isMultiMonth ? 8.8 : 7.5;
+      const hpRelevanceScore = params.hpImpactWeight;
+
+      return { magnitudeScore, persistenceScore, hpRelevanceScore };
+    };
 
     // ========================================================================
     // SIGNAL 1: Brother Promotional Surge & SME Enclosed Tray Sales Push
@@ -272,6 +290,13 @@ export class InsightEngine {
           ? ` Average discount deepened from ${brotherDiscountMoM.june}% in June to ${brotherDiscountMoM.august}% in August (+${(brotherDiscountMoM.august - brotherDiscountMoM.june).toFixed(1)}pp).`
           : '';
 
+      const brotherScores = calculateDynamicScores({
+        evidenceCount: evidenceIds.length,
+        deltaOrGap: brotherDiscountMoM.delta ? Math.abs(brotherDiscountMoM.delta) : (brotherDiscount ?? 10),
+        isMultiMonth: brotherDiscountMoM.direction !== 'STABLE' || month === 'ALL',
+        hpImpactWeight: 9.0,
+      });
+
       candidates.push({
         id: 'SIG-BROTHER-PROMO-SURGE',
         category: 'PROMOTION',
@@ -292,9 +317,9 @@ export class InsightEngine {
         supportingMetrics,
         evidenceIds,
         sourceUrls: sourceLinks,
-        magnitudeScore: 8.5,
-        persistenceScore: 8.0,
-        hpRelevanceScore: 9.0,
+        magnitudeScore: brotherScores.magnitudeScore,
+        persistenceScore: brotherScores.persistenceScore,
+        hpRelevanceScore: brotherScores.hpRelevanceScore,
         dataState: 'OBSERVED',
         analyticalMonth: month,
         methodologyNote:
@@ -365,6 +390,13 @@ export class InsightEngine {
           ? ` Canon discount depth expanded from ${canonDiscountMoM.june}% in June to ${canonDiscountMoM.august}% in August, representing the sharpest price discounting among all tracked competitors.`
           : '';
 
+      const canonScores = calculateDynamicScores({
+        evidenceCount: evidenceIds.length,
+        deltaOrGap: canonDiscountMoM.delta ? Math.abs(canonDiscountMoM.delta) : 8.0,
+        isMultiMonth: canonDiscountMoM.direction !== 'STABLE' || month === 'ALL',
+        hpImpactWeight: 9.0,
+      });
+
       candidates.push({
         id: 'SIG-CANON-COST-PER-PAGE',
         category: 'CREATIVE_MESSAGING',
@@ -385,9 +417,9 @@ export class InsightEngine {
         supportingMetrics,
         evidenceIds,
         sourceUrls: sourceLinks,
-        magnitudeScore: 8.0,
-        persistenceScore: 8.5,
-        hpRelevanceScore: 9.0,
+        magnitudeScore: canonScores.magnitudeScore,
+        persistenceScore: canonScores.persistenceScore,
+        hpRelevanceScore: canonScores.hpRelevanceScore,
         dataState: 'OBSERVED',
         analyticalMonth: month,
         methodologyNote:
@@ -443,6 +475,13 @@ export class InsightEngine {
         ? `HP achieved ${hpWsPct !== null ? `${hpWsPct}%` : '100%'} positive sentiment across ${hpWsReviews.length} verified reviews for Warranty & Service, whereas Epson reviews contain ${epsonClogCount} recurring maintenance observations regarding printhead maintenance and carry-in depot service.`
         : 'Consumer sentiment cannot currently be assessed from verified review evidence for this period.';
 
+      const moatScores = calculateDynamicScores({
+        evidenceCount: evidenceIds.length,
+        deltaOrGap: reviewAudit.count > 0 ? 15.0 : 0,
+        isMultiMonth: true,
+        hpImpactWeight: 9.5,
+      });
+
       candidates.push({
         id: 'SIG-HP-ONSITE-SERVICE-MOAT',
         category: 'CONSUMER_SENTIMENT',
@@ -463,9 +502,9 @@ export class InsightEngine {
         supportingMetrics: [],
         evidenceIds,
         sourceUrls: sourceLinks,
-        magnitudeScore: 9.0,
-        persistenceScore: 9.0,
-        hpRelevanceScore: 9.5,
+        magnitudeScore: moatScores.magnitudeScore,
+        persistenceScore: moatScores.persistenceScore,
+        hpRelevanceScore: moatScores.hpRelevanceScore,
         dataState: reviewAudit.hasData ? 'OBSERVED' : 'INSUFFICIENT_EVIDENCE',
         analyticalMonth: month,
         methodologyNote:
@@ -517,6 +556,13 @@ export class InsightEngine {
           ? `${(epsonEcomSov - hpEcomSov).toFixed(1)}%`
           : 'unobserved';
 
+      const epsonScores = calculateDynamicScores({
+        evidenceCount: evidenceIds.length,
+        deltaOrGap: epsonEcomSov !== null && hpEcomSov !== null ? Math.max(0, epsonEcomSov - hpEcomSov) : 10,
+        isMultiMonth: true,
+        hpImpactWeight: 8.8,
+      });
+
       candidates.push({
         id: 'SIG-EPSON-SHELF-DOMINANCE',
         category: 'ECOMMERCE',
@@ -537,9 +583,9 @@ export class InsightEngine {
         supportingMetrics,
         evidenceIds,
         sourceUrls: sourceLinks,
-        magnitudeScore: 8.5,
-        persistenceScore: 9.5,
-        hpRelevanceScore: 8.5,
+        magnitudeScore: epsonScores.magnitudeScore,
+        persistenceScore: epsonScores.persistenceScore,
+        hpRelevanceScore: epsonScores.hpRelevanceScore,
         dataState: 'OBSERVED',
         analyticalMonth: month,
         methodologyNote:
@@ -601,6 +647,13 @@ export class InsightEngine {
       const evidenceIds = videoAds.slice(0, 4).map((r) => r.evidence_id);
       const { sourceLinks } = insightEvidenceResolver.resolveEvidenceSources(evidenceIds);
 
+      const videoScores = calculateDynamicScores({
+        evidenceCount: evidenceIds.length,
+        deltaOrGap: epsonFmt.video + brotherFmt.video > 0 ? 8.0 : 2.0,
+        isMultiMonth: true,
+        hpImpactWeight: 8.5,
+      });
+
       candidates.push({
         id: 'SIG-SHORTFORM-VIDEO-SHIFT',
         category: 'ADVERTISING',
@@ -621,9 +674,9 @@ export class InsightEngine {
         supportingMetrics,
         evidenceIds,
         sourceUrls: sourceLinks,
-        magnitudeScore: 7.5,
-        persistenceScore: 8.0,
-        hpRelevanceScore: 8.5,
+        magnitudeScore: videoScores.magnitudeScore,
+        persistenceScore: videoScores.persistenceScore,
+        hpRelevanceScore: videoScores.hpRelevanceScore,
         dataState: 'OBSERVED',
         analyticalMonth: month,
         methodologyNote:

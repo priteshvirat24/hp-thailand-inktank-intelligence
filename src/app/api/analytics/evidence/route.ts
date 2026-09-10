@@ -22,7 +22,13 @@ export async function GET(req: NextRequest) {
     const channel = searchParams.get('channel');
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
     const pageSizeParam = searchParams.get('pageSize') || searchParams.get('limit');
-    const pageSize = pageSizeParam ? Math.max(1, parseInt(pageSizeParam, 10)) : 0;
+    const allRequested = searchParams.get('all') === 'true';
+    let pageSize = pageSizeParam ? Math.min(500, Math.max(1, parseInt(pageSizeParam, 10))) : 0;
+
+    // Enforce bounded default pagination of 50 for ALL evidence queries unless all=true is explicitly requested
+    if (!allRequested && pageSize === 0 && (!metricId || metricId === 'ALL')) {
+      pageSize = 50;
+    }
 
     let evidence = [];
 

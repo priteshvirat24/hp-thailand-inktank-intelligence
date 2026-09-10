@@ -92,13 +92,14 @@ export class RetrievalEngine {
       metricsToFetch.push('TOTAL_VISIBILITY_TOUCHPOINTS', 'ECOMMERCE_SOV', 'AVG_SELLING_PRICE_THB');
     }
 
+    const uniqueMetrics = Array.from(new Set(metricsToFetch));
     const targetMonth = (!isAllOrEmpty(query.monthFilter) ? query.monthFilter : '2026-08') as AnalyticalMonth;
     const targetBrands: readonly TargetBrand[] =
       !isAllOrEmpty(query.brandFilter) ? [query.brandFilter as TargetBrand] : TARGET_BRANDS;
 
     const results: RagSupportingMetric[] = [];
 
-    for (const metricId of metricsToFetch) {
+    for (const metricId of uniqueMetrics) {
       const def = METRIC_DEFINITIONS[metricId];
       if (!def) continue;
 
@@ -163,9 +164,9 @@ export class RetrievalEngine {
       );
     }
 
-    // Safety: If overly restrictive filter combination produces 0 candidates, fallback to allChunks
+    // Strict Filtering: If filter combination produces 0 candidates, return 0 candidates (NO EVIDENCE = NO BUSINESS CLAIM)
     if (candidateChunks.length === 0) {
-      candidateChunks = [...allChunks];
+      return [];
     }
 
     // 2. Extract query terms and intent signals

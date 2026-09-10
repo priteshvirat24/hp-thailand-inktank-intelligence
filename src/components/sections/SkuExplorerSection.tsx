@@ -165,9 +165,9 @@ export const SkuExplorerSection: React.FC<SkuExplorerSectionProps> = ({
       {/* Header */}
       <SectionHeader
         title="5. Product / SKU Push & Commercial Traction"
-        subtitle={`${enriched.length} canonical printer models across HP, Epson, Canon, and Brother in the Thailand market.`}
+        subtitle={`${enriched.length} tracked printer models (28 core canonical benchmarks + 37 expanded portfolio models) across HP, Epson, Canon, and Brother in the Thailand market.`}
         period={selectedMonth}
-        badge={`${enriched.length} CANONICAL MODELS`}
+        badge={`${enriched.length} TRACKED MODELS (28 CORE + 37 EXPANDED)`}
       />
 
       {/* Taxonomy & Integrity Scope Disclosure */}
@@ -175,11 +175,11 @@ export const SkuExplorerSection: React.FC<SkuExplorerSectionProps> = ({
         <MethodologyDisclosure
           defaultExpanded={false}
           title="SKU Taxonomy Governance & Contamination Safeguards"
-          description={`The ${enriched.length} canonical models constitute the comprehensive competitive universe monitored in Thailand. Crawled products pass through a 4-stage regex normalizer and a 6-gate contamination classifier. Ingested listings for ink bottles, refill tanks, printheads, and photo paper are automatically filtered out to ensure clean hardware pricing.`}
+          description={`The ${enriched.length} tracked models (comprising the 28 core benchmark canonical models and 37 expanded portfolio models) constitute the comprehensive competitive universe monitored in Thailand. Crawled products pass through a 4-stage regex normalizer and a 6-gate contamination classifier. Ingested listings for ink bottles, refill tanks, printheads, and photo paper are automatically filtered out to ensure clean hardware pricing.`}
           rules={[
             {
               label: 'No Ambiguous Mapping',
-              rule: `Listings that cannot be resolved to one of the ${enriched.length} canonical SKUs remain Unassigned.`,
+              rule: `Listings that cannot be resolved to one of the ${enriched.length} tracked SKUs remain Unassigned.`,
             },
             {
               label: 'Hardware Isolation',

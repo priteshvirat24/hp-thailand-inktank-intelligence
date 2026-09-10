@@ -145,7 +145,7 @@ export const IngestionStatusModal: React.FC<IngestionStatusModalProps> = ({
                       </span>
                     </div>
                     <p className="text-[11px] text-zinc-400 leading-relaxed font-normal">
-                      Meta Ad Library, YouTube (HP, Canon, Brother), Facebook Official Brand Pages
+                      Meta Ad Library, YouTube (HP, Canon, Brother, Epson), Facebook Official Brand Pages
                     </p>
                   </div>
 

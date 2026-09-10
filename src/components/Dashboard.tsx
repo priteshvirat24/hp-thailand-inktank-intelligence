@@ -34,6 +34,7 @@ import {
   fetchSummary,
   fetchBrands,
   fetchSkus,
+  fetchTrends,
   fetchEvidence,
   fetchInsights,
   fetchIngestionHealth,
@@ -45,6 +46,7 @@ import {
   ExecutiveOverviewData,
   BrandComparisonRecord,
   SkuComparisonRecord,
+  MonthlyTrendPoint,
   AnalyticalMonth,
   MetricId,
 } from '@/types/analytics';
@@ -95,6 +97,10 @@ interface DashboardData {
   skus: SkuComparisonRecord[];
   insights: Insight[];
   allEvidence: RawEvidenceRecord[];
+  avgRatings: BrandComparisonRecord[];
+  positiveSentiment: BrandComparisonRecord[];
+  reviewsCount: BrandComparisonRecord[];
+  visibilityTrends: MonthlyTrendPoint[];
 }
 
 const EMPTY_DATA: DashboardData = {
@@ -113,6 +119,10 @@ const EMPTY_DATA: DashboardData = {
   skus: [],
   insights: [],
   allEvidence: [],
+  avgRatings: [],
+  positiveSentiment: [],
+  reviewsCount: [],
+  visibilityTrends: [],
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -147,7 +157,7 @@ export const Dashboard: React.FC = () => {
 
   // ─── Data Fetching ──────────────────────────────────────────────────────────
 
-  const fetchAllData = useCallback(async (month: AnalyticalMonth) => {
+  const fetchAllData = useCallback(async (month: AnalyticalMonth, brand: TargetBrand | 'All' = 'All') => {
     setIsLoading(true);
     setError(null);
 
@@ -169,8 +179,12 @@ export const Dashboard: React.FC = () => {
         skusRes,
         insightsRes,
         evidenceRes,
+        avgRatingsRes,
+        positiveSentimentRes,
+        reviewsCountRes,
+        visibilityTrendsRes,
       ] = await Promise.all([
-        fetchSummary(month).catch(() => null),
+        fetchSummary(month, brand).catch(() => null),
         fetchBrands('TOTAL_VISIBILITY_TOUCHPOINTS', month).catch(() => null),
         fetchBrands('PAID_MEDIA_SOV', month).catch(() => null),
         fetchBrands('SOCIAL_SOV', month).catch(() => null),
@@ -182,9 +196,13 @@ export const Dashboard: React.FC = () => {
         fetchBrands('SOCIAL_POSTS_COUNT', month).catch(() => null),
         fetchBrands('TOTAL_SOCIAL_ENGAGEMENT', month).catch(() => null),
         fetchBrands('ECOMMERCE_LISTINGS_COUNT', month).catch(() => null),
-        fetchSkus(null, month).catch(() => null),
-        fetchInsights(month, 'All', 5).catch(() => null),
-        fetchEvidence('ALL' as unknown as MetricId, 'All', month).catch(() => null),
+        fetchSkus(brand === 'All' ? null : brand, month).catch(() => null),
+        fetchInsights(month, brand, 5).catch(() => null),
+        fetchEvidence('ALL' as unknown as MetricId, brand, month, undefined, { all: true }).catch(() => null),
+        fetchBrands('AVG_CONSUMER_RATING', month).catch(() => null),
+        fetchBrands('POSITIVE_SENTIMENT_PCT', month).catch(() => null),
+        fetchBrands('TOTAL_CONSUMER_REVIEWS_COUNT', month).catch(() => null),
+        fetchTrends('TOTAL_VISIBILITY_TOUCHPOINTS', brand).catch(() => null),
       ]);
 
       setData((prev) => ({
@@ -203,6 +221,10 @@ export const Dashboard: React.FC = () => {
         skus: skusRes?.skus ?? [],
         insights: insightsRes?.insights ?? [],
         allEvidence: evidenceRes?.evidence ?? prev.allEvidence,
+        avgRatings: avgRatingsRes?.comparison ?? [],
+        positiveSentiment: positiveSentimentRes?.comparison ?? [],
+        reviewsCount: reviewsCountRes?.comparison ?? [],
+        visibilityTrends: visibilityTrendsRes?.trends ?? [],
       }));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to synchronize analytical data from server.');
@@ -211,10 +233,10 @@ export const Dashboard: React.FC = () => {
     }
   }, []);
 
-  // Fetch evidence lake on section activation or month change
-  const fetchEvidenceLake = useCallback(async (month: AnalyticalMonth) => {
+  // Fetch evidence lake on section activation or month/brand change
+  const fetchEvidenceLake = useCallback(async (month: AnalyticalMonth, brand: TargetBrand | 'All' = 'All') => {
     try {
-      const res = await fetchEvidence('ALL' as unknown as MetricId, 'All', month);
+      const res = await fetchEvidence('ALL' as unknown as MetricId, brand, month, undefined, { all: true });
       setData((prev) => ({ ...prev, allEvidence: res.evidence }));
     } catch {
       // Non-fatal
@@ -232,9 +254,9 @@ export const Dashboard: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    void fetchAllData(selectedMonth);
+    void fetchAllData(selectedMonth, selectedBrand);
     void loadIngestionHealth();
-  }, [selectedMonth, fetchAllData, loadIngestionHealth]);
+  }, [selectedMonth, selectedBrand, fetchAllData, loadIngestionHealth]);
 
   useEffect(() => {
     if (
@@ -243,9 +265,9 @@ export const Dashboard: React.FC = () => {
       activeSection === 'insights' ||
       activeSection === 'signals'
     ) {
-      void fetchEvidenceLake(selectedMonth);
+      void fetchEvidenceLake(selectedMonth, selectedBrand);
     }
-  }, [activeSection, selectedMonth, fetchEvidenceLake]);
+  }, [activeSection, selectedMonth, selectedBrand, fetchEvidenceLake]);
 
   // ─── Evidence Modal ─────────────────────────────────────────────────────────
 
@@ -293,9 +315,9 @@ export const Dashboard: React.FC = () => {
   // ─── Refresh ────────────────────────────────────────────────────────────────
 
   const handleRefresh = useCallback(() => {
-    void fetchAllData(selectedMonth);
+    void fetchAllData(selectedMonth, selectedBrand);
     void loadIngestionHealth();
-  }, [selectedMonth, fetchAllData, loadIngestionHealth]);
+  }, [selectedMonth, selectedBrand, fetchAllData, loadIngestionHealth]);
 
   // ─── Render active section ──────────────────────────────────────────────────
 
@@ -369,6 +391,7 @@ export const Dashboard: React.FC = () => {
             insights={data.insights}
             selectedMonth={selectedMonth}
             selectedBrand={selectedBrand}
+            isLoading={isLoading}
             onOpenEvidence={openEvidence}
             onNavigateSection={(sec) => setActiveSection(sec)}
           />
@@ -383,6 +406,7 @@ export const Dashboard: React.FC = () => {
             paidSovComparisons={data.paidSov}
             socialSovComparisons={data.socialSov}
             ecomSovComparisons={data.ecomSov}
+            trends={data.visibilityTrends}
             onOpenEvidence={openEvidence}
           />
         );
@@ -391,6 +415,7 @@ export const Dashboard: React.FC = () => {
           <AdvertisingSection
             selectedMonth={selectedMonth}
             selectedBrand={selectedBrand}
+            evidenceRecords={data.allEvidence}
             adComparisons={data.ads}
             videoComparisons={data.videoAds}
             staticComparisons={data.staticAds}
@@ -436,6 +461,9 @@ export const Dashboard: React.FC = () => {
             selectedMonth={selectedMonth}
             selectedBrand={selectedBrand}
             evidenceRecords={data.allEvidence}
+            ratingComparisons={data.avgRatings}
+            sentimentComparisons={data.positiveSentiment}
+            reviewsCountComparisons={data.reviewsCount}
             onOpenEvidence={openEvidence}
           />
         );
@@ -461,7 +489,7 @@ export const Dashboard: React.FC = () => {
       case 'web':
         return (
           <WebIntelligenceSection
-            onEvidenceCreated={() => void fetchAllData(selectedMonth)}
+            onEvidenceCreated={() => void fetchAllData(selectedMonth, selectedBrand)}
           />
         );
       default:
@@ -481,7 +509,10 @@ export const Dashboard: React.FC = () => {
           setData(EMPTY_DATA);
         }}
         selectedBrand={selectedBrand}
-        onSelectBrand={setSelectedBrand}
+        onSelectBrand={(b) => {
+          setSelectedBrand(b);
+          setData(EMPTY_DATA);
+        }}
         theme={theme}
         onToggleTheme={handleToggleTheme}
         onRefresh={handleRefresh}

@@ -7,16 +7,21 @@ describe('Friday Presentation Evidentiary Compliance & Regression Suite', () => 
   const lakePath = path.join(process.cwd(), 'data/evidence_lake/scrapling_verified_lake.json');
   const manifestPath = path.join(process.cwd(), 'data/evidence_lake/screenshot_manifest.json');
 
-  it('verifies Epson YouTube is completely dropped from Evidence Lake and Manifest', () => {
+  it('verifies Epson Thailand YouTube is validated with official channel URL and authentic screenshot', () => {
     const rawLake = fs.readFileSync(lakePath, 'utf-8');
     const lake = JSON.parse(rawLake);
-    const epsonYT = lake.filter((r: { brand: string; platform: string }) => r.brand === 'Epson' && r.platform === 'YouTube');
-    expect(epsonYT.length).toBe(0);
+    const epsonYT = lake.filter((r: { brand: string; platform: string; source_url: string; screenshot_url: string }) => r.brand === 'Epson' && r.platform === 'YouTube');
+    expect(epsonYT.length).toBe(25);
+    for (const r of epsonYT) {
+      expect(r.source_url).toBe('https://www.youtube.com/@EpsonThailandOfficial/featured');
+      expect(r.screenshot_url).toBe('/screenshots/social/youtube_epson.png');
+    }
 
     const rawManifest = fs.readFileSync(manifestPath, 'utf-8');
     const manifest = JSON.parse(rawManifest);
-    const epsonManifest = manifest.filter((item: { id: string }) => item.id === 'youtube_epson');
-    expect(epsonManifest.length).toBe(0);
+    const epsonManifest = manifest.find((item: { id: string }) => item.id === 'youtube_epson');
+    expect(epsonManifest).toBeDefined();
+    expect(epsonManifest.url).toBe('https://www.youtube.com/@EpsonThailandOfficial/featured');
   });
 
   it('verifies Google Ads and TikTok are dropped from Evidence Lake to prevent claiming unevidenced sources', () => {

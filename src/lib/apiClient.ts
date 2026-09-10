@@ -81,11 +81,18 @@ async function apiFetch<T>(path: string): Promise<T> {
 // ─── Endpoint Functions ───────────────────────────────────────────────────────
 
 /**
- * GET /api/analytics/summary?month=
- * Returns the executive overview with all 4 brands.
+ * GET /api/analytics/summary?month=&brand=
+ * Returns the executive overview with all 4 brands or filtered brand observations.
  */
-export async function fetchSummary(month: AnalyticalMonth): Promise<ExecutiveOverviewData> {
-  return apiFetch<ExecutiveOverviewData>(`/api/analytics/summary?month=${month}`);
+export async function fetchSummary(
+  month: AnalyticalMonth,
+  brand?: TargetBrand | 'All'
+): Promise<ExecutiveOverviewData> {
+  const params = new URLSearchParams({ month });
+  if (brand && brand !== 'All') {
+    params.set('brand', brand);
+  }
+  return apiFetch<ExecutiveOverviewData>(`/api/analytics/summary?${params.toString()}`);
 }
 
 /**
@@ -145,10 +152,14 @@ export async function fetchEvidence(
   metricId: MetricId,
   brand: TargetBrand | 'All',
   month: AnalyticalMonth | 'All',
-  skuId?: string
+  skuId?: string,
+  options?: { page?: number; pageSize?: number; all?: boolean }
 ): Promise<EvidenceApiResponse> {
   const params = new URLSearchParams({ metric: metricId, brand, month });
   if (skuId && skuId !== 'All') params.set('sku_id', skuId);
+  if (options?.all) params.set('all', 'true');
+  if (options?.pageSize) params.set('pageSize', String(options.pageSize));
+  if (options?.page) params.set('page', String(options.page));
   return apiFetch<EvidenceApiResponse>(`/api/analytics/evidence?${params.toString()}`);
 }
 

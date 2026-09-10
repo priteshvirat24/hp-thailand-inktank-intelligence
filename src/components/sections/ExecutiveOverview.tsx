@@ -42,6 +42,7 @@ interface ExecutiveOverviewProps {
   insights?: readonly import('@/services/insights/insightTypes').Insight[];
   selectedMonth: AnalyticalMonth;
   selectedBrand?: TargetBrand | 'All';
+  isLoading?: boolean;
   onOpenEvidence?: (metricId: string, metricName: string, brand: TargetBrand | 'All') => void;
   onNavigateSection?: (section: DashboardSection) => void;
 }
@@ -59,7 +60,7 @@ const VERIFIED_SOURCES = [
   'JIB Thailand',
   'Pantip.com Community',
   'Facebook Official',
-  'YouTube Official (HP, Canon, Brother)',
+  'YouTube Official (HP, Canon, Brother, Epson)',
 ] as const;
 
 const containerVariants: Variants = {
@@ -80,6 +81,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
   insights,
   selectedMonth,
   selectedBrand = 'All',
+  isLoading = false,
   onOpenEvidence,
   onNavigateSection,
 }) => {
@@ -106,8 +108,6 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
 
   const focusBrand: TargetBrand = selectedBrand !== 'All' ? selectedBrand : 'HP';
   const activeBrandData = data?.brands?.[focusBrand];
-  const hp = data?.brands?.HP;
-  const canon = data?.brands?.Canon;
   const totalObs = data?.total_evidence_observations ?? 0;
 
   // Real observation counts from backend
@@ -120,22 +120,6 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
     : (activeBrandData?.avg_consumer_rating ?? data?.avg_consumer_rating);
 
   // Dynamic calculations for Key Insights
-  const rankedBrandsByTouchpoints = TARGET_BRANDS.slice().sort(
-    (a, b) => (data?.brands?.[b]?.total_visibility_touchpoints ?? 0) - (data?.brands?.[a]?.total_visibility_touchpoints ?? 0)
-  );
-  const touchpointLeader = rankedBrandsByTouchpoints[0] ?? 'HP';
-  const leaderTouchpoints = data?.brands?.[touchpointLeader]?.total_visibility_touchpoints ?? 0;
-  const hpTouchpoints = hp?.total_visibility_touchpoints ?? 0;
-
-  const rankedBrandsByEcom = TARGET_BRANDS.slice().sort(
-    (a, b) => (data?.brands?.[b]?.ecom_sov_pct ?? 0) - (data?.brands?.[a]?.ecom_sov_pct ?? 0)
-  );
-  const ecomLeader = rankedBrandsByEcom[0] ?? 'Epson';
-  const leaderEcomSov = data?.brands?.[ecomLeader]?.ecom_sov_pct ?? 0;
-  const hpEcomSov = hp?.ecom_sov_pct ?? 0;
-
-  const hpAvgPrice = hp?.avg_price_thb;
-  const canonAvgPrice = canon?.avg_price_thb;
 
   return (
     <motion.div
@@ -294,112 +278,31 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                 </div>
               );
             })
-          ) : (
+          ) : isLoading ? (
             <>
-              {/* Card 1: Visibility Leadership */}
-              <div className="p-4 rounded-xl bg-[#121214] border border-[#222226] space-y-2.5 relative overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-all">
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-[10px] font-mono">
-                    <span className="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800 uppercase font-semibold">
-                      Visibility &amp; SOV
-                    </span>
-                    <span className="text-zinc-400">{leaderTouchpoints} pts</span>
-                  </div>
-                  <h4 className="text-xs font-bold text-white leading-snug">
-                    {touchpointLeader} leads online presence; HP captures {hpTouchpoints} touchpoints
-                  </h4>
-                  <p className="text-[11px] text-zinc-400 leading-relaxed">
-                    {touchpointLeader} maintains the highest combined volume across search ads and marketplace listings. HP holds a strong paid ad share ({hp?.paid_sov_pct ?? '—'}% paid SOV) but has headroom on marketplace listings.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onOpenEvidence?.('TOTAL_VISIBILITY_TOUCHPOINTS', 'Total Online Visibility Touchpoints', 'HP')}
-                  className="text-[10px] font-mono text-sky-400 hover:text-sky-300 flex items-center gap-1 pt-1"
+              {[1, 2, 3, 4].map((n) => (
+                <div
+                  key={n}
+                  className="p-4 rounded-xl bg-[#121214]/60 border border-[#222226] space-y-3 animate-pulse h-44 flex flex-col justify-between"
                 >
-                  <span>Inspect visibility evidence</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
-              </div>
-
-              {/* Card 2: E-Commerce Shelf Dominance */}
-              <div className="p-4 rounded-xl bg-[#121214] border border-[#222226] space-y-2.5 relative overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-all">
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-[10px] font-mono">
-                    <span className="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 uppercase font-semibold">
-                      E-Commerce SOV
-                    </span>
-                    <span className="text-zinc-400">{leaderEcomSov}% vs {hpEcomSov}%</span>
+                  <div className="space-y-2">
+                    <div className="h-4 w-24 bg-zinc-800 rounded" />
+                    <div className="h-5 w-3/4 bg-zinc-800 rounded" />
+                    <div className="h-10 w-full bg-zinc-900 rounded" />
                   </div>
-                  <h4 className="text-xs font-bold text-white leading-snug">
-                    {ecomLeader} anchors marketplace shelf share on Shopee &amp; LazMall
-                  </h4>
-                  <p className="text-[11px] text-zinc-400 leading-relaxed">
-                    {ecomLeader} holds {leaderEcomSov}% of observed product listings, leveraging high listing density for entry models. HP at {hpEcomSov}% focuses on official store bundles.
-                  </p>
+                  <div className="h-3 w-32 bg-zinc-800 rounded" />
                 </div>
-                <button
-                  type="button"
-                  onClick={() => onOpenEvidence?.('ECOMMERCE_SOV', 'E-Commerce Share of Voice %', 'HP')}
-                  className="text-[10px] font-mono text-amber-400 hover:text-amber-300 flex items-center gap-1 pt-1"
-                >
-                  <span>Inspect e-commerce listings</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
-              </div>
-
-              {/* Card 3: Pricing Gap & Margin Anchor */}
-              <div className="p-4 rounded-xl bg-[#121214] border border-[#222226] space-y-2.5 relative overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-all">
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-[10px] font-mono">
-                    <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 uppercase font-semibold">
-                      Pricing Anchor
-                    </span>
-                    <span className="text-zinc-400">{hpAvgPrice ? formatTHB(hpAvgPrice) : '—'}</span>
-                  </div>
-                  <h4 className="text-xs font-bold text-white leading-snug">
-                    HP maintains premium positioning vs Canon entry price
-                  </h4>
-                  <p className="text-[11px] text-zinc-400 leading-relaxed">
-                    HP average selling price ({hpAvgPrice ? formatTHB(hpAvgPrice) : '—'}) reflects bundled value and connectivity features, while Canon ({canonAvgPrice ? formatTHB(canonAvgPrice) : '—'}) targets price-sensitive students.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onOpenEvidence?.('AVG_SELLING_PRICE_THB', 'Average Selling Price', 'HP')}
-                  className="text-[10px] font-mono text-emerald-400 hover:text-emerald-300 flex items-center gap-1 pt-1"
-                >
-                  <span>Inspect pricing evidence</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
-              </div>
-
-              {/* Card 4: Service Warranty Moat */}
-              <div className="p-4 rounded-xl bg-[#121214] border border-[#222226] space-y-2.5 relative overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition-all">
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-[10px] font-mono">
-                    <span className="px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 uppercase font-semibold">
-                      Strategic Moat
-                    </span>
-                    <span className="text-zinc-400">Proven Moat</span>
-                  </div>
-                  <h4 className="text-xs font-bold text-white leading-snug">
-                    2-Year Onsite Service is HP&apos;s strongest uncopied differentiator
-                  </h4>
-                  <p className="text-[11px] text-zinc-400 leading-relaxed">
-                    Door-to-door technician repair across all 77 Thai provinces remains HP&apos;s primary value moat against competitor carry-in depot service requirements.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onNavigateSection?.('insights')}
-                  className="text-[10px] font-mono text-purple-400 hover:text-purple-300 flex items-center gap-1 pt-1"
-                >
-                  <span>View strategic action plan</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
-              </div>
+              ))}
             </>
+          ) : (
+            <div className="col-span-1 md:col-span-2 lg:col-span-4 p-8 rounded-xl bg-[#121214]/80 border border-[#222226] text-center space-y-2">
+              <span className="text-xs font-mono uppercase tracking-wider text-zinc-400 block font-bold">
+                NO AUTHORITATIVE INSIGHTS GENERATED FOR THIS SELECTION
+              </span>
+              <p className="text-xs text-zinc-500 font-sans max-w-lg mx-auto">
+                No verified strategic signals met the high-significance corroboration threshold for {monthInfo.full} ({selectedBrand}). Expand filters or run web crawlers to capture additional evidence.
+              </p>
+            </div>
           )}
         </div>
       </motion.div>
@@ -517,7 +420,7 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                   {TARGET_BRANDS.map((brand) => {
                     const b = data?.brands?.[brand];
                     const isFocus = brand === focusBrand;
-                    const hasBData = totalObs > 0 && b && b.total_visibility_touchpoints > 0;
+                    const hasBData = totalObs > 0 && b && b.total_visibility_touchpoints !== null && b.total_visibility_touchpoints > 0;
 
                     return (
                       <tr key={brand} className={`transition-colors ${isFocus ? 'bg-[#1a1a24] border-l-2 border-sky-400' : 'hover:bg-[#151515]'}`}>

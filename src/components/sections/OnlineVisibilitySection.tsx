@@ -21,6 +21,8 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
@@ -30,6 +32,7 @@ import {
 } from 'recharts';
 import { ArrowUpRight } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
+import { MonthlyTrendPoint } from '@/types/analytics';
 
 interface OnlineVisibilitySectionProps {
   selectedMonth: AnalyticalMonth;
@@ -39,6 +42,7 @@ interface OnlineVisibilitySectionProps {
   paidSovComparisons: BrandComparisonRecord[];
   socialSovComparisons: BrandComparisonRecord[];
   ecomSovComparisons: BrandComparisonRecord[];
+  trends?: MonthlyTrendPoint[];
   onOpenEvidence: (metricId: string, metricName: string, brand: TargetBrand | 'All') => void;
 }
 
@@ -55,7 +59,7 @@ const VISIBILITY_SOURCES = [
   'JIB Thailand',
   'Pantip.com Community',
   'Facebook Official',
-  'YouTube Official (HP, Canon, Brother)',
+  'YouTube Official (HP, Canon, Brother, Epson)',
 ] as const;
 
 const MONOCHROME_BRAND_SHADES: Record<TargetBrand, string> = {
@@ -102,6 +106,7 @@ export const OnlineVisibilitySection: React.FC<OnlineVisibilitySectionProps> = (
   paidSovComparisons,
   socialSovComparisons,
   ecomSovComparisons,
+  trends,
   onOpenEvidence,
 }) => {
   const hasData = touchpointComparisons.some((b) => b.value !== null && b.value > 0);
@@ -127,18 +132,27 @@ export const OnlineVisibilitySection: React.FC<OnlineVisibilitySectionProps> = (
     );
   }
 
-  const touchpointData = TARGET_BRANDS.map((brand) => ({
-    brand,
-    value: touchpointComparisons.find((c) => c.brand === brand)?.value ?? 0,
-    fill: brand === selectedBrand ? '#38bdf8' : MONOCHROME_BRAND_SHADES[brand],
-  }));
+  // Preserve nulls for unobserved/insufficient data instead of converting null to 0
+  const touchpointData = TARGET_BRANDS.map((brand) => {
+    const comp = touchpointComparisons.find((c) => c.brand === brand);
+    return {
+      brand,
+      value: comp && comp.data_state === 'OBSERVED' && comp.value !== null ? comp.value : null,
+      fill: brand === selectedBrand ? '#38bdf8' : MONOCHROME_BRAND_SHADES[brand],
+    };
+  });
 
-  const sovData = TARGET_BRANDS.map((brand) => ({
-    brand,
-    'Paid Media': paidSovComparisons.find((c) => c.brand === brand)?.value ?? 0,
-    'Social Channels': socialSovComparisons.find((c) => c.brand === brand)?.value ?? 0,
-    'E-Commerce': ecomSovComparisons.find((c) => c.brand === brand)?.value ?? 0,
-  }));
+  const sovData = TARGET_BRANDS.map((brand) => {
+    const paidRec = paidSovComparisons.find((c) => c.brand === brand);
+    const socialRec = socialSovComparisons.find((c) => c.brand === brand);
+    const ecomRec = ecomSovComparisons.find((c) => c.brand === brand);
+    return {
+      brand,
+      'Paid Media': paidRec && paidRec.data_state === 'OBSERVED' && paidRec.value !== null ? paidRec.value : null,
+      'Social Channels': socialRec && socialRec.data_state === 'OBSERVED' && socialRec.value !== null ? socialRec.value : null,
+      'E-Commerce': ecomRec && ecomRec.data_state === 'OBSERVED' && ecomRec.value !== null ? ecomRec.value : null,
+    };
+  });
 
   return (
     <motion.div
@@ -188,7 +202,13 @@ export const OnlineVisibilitySection: React.FC<OnlineVisibilitySectionProps> = (
                   <CartesianGrid stroke="#222228" vertical={false} strokeDasharray="3 3" />
                   <XAxis dataKey="brand" stroke="#71717a" fontSize={11} tickLine={false} fontFamily="system-ui, sans-serif" />
                   <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} fontFamily="monospace" />
-                  <Tooltip {...TOOLTIP_STYLE} formatter={(v: number) => [v.toLocaleString(), 'Touchpoints']} />
+                  <Tooltip
+                    {...TOOLTIP_STYLE}
+                    formatter={(v: unknown) => [
+                      v !== null && v !== undefined ? Number(v).toLocaleString() : 'UNOBSERVED / INSUFFICIENT EVIDENCE',
+                      'Touchpoints',
+                    ]}
+                  />
                   <Bar dataKey="value" name="Touchpoints" radius={[4, 4, 0, 0]} maxBarSize={48}>
                     {touchpointData.map((d) => (
                       <Cell key={d.brand} fill={d.fill} />
@@ -292,7 +312,13 @@ export const OnlineVisibilitySection: React.FC<OnlineVisibilitySectionProps> = (
                 <CartesianGrid stroke="#222228" vertical={false} strokeDasharray="3 3" />
                 <XAxis dataKey="brand" stroke="#71717a" fontSize={11} tickLine={false} fontFamily="system-ui, sans-serif" />
                 <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} unit="%" fontFamily="monospace" />
-                <Tooltip {...TOOLTIP_STYLE} formatter={(v: number) => [`${v.toFixed(1)}%`]} />
+                <Tooltip
+                  {...TOOLTIP_STYLE}
+                  formatter={(v: unknown, name: unknown) => [
+                    v !== null && v !== undefined ? `${Number(v).toFixed(1)}%` : 'UNOBSERVED / INSUFFICIENT EVIDENCE',
+                    name as string,
+                  ]}
+                />
                 <Legend
                   wrapperStyle={{
                     fontSize: '11px',
@@ -309,6 +335,59 @@ export const OnlineVisibilitySection: React.FC<OnlineVisibilitySectionProps> = (
           </div>
         </Card>
       </motion.div>
+
+      {/* 3-Month Trajectory Trend Line Chart (BUG-011) */}
+      {trends && trends.length > 0 && (
+        <motion.div variants={itemVariants}>
+          <Card className="p-6 space-y-4 rounded-xl bg-[#0c0c0e]/90 border-zinc-800">
+            <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                    3-Month Visibility Trend Trajectory (June – August 2026)
+                  </h3>
+                  <InfoTooltip
+                    title="3-Month Trajectory"
+                    content="Continuous 90-day trajectory of aggregate online visibility touchpoints across the analytical period."
+                  />
+                </div>
+                <p className="text-xs text-zinc-400 font-sans mt-0.5">
+                  Month-over-month volume progression {selectedBrand !== 'All' ? `for ${selectedBrand}` : 'across all brands'}
+                </p>
+              </div>
+              <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800">
+                90-DAY TRAJECTORY
+              </span>
+            </div>
+
+            <div className="h-56 w-full pt-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={trends.filter((t) => t.month !== 'ALL')} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
+                  <CartesianGrid stroke="#222228" strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="month_label" stroke="#71717a" fontSize={11} tickLine={false} fontFamily="system-ui, sans-serif" />
+                  <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} fontFamily="monospace" />
+                  <Tooltip
+                    {...TOOLTIP_STYLE}
+                    formatter={(v: unknown) => [
+                      v !== null && v !== undefined ? Number(v).toLocaleString() : 'UNOBSERVED',
+                      'Touchpoints',
+                    ]}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    name="Touchpoints"
+                    stroke="#38bdf8"
+                    strokeWidth={2.5}
+                    dot={{ r: 4, fill: '#38bdf8' }}
+                    activeDot={{ r: 6, fill: '#ffffff' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Collapsible Methodology Disclosure */}
       <motion.div variants={itemVariants}>
