@@ -85,6 +85,20 @@ export function buildChunkContent(record: RawEvidenceRecord): string {
     parts.push([ratingStr, reviewStr].filter(Boolean).join(' | '));
   }
 
+  // Consumer Review Integrity Metadata
+  if (record.channel === 'Consumer Review') {
+    const rec = record as unknown as Record<string, unknown>;
+    if (rec.category_status) {
+      parts.push(`Category Status: ${rec.category_status}`);
+    }
+    if (rec.attribution_status) {
+      parts.push(`Attribution Status: ${rec.attribution_status}`);
+    }
+    if (rec.temporal_window_status) {
+      parts.push(`Temporal Window Status: ${rec.temporal_window_status}`);
+    }
+  }
+
   // Temporal Attribution
   parts.push(`Published: ${record.published_at} | Captured: ${record.captured_at.split('T')[0]}`);
   parts.push(`Source URL: ${record.source_url}`);

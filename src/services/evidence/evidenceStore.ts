@@ -21,22 +21,24 @@ export class EvidenceStore {
   private initializedFromDisk: boolean = false;
 
   constructor() {
-    if (process.env.NODE_ENV !== 'test') {
-      this.loadFromDisk();
-    }
+    this.loadFromDisk();
   }
 
   public loadFromDisk(force: boolean = false): void {
-    if (process.env.NODE_ENV === 'test' && !force) return;
     if (this.initializedFromDisk && this.records.size > 0 && !force) return;
     try {
       const candidatePaths = [
         path.join(process.cwd(), 'data/evidence_lake/scrapling_verified_lake.json'),
         path.resolve(process.cwd(), 'data/evidence_lake/scrapling_verified_lake.json'),
-        path.join(__dirname, '../../../../data/evidence_lake/scrapling_verified_lake.json'),
-        path.join(__dirname, '../../../data/evidence_lake/scrapling_verified_lake.json'),
-        path.join(__dirname, '../../data/evidence_lake/scrapling_verified_lake.json'),
       ];
+
+      if (typeof __dirname !== 'undefined') {
+        candidatePaths.push(
+          path.join(__dirname, '../../../../data/evidence_lake/scrapling_verified_lake.json'),
+          path.join(__dirname, '../../../data/evidence_lake/scrapling_verified_lake.json'),
+          path.join(__dirname, '../../data/evidence_lake/scrapling_verified_lake.json')
+        );
+      }
 
       let foundPath: string | null = null;
       for (const p of candidatePaths) {
@@ -58,7 +60,6 @@ export class EvidenceStore {
           }
         }
       }
-      this.initializedFromDisk = true;
     } catch {
       // File read error non-fatal
     }

@@ -36,6 +36,7 @@ import {
   Minimize2,
   Copy,
   Check,
+  Info,
 } from 'lucide-react';
 import { cn, formatTHB } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -44,6 +45,8 @@ import { getVerifiedWorkingSourceUrl } from '@/lib/urlHelpers';
 export interface RagAssistantProps {
   currentMonth: AnalyticalMonth;
   currentBrand: TargetBrand | 'All';
+  totalLakeCount?: number;
+  activeCount?: number;
   isEvidenceModalOpen?: boolean;
   onOpenEvidence?: (
     metricId: string,
@@ -74,6 +77,8 @@ const SUGGESTED_QUERIES = [
 export const RagAssistant: React.FC<RagAssistantProps> = ({
   currentMonth,
   currentBrand,
+  totalLakeCount = 3653,
+  activeCount,
   isEvidenceModalOpen = false,
   onOpenEvidence,
 }) => {
@@ -278,8 +283,14 @@ export const RagAssistant: React.FC<RagAssistantProps> = ({
                   <h3 className="text-xs font-bold uppercase tracking-wider text-white font-mono">
                     Intelligence Assistant
                   </h3>
-                  <p className="text-[11px] text-zinc-400 font-sans mt-0.5">
-                    Grounded in 3,855 verified observations &amp; Analytical Metric Cube
+                  <p
+                    className="text-[11px] text-zinc-400 font-sans mt-0.5 flex items-center gap-1.5 cursor-help group"
+                    title={`Grounded in ${totalLakeCount.toLocaleString()} total immutable lake records across June (1,148), July (1,219), and August (1,286) 2026${activeCount ? ` (${activeCount.toLocaleString()} active in ${activeMonth})` : ''}. Zero synthetic data.`}
+                  >
+                    <span>
+                      Grounded in <strong className="text-zinc-200 font-mono font-semibold">{totalLakeCount.toLocaleString()}</strong> Verified Lake Records &amp; Metric Cube
+                    </span>
+                    <Info className="w-3 h-3 text-zinc-500 group-hover:text-zinc-300 transition-colors shrink-0" />
                   </p>
                 </div>
               </div>

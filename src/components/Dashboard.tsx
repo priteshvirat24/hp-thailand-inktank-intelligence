@@ -276,13 +276,14 @@ export const Dashboard: React.FC = () => {
       metricId: string,
       metricName: string,
       brand: TargetBrand | 'All',
-      skuId?: string
+      skuId?: string,
+      metricValue?: string | number | null
     ) => {
       setModal({
         isOpen: true,
         metricId,
         metricName,
-        metricValue: null,
+        metricValue: metricValue !== undefined ? metricValue : null,
         brand,
         month: selectedMonth,
         skuId,
@@ -298,7 +299,7 @@ export const Dashboard: React.FC = () => {
         );
         setModal((prev) => ({
           ...prev,
-          metricValue: res.count,
+          metricValue: prev.metricValue ?? `${res.count} Observations`,
           evidenceRecords: res.evidence,
         }));
       } catch {
@@ -554,6 +555,8 @@ export const Dashboard: React.FC = () => {
       <RagAssistant
         currentMonth={selectedMonth}
         currentBrand={selectedBrand}
+        totalLakeCount={data.summary?.total_lake_observations ?? 3653}
+        activeCount={data.summary?.total_evidence_observations}
         isEvidenceModalOpen={modal.isOpen || isIngestionModalOpen}
         onOpenEvidence={openEvidence}
       />

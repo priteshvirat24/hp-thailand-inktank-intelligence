@@ -258,6 +258,24 @@ export class QueryUnderstandingEngine {
     const targetBrand = detectedBrands[0] || context?.activeSubject || undefined;
     const brandLabel = targetBrand || 'the requested brand';
 
+    // 0. Advertising Reach & Impressions Boundary (RAG-NUM-BUG-001)
+    // Detect reach, unique impressions, views, audience size, viewership
+    const isAdReachQuery =
+      /\b(impressions?|impression count|unique impressions?|unique reach|people reached|people saw|ad views?|views|audience size|audience reached|viewership|number of viewers|how many people saw|how many users saw|how many users viewed|how many saw)\b|คนเห็น|ยอดวิว|การเข้าถึง/i.test(q) ||
+      (/\b(how many (people|users|viewers|customers|consumers) (saw|viewed|watched))\b/i.test(q)) ||
+      (/\b(saw|viewed)\b/i.test(q) && /\b(ads?|campaigns?|creatives?)\b/i.test(q)) ||
+      (/\b(reach)\b/i.test(q) && !/\b(outreach|reaching out|reach\s+out)\b/i.test(q));
+
+    if (isAdReachQuery) {
+      return {
+        isUnsupported: true,
+        dimension: 'Ad Reach / Impressions',
+        brand: targetBrand,
+        entity: targetBrand,
+        explanation: `I don't have verified ad reach or impression data for ${brandLabel} in the current dataset. The platform tracks observed ad presence and creative activity, but not the number of people reached or impressions generated.`,
+      };
+    }
+
     // 1. Off-Platform Unit Sales Volume Boundary (RAG-BUG-015)
     // Distinguish actual commercial unit sales from observable marketplace traction index
     const isExplicitUnitSales =
@@ -346,6 +364,17 @@ export class QueryUnderstandingEngine {
         dimension: 'Unobserved Platform',
         platform: platformName,
         explanation: `I don't have verified campaign data for ${platformName}. The platform is outside tracked digital channel campaign coverage in this dataset.`,
+      };
+    }
+
+    // 6. Off-Topic Hardware / Non-Printer Category Boundary (Phase 22 Category Gating)
+    const isOffTopicHardware =
+      /\b(omen|victus|pavilion|laptop|notebook|โน๊ตบุ๊ค|โน้ตบุ๊ก|การ์ดจอ|gpu|rtx|gtx|ssd|nvme|bios|motherboard|เมนบอร์ด|desktop\s*pc|gaming\s*pc)\b/i.test(q);
+    if (isOffTopicHardware) {
+      return {
+        isUnsupported: true,
+        dimension: 'Off-Topic Non-Printer Hardware',
+        explanation: `No Ink Tank consumer sentiment evidence is available for non-printer hardware (such as laptops, BIOS updates, SSDs, or gaming PCs). The competitive intelligence platform scope is strictly restricted to Ink Tank printers in Thailand, and unrelated hardware categories are excluded from the dataset.`,
       };
     }
 
@@ -882,7 +911,7 @@ export class QueryUnderstandingEngine {
     const isVisibility =
       /\b(sov|share of voice|visibility|visible|more visible|most visible)\b/i.test(q) ||
       /\b(presence|dominance|dominates?|dominating|dominates? digitally)\b/i.test(q) ||
-      /\b(digital footprint|online presence|digital presence|market presence|reach|exposure|shelf share|touchpoint|touchpoints)\b/i.test(q) ||
+      /\b(digital footprint|online presence|digital presence|market presence|exposure|shelf share|touchpoint|touchpoints)\b/i.test(q) ||
       /\b(everywhere|appears? most often|strongest digital footprint|strongest online presence)\b/i.test(q) ||
       /touch\s*p?points?/i.test(q) ||
       /การมองเห็น|ส่วนแบ่ง/i.test(q);
@@ -917,6 +946,18 @@ export class QueryUnderstandingEngine {
 
     if (isTraction) {
       subIntents.push('TRACTION', 'TREND');
+    }
+
+    // SKU & Product Portfolio Intent (RAG-NUM-BUG-003)
+    const isSku =
+      !isPricing &&
+      !isSentiment &&
+      (/\b(how many (skus?|models?|printers?|products?|offerings?) (does|do|have|has|are)|how many (canonical|benchmark|observed|active|market) (skus?|models?)|sku count|model count|number of (skus?|models?|printers?)|product portfolio|product lineup|printer portfolio|how many .* (models?|skus?))\b/i.test(q) ||
+      (/\b(skus?|models?|portfolio|product range)\b/i.test(q) && !/\b(price|prices|pricing|expensive|cheaper|cheap|cost|costly|discount|promo|review|reviews|rating|ratings|ads?|advertising|sentiment)\b/i.test(q)) ||
+      /จำนวนรุ่น|มีกี่รุ่น|พอร์ตโฟลิโอ/i.test(q));
+
+    if (isSku) {
+      subIntents.push('SKU');
     }
 
     // Conceptual Definition Query (e.g. "what is touch ppoint here", "what does touchpoint mean?")
@@ -995,12 +1036,13 @@ export class QueryUnderstandingEngine {
 
     // Check for conversational greetings, capabilities, and small talk (Chatbot NLP)
     const isGreeting = this.isGreetingOrConversational(q);
-    const hasBusinessDomain = isPricing || isSentiment || isVisibility || isAd || isSocial || isTraction || isExecutive;
+    const hasBusinessDomain = isPricing || isSentiment || isVisibility || isAd || isSocial || isTraction || isSku || isExecutive;
 
     if (isGreeting && !hasBusinessDomain) {
       return { primaryIntent: 'GREETING', subIntents: ['GREETING'] };
     }
 
+    if (isSku) return { primaryIntent: 'SKU', subIntents: Array.from(new Set(subIntents)) };
     if (isSentiment) return { primaryIntent: 'CONSUMER_SENTIMENT', subIntents: Array.from(new Set(subIntents)) };
     if (isPricing) return { primaryIntent: 'PRICING', subIntents: Array.from(new Set(subIntents)) };
     if (isVisibility) return { primaryIntent: 'VISIBILITY', subIntents: Array.from(new Set(subIntents)) };
@@ -1032,7 +1074,17 @@ export class QueryUnderstandingEngine {
     }
 
     if (all.includes('CONSUMER_SENTIMENT') || all.includes('CUSTOMER_REVIEWS')) {
-      metrics.push('AVG_CONSUMER_RATING', 'TOTAL_CONSUMER_REVIEWS_COUNT', 'POSITIVE_SENTIMENT_PCT');
+      metrics.push(
+        'TOTAL_CONSUMER_REVIEWS_COUNT',
+        'RATED_REVIEWS_COUNT',
+        'UNRATED_CONSUMER_VOICE_COUNT',
+        'AVG_CONSUMER_RATING',
+        'POSITIVE_SENTIMENT_PCT'
+      );
+    }
+
+    if (all.includes('SKU')) {
+      metrics.push('CANONICAL_SKU_COUNT', 'OBSERVED_SKU_COUNT', 'MARKET_SKU_COUNT');
     }
 
     if (all.includes('VISIBILITY') || all.includes('COMPETITIVE_COMPARISON') || all.includes('EXECUTIVE_SUMMARY')) {

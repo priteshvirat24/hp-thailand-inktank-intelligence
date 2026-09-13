@@ -11,7 +11,7 @@ import { RawEvidenceRecord } from '@/types/evidence';
 import { TARGET_BRANDS } from '@/config/brands';
 import { ALL_MARKET_SKUS } from '@/config/skus';
 import { assignAnalyticalMonth } from '@/lib/dates';
-import { METRIC_DEFINITIONS, getAllMetricDefinitions } from './metricRegistry';
+import { METRIC_DEFINITIONS, getAllMetricDefinitions, isValidConsumerReview } from './metricRegistry';
 
 export class MetricAggregator {
   /**
@@ -30,8 +30,11 @@ export class MetricAggregator {
     const taggedRecords: TaggedEvidence[] = [];
 
     for (const record of evidenceRecords) {
-      // Must be target brand
-      if (!TARGET_BRANDS.includes(record.brand)) continue;
+      // Must be target brand or have target brand in attributed_brands
+      const isTargetBrand =
+        TARGET_BRANDS.includes(record.brand) ||
+        (record.attributed_brands && record.attributed_brands.some((b) => (TARGET_BRANDS as readonly string[]).includes(b)));
+      if (!isTargetBrand) continue;
 
       // Assign analytical month (rolls late May baseline into 2026-06)
       const month = assignAnalyticalMonth(record.published_at);
@@ -64,8 +67,10 @@ export class MetricAggregator {
         monthlyCategoryTotals[item.analyticalMonth].ecomListings++;
         monthlyCategoryTotals['ALL'].ecomListings++;
       } else if (item.record.channel === 'Consumer Review') {
-        monthlyCategoryTotals[item.analyticalMonth].consumerReviews++;
-        monthlyCategoryTotals['ALL'].consumerReviews++;
+        if (isValidConsumerReview(item.record)) {
+          monthlyCategoryTotals[item.analyticalMonth].consumerReviews++;
+          monthlyCategoryTotals['ALL'].consumerReviews++;
+        }
       }
     }
 
@@ -75,7 +80,13 @@ export class MetricAggregator {
     for (const brand of TARGET_BRANDS) {
       for (const month of analyticalMonths) {
         const brandMonthRecords = taggedRecords
-          .filter((t) => t.record.brand === brand && (month === 'ALL' || t.analyticalMonth === month))
+          .filter((t) => {
+            const isMatch =
+              t.record.brand === brand ||
+              (t.record.channel === 'Consumer Review' &&
+                (t.record.attributed_brands as readonly string[] | undefined)?.includes(brand));
+            return isMatch && (month === 'ALL' || t.analyticalMonth === month);
+          })
           .map((t) => t.record);
 
         for (const metricDef of allMetrics) {

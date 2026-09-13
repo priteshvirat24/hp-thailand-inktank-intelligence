@@ -29,7 +29,7 @@ export interface RawEvidenceRecord {
   readonly product_sku: string | null;
   readonly raw_title: string;
   readonly raw_content_th: string;
-  readonly content_en_translation: string;
+  readonly content_en_translation: string | null;
   readonly price_current_thb: number | null;
   readonly price_original_thb: number | null;
   readonly discount_pct: number | null;
@@ -48,4 +48,24 @@ export interface RawEvidenceRecord {
   readonly evidence_tags: readonly string[];
   readonly extraction_method: ExtractionMethod;
   readonly confidence_score: number;
+  readonly category_status?: string;
+  readonly translation_status?: string;
+  readonly detected_brands?: readonly string[];
+  readonly attributed_brands?: readonly string[];
+  readonly attribution_status?: string;
+  readonly brand_sentiments?: readonly {
+    readonly brand: TargetBrand;
+    readonly sentiment: string;
+    readonly themes: readonly string[];
+    readonly evidence_span?: string;
+  }[];
+  readonly detected_skus?: readonly string[];
+  readonly attributed_skus?: readonly string[];
+  readonly exclusion_reason?: string | null;
+  readonly temporal_window_status?: 'IN_WINDOW' | 'OUT_OF_WINDOW' | 'UNVERIFIED';
+  readonly thread_url?: string;
+  readonly comment_url?: string;
+  readonly source_thread_id?: string;
+  readonly source_comment_id?: string;
+  readonly metadata?: Record<string, unknown>;
 }

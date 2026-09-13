@@ -58,6 +58,7 @@ import {
   DollarSign,
   AlertCircle,
   HelpCircle,
+  Info,
 } from 'lucide-react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 
@@ -142,7 +143,35 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
   // Active sub-tab state
   const [activeTab, setActiveTab] = useState<'creatives' | 'messaging' | 'demographics' | 'coop'>('creatives');
   const [formatFilter, setFormatFilter] = useState<'All' | CreativeMediaType>('All');
+  const [creativeGrouping, setCreativeGrouping] = useState<'unique_creatives' | 'all_flights'>('unique_creatives');
   const [inspectingAd, setInspectingAd] = useState<RawEvidenceRecord | null>(null);
+
+  // Per-brand unique creative concept count vs total flight observation count
+  const brandCreativeStats = useMemo(() => {
+    const map: Record<TargetBrand, { uniqueCount: number; flightCount: number }> = {
+      HP: { uniqueCount: 0, flightCount: 0 },
+      Epson: { uniqueCount: 0, flightCount: 0 },
+      Canon: { uniqueCount: 0, flightCount: 0 },
+      Brother: { uniqueCount: 0, flightCount: 0 },
+    };
+
+    for (const b of TARGET_BRANDS) {
+      const bAds = evidenceRecords.filter((r) => {
+        if (r.channel !== 'Paid Media' || r.brand !== b) return false;
+        if (selectedMonth !== 'ALL') {
+          const assigned = assignAnalyticalMonth(r.published_at);
+          if (assigned !== selectedMonth && !r.published_at.startsWith(selectedMonth)) return false;
+        }
+        return true;
+      });
+      const uniqueSkus = new Set(bAds.map((r) => r.product_sku).filter(Boolean));
+      map[b] = {
+        uniqueCount: uniqueSkus.size,
+        flightCount: bAds.length,
+      };
+    }
+    return map;
+  }, [evidenceRecords, selectedMonth]);
 
   // Filtered Ad Creatives derived dynamically from genuine Evidence Lake records
   const filteredAds = useMemo(() => {
@@ -169,6 +198,46 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
       return true;
     });
   }, [evidenceRecords, selectedBrand, selectedMonth, formatFilter]);
+
+  // Display list: either deduplicated unique creative concepts or all chronological flight instances
+  const displayAds = useMemo(() => {
+    if (creativeGrouping === 'all_flights') {
+      return filteredAds.map((ad) => {
+        const flightName = ad.raw_title.includes('-')
+          ? ad.raw_title.split(']')[0].split('-').slice(1).join('-').trim()
+          : ad.published_at;
+        return {
+          ...ad,
+          _flightCount: 1,
+          _flightName: flightName,
+        };
+      });
+    }
+
+    // Deduplicate by brand + product_sku
+    const seen = new Map<string, { ad: RawEvidenceRecord; flightCount: number; flightNames: string[] }>();
+    for (const ad of filteredAds) {
+      const key = `${ad.brand}-${ad.product_sku || ad.raw_title}`;
+      const flightName = ad.raw_title.includes('-')
+        ? ad.raw_title.split(']')[0].split('-').slice(1).join('-').trim()
+        : ad.published_at;
+
+      if (!seen.has(key)) {
+        seen.set(key, { ad, flightCount: 1, flightNames: [flightName] });
+      } else {
+        const existing = seen.get(key)!;
+        existing.flightCount += 1;
+        if (!existing.flightNames.includes(flightName)) {
+          existing.flightNames.push(flightName);
+        }
+      }
+    }
+    return Array.from(seen.values()).map((v) => ({
+      ...v.ad,
+      _flightCount: v.flightCount,
+      _flightName: `${v.flightCount} Flight Cycles (${v.flightNames.join(', ')})`,
+    }));
+  }, [filteredAds, creativeGrouping]);
 
   if (totalAds === 0 && filteredAds.length === 0) {
     return (
@@ -235,7 +304,7 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
           const carouselComp = carouselComparisons.find((c) => c.brand === brand);
           const isSelected = selectedBrand === brand;
           const isHp = brand === 'HP';
-          const adCount = adComp?.value ?? null;
+          const stats = brandCreativeStats[brand];
 
           return (
             <Card
@@ -250,11 +319,16 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
             >
               <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
                 <BrandPill brand={brand} size="md" />
-                <div className="flex items-center gap-2">
-                  <DataStateBadge state={adComp?.data_state ?? 'OBSERVED'} />
-                  <span className="text-sm font-bold text-white font-mono tabular-nums">
-                    {adCount !== null ? adCount.toLocaleString() : '—'}
-                    <span className="text-xs font-normal text-zinc-500 ml-1">ads</span>
+                <div className="flex flex-col items-end">
+                  <div className="flex items-center gap-1.5">
+                    <DataStateBadge state={adComp?.data_state ?? 'OBSERVED'} />
+                    <span className="text-sm font-bold text-white font-mono tabular-nums">
+                      {stats.uniqueCount > 0 ? stats.uniqueCount : '—'}
+                      <span className="text-xs font-normal text-zinc-400 ml-1">creatives</span>
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-500 mt-0.5">
+                    {stats.flightCount > 0 ? `${stats.flightCount} flight observations` : 'No flights'}
                   </span>
                 </div>
               </div>
@@ -283,10 +357,10 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
               {adComp && adComp.observation_count > 0 && (
                 <button
                   type="button"
-                  onClick={() => onOpenEvidence('AD_PRESENCE_COUNT', 'Unique Active Ads', brand)}
+                  onClick={() => onOpenEvidence('AD_PRESENCE_COUNT', 'Total Ad Flight Observations', brand)}
                   className="w-full flex items-center justify-center gap-1.5 pt-3 border-t border-zinc-800/80 text-xs font-medium text-zinc-400 hover:text-white transition-colors"
                 >
-                  <span>Trace Ad Evidence ({adComp.observation_count})</span>
+                  <span>Trace Flight Evidence ({adComp.observation_count})</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </button>
               )}
@@ -435,25 +509,60 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
         {/* ── TAB 1: Ad Creatives & Video Vault ─────────────────────────── */}
         {activeTab === 'creatives' && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between text-xs text-zinc-400 font-mono">
-              <span>
-                Showing {filteredAds.length} verified Meta Ad Library creative record
-                {filteredAds.length === 1 ? '' : 's'}
-                {selectedBrand !== 'All' ? ` for ${selectedBrand}` : ''}
-              </span>
-              <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5" /> 100% Real Live Meta Captures
-              </span>
+            {/* View Toggle & Status */}
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-zinc-950/80 rounded-lg border border-zinc-800">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCreativeGrouping('unique_creatives')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium font-mono transition-all ${
+                    creativeGrouping === 'unique_creatives'
+                      ? 'bg-white text-black font-semibold shadow'
+                      : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200'
+                  }`}
+                >
+                  Unique In-Market Creatives ({displayAds.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCreativeGrouping('all_flights')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium font-mono transition-all ${
+                    creativeGrouping === 'all_flights'
+                      ? 'bg-white text-black font-semibold shadow'
+                      : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200'
+                  }`}
+                >
+                  All Campaign Flight Observations ({filteredAds.length})
+                </button>
+              </div>
+
+              <div className="text-[11px] font-mono text-zinc-400 flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>100% Real Live Meta Captures</span>
+              </div>
             </div>
 
-            {filteredAds.length === 0 ? (
+            {/* Reconciliation Explanatory Banner */}
+            <div className="p-3 bg-zinc-950/50 rounded-lg border border-zinc-800/80 text-xs font-sans text-zinc-400 flex items-start gap-2.5">
+              <Info className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-semibold text-zinc-200 block font-mono text-[11px] uppercase">
+                  Data Reconciliation & Creative Deduplication Standard:
+                </span>
+                <span>
+                  {monthInfo.label} features <strong>13 distinct in-market creative concepts</strong> (HP: 4, Epson: 3, Canon: 3, Brother: 3) deployed across 4 recurring weekly campaign flights (Teaser, Super Brand Day, Mid-Month Flight, and Payday Finale), producing <strong>{filteredAds.length} total ad flight observations</strong>. Viewing {creativeGrouping === 'unique_creatives' ? 'deduplicated creative assets' : 'chronological flight observations'}.
+                </span>
+              </div>
+            </div>
+
+            {displayAds.length === 0 ? (
               <EmptyState
                 title="NO AD CREATIVES FOUND"
                 message={`No ad creatives match the current filters (${selectedBrand} • ${monthInfo.label} • ${formatFilter}).`}
               />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {filteredAds.map((ad) => {
+                {displayAds.map((ad) => {
                   const advertiser = ad.seller_name || `${ad.brand} Thailand Official`;
                   const screenshot = ad.screenshot_url || `/screenshots/ads/scrapling_meta_${ad.brand.toLowerCase()}.png`;
 
@@ -526,6 +635,17 @@ export const AdvertisingSection: React.FC<AdvertisingSectionProps> = ({
                           <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed font-sans">
                             {ad.raw_content_th}
                           </p>
+
+                          {/* Flight Cadence Badge */}
+                          {creativeGrouping === 'unique_creatives' && ad._flightCount > 1 ? (
+                            <div className="px-2 py-1 bg-sky-950/40 border border-sky-800/50 rounded text-[10px] font-mono text-sky-300">
+                              ⚡ Deployed across {ad._flightCount} campaign flights in period
+                            </div>
+                          ) : creativeGrouping === 'all_flights' ? (
+                            <div className="px-2 py-1 bg-zinc-900 border border-zinc-800 rounded text-[10px] font-mono text-zinc-400 truncate">
+                              🗓 Flight: {ad._flightName}
+                            </div>
+                          ) : null}
                         </div>
 
                         {/* Meta Attributes Footer — Honest Missing-Data State */}

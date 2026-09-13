@@ -26,7 +26,7 @@ import { TARGET_BRANDS } from '@/config/brands';
 import { CANONICAL_SKUS, ALL_MARKET_SKUS } from '@/config/skus';
 import { globalEvidenceStore } from '@/services/evidence/evidenceStore';
 import { metricAggregator } from './metricAggregator';
-import { METRIC_DEFINITIONS } from './metricRegistry';
+import { METRIC_DEFINITIONS, isValidConsumerReview } from './metricRegistry';
 
 export class AnalyticsService {
   private cubeCache: AnalyticalMetricRow[] | null = null;
@@ -227,7 +227,7 @@ export class AnalyticsService {
     );
 
     const relevantRecords = brand !== 'All'
-      ? activeRecords.filter((r) => r.brand === brand)
+      ? activeRecords.filter((r) => r.brand === brand || (r.attributed_brands as readonly string[] | undefined)?.includes(brand))
       : activeRecords;
 
     for (const b of TARGET_BRANDS) {
@@ -243,7 +243,12 @@ export class AnalyticsService {
       const topPromoted = brandSkus.sort((x, y) => (y.promo_penetration_pct || 0) - (x.promo_penetration_pct || 0))[0];
 
       const brandRated = activeRecords.filter(
-        (r) => r.brand === b && r.channel === 'Consumer Review' && typeof r.rating === 'number' && r.rating > 0
+        (r) =>
+          (r.brand === b || (r.attributed_brands as readonly string[] | undefined)?.includes(b)) &&
+          r.channel === 'Consumer Review' &&
+          isValidConsumerReview(r) &&
+          typeof r.rating === 'number' &&
+          r.rating > 0
       );
       const brandAvgRating = brandRated.length > 0
         ? Number((brandRated.reduce((acc, r) => acc + (r.rating || 0), 0) / brandRated.length).toFixed(1))
@@ -263,7 +268,11 @@ export class AnalyticsService {
     }
 
     const ratedRecords = relevantRecords.filter(
-      (r) => r.channel === 'Consumer Review' && typeof r.rating === 'number' && r.rating > 0
+      (r) =>
+        r.channel === 'Consumer Review' &&
+        isValidConsumerReview(r) &&
+        typeof r.rating === 'number' &&
+        r.rating > 0
     );
     const overallAvgRating = ratedRecords.length > 0
       ? Number((ratedRecords.reduce((acc, r) => acc + (r.rating || 0), 0) / ratedRecords.length).toFixed(1))
@@ -273,7 +282,7 @@ export class AnalyticsService {
       paid_media: relevantRecords.filter((r) => r.channel === 'Paid Media').length,
       social: relevantRecords.filter((r) => (r.channel as string) === 'Social' || (r.channel as string) === 'Social Channels').length,
       ecommerce: relevantRecords.filter((r) => (r.channel as string) === 'E-commerce' || (r.channel as string) === 'E-Commerce').length,
-      consumer_review: relevantRecords.filter((r) => r.channel === 'Consumer Review').length,
+      consumer_review: relevantRecords.filter((r) => r.channel === 'Consumer Review' && isValidConsumerReview(r)).length,
     };
 
     return {

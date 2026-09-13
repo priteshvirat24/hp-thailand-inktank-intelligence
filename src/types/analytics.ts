@@ -13,6 +13,7 @@ export type AnalyticalMonth = '2026-06' | '2026-07' | '2026-08' | 'ALL';
 export type MetricId =
   // Data Cut 1: Online Visibility & Share of Voice
   | 'AD_PRESENCE_COUNT'
+  | 'UNIQUE_CREATIVES_COUNT'
   | 'SOCIAL_POSTS_COUNT'
   | 'ECOMMERCE_LISTINGS_COUNT'
   | 'PAID_MEDIA_SOV'
@@ -35,13 +36,23 @@ export type MetricId =
   | 'PROMO_PENETRATION_PCT'
   | 'ACTIVE_OFFICIAL_STORES_COUNT'
   | 'OBSERVABLE_SALES_TRACTION_INDEX'
+  // Data Cut 4b: SKU & Portfolio Metrics
+  | 'CANONICAL_SKU_COUNT'
+  | 'OBSERVED_SKU_COUNT'
+  | 'MARKET_SKU_COUNT'
   // Data Cut 5: Consumer Sentiment
   | 'AVG_CONSUMER_RATING'
   | 'TOTAL_CONSUMER_REVIEWS_COUNT'
+  | 'RATED_REVIEWS_COUNT'
+  | 'UNRATED_CONSUMER_VOICE_COUNT'
+  | 'SHOPEE_REVIEW_COUNT'
+  | 'PANTIP_CONSUMER_VOICE_COUNT'
   | 'POSITIVE_SENTIMENT_PCT';
 
 export type MetricName =
   | 'Unique Active Ads'
+  | 'Total Ad Flight Observations'
+  | 'Unique Creative Assets'
   | 'Total Social Posts'
   | 'Active E-Commerce Listings'
   | 'Paid Media Share of Voice %'
@@ -61,8 +72,15 @@ export type MetricName =
   | 'Promotional Listing Share %'
   | 'Active Official Store Listings'
   | 'Observable Cumulative Sales Traction Index'
+  | 'Canonical Benchmark SKU Count'
+  | 'Observed Active SKU Count'
+  | 'Market Catalog Model Count'
   | 'Average Star Rating (out of 5)'
   | 'Total Verified Customer Reviews'
+  | 'Rated Reviews Count'
+  | 'Unrated Consumer Voice Records'
+  | 'Shopee Review Count'
+  | 'Pantip Consumer Voice Posts'
   | 'Positive Consumer Sentiment %';
 
 export type MetricUnit = 'THB' | 'Count' | 'Percentage' | 'Score' | 'Ratio' | 'Index';

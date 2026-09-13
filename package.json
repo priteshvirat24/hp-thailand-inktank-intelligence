@@ -10,7 +10,13 @@
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "audit:reviews": "node scripts/audit-reviews.mjs",
+    "audit:analytics": "node scripts/audit-analytics.mjs",
+    "reprocess:reviews": "node scripts/reprocess-reviews.mjs",
+    "scrape:jib": "bash -c 'source .venv/bin/activate && python3 scripts/crawlers/scrape_real_marketplace_reviews.py'",
+    "scrape:pantip": "bash -c 'source .venv/bin/activate && python3 scripts/crawlers/scrape_real_marketplace_reviews.py --pantip-only'",
+    "scrape:all": "bash -c 'source .venv/bin/activate && python3 scripts/crawlers/scrape_real_marketplace_reviews.py'"
   },
   "dependencies": {
     "clsx": "^2.1.1",

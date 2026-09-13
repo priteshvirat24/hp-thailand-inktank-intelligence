@@ -8,6 +8,7 @@
 import { MetricId, MetricName, MetricUnit, AggregationType, DataState } from '@/types/analytics';
 import { ChannelType, PlatformType } from '@/types/sources';
 import { RawEvidenceRecord } from '@/types/evidence';
+import { CANONICAL_SKUS, ALL_MARKET_SKUS } from '@/config/skus';
 
 export interface MetricCalculationResult {
   readonly value: number | null;
@@ -30,6 +31,21 @@ export interface MetricDefinition {
   calculate(records: readonly RawEvidenceRecord[], denominatorTotal?: number): MetricCalculationResult;
 }
 
+export function isValidConsumerReview(r: RawEvidenceRecord): boolean {
+  if (r.channel !== 'Consumer Review') return false;
+  const rec = r as unknown as Record<string, unknown>;
+  const status = rec.category_status as string | undefined;
+  if (!status) return true;
+  return (
+    status !== 'OFF_TOPIC' &&
+    status !== 'AI_COPIED_CONTENT' &&
+    status !== 'GENERAL_CATEGORY_CONTENT' &&
+    status !== 'SUPPORT_DISCUSSION' &&
+    rec.attribution_status !== 'EXCLUDED' &&
+    (status === 'VERIFIED_REVIEW' || status === 'VERIFIED_COMPARATIVE_REVIEW')
+  );
+}
+
 /**
  * Metric Definitions Registry
  */
@@ -39,13 +55,13 @@ export const METRIC_DEFINITIONS: Record<MetricId, MetricDefinition> = {
   // ============================================================================
   AD_PRESENCE_COUNT: {
     metric_id: 'AD_PRESENCE_COUNT',
-    name: 'Unique Active Ads',
+    name: 'Total Ad Flight Observations',
     channel: 'Paid Media',
     applicable_platforms: ['Meta', 'Google Ads', 'YouTube', 'All'],
     unit: 'Count',
     aggregation_type: 'COUNT',
-    description: 'Count of unique active paid ad creatives observed during the analytical window.',
-    methodology: 'Count of distinct ad observations filtered by brand, month, and paid media platforms.',
+    description: 'Count of observed active paid ad campaign flights captured from Meta Ad Library Thailand (52/month, 156 across 90 days).',
+    methodology: 'Count of distinct ad flight observations filtered by brand, month, and paid media platforms.',
     calculate: (records) => {
       const ads = records.filter((r) => r.channel === 'Paid Media');
       return {
@@ -54,7 +70,30 @@ export const METRIC_DEFINITIONS: Record<MetricId, MetricDefinition> = {
         observation_count: ads.length,
         evidence_ids: ads.map((r) => r.evidence_id),
         data_state: 'OBSERVED',
-        methodology_note: 'Direct count of observed paid media ad creatives.',
+        methodology_note: 'Direct count of observed paid media ad campaign flights across in-scope SKUs.',
+      };
+    },
+  },
+
+  UNIQUE_CREATIVES_COUNT: {
+    metric_id: 'UNIQUE_CREATIVES_COUNT',
+    name: 'Unique Creative Assets',
+    channel: 'Paid Media',
+    applicable_platforms: ['Meta', 'Google Ads', 'YouTube', 'All'],
+    unit: 'Count',
+    aggregation_type: 'COUNT',
+    description: 'Count of unique in-market creative concepts / SKU executions (13 total: HP 4, Epson 3, Canon 3, Brother 3).',
+    methodology: 'Deduplicated count of distinct product SKU creative executions observed in the market.',
+    calculate: (records) => {
+      const ads = records.filter((r) => r.channel === 'Paid Media');
+      const uniqueSkus = new Set(ads.map((r) => r.product_sku).filter(Boolean));
+      return {
+        value: uniqueSkus.size,
+        unit: 'Count',
+        observation_count: ads.length,
+        evidence_ids: ads.map((r) => r.evidence_id),
+        data_state: uniqueSkus.size > 0 ? 'OBSERVED' : 'INSUFFICIENT_EVIDENCE',
+        methodology_note: `Deduplicated to ${uniqueSkus.size} unique creative concepts across ${ads.length} flight observations.`,
       };
     },
   },
@@ -209,16 +248,19 @@ export const METRIC_DEFINITIONS: Record<MetricId, MetricDefinition> = {
     applicable_platforms: ['All'],
     unit: 'Count',
     aggregation_type: 'COUNT',
-    description: 'Sum of all verified observations (Paid Media Ads + Social Posts + E-Commerce Listings).',
+    description: 'Sum of all verified observations (Paid Media Ads + Social Posts + E-Commerce Listings + Consumer Reviews).',
     methodology: 'Count of all valid evidence records for the brand and month.',
     calculate: (records) => {
+      const validRecords = records.filter(
+        (r) => r.channel !== 'Consumer Review' || isValidConsumerReview(r)
+      );
       return {
-        value: records.length > 0 ? records.length : 0,
+        value: validRecords.length > 0 ? validRecords.length : 0,
         unit: 'Count',
-        observation_count: records.length,
-        evidence_ids: records.map((r) => r.evidence_id),
+        observation_count: validRecords.length,
+        evidence_ids: validRecords.map((r) => r.evidence_id),
         data_state: 'OBSERVED',
-        methodology_note: 'Combined sum of active ads, social posts, and marketplace listings.',
+        methodology_note: 'Combined sum of active ads, social posts, marketplace listings, and verified consumer reviews.',
       };
     },
   },
@@ -657,8 +699,86 @@ export const METRIC_DEFINITIONS: Record<MetricId, MetricDefinition> = {
   },
 
   // ============================================================================
-  // DATA CUT 5: Consumer Sentiment
+  // DATA CUT 4b: SKU & Portfolio Metrics
   // ============================================================================
+  CANONICAL_SKU_COUNT: {
+    metric_id: 'CANONICAL_SKU_COUNT',
+    name: 'Canonical Benchmark SKU Count',
+    channel: 'E-commerce',
+    applicable_platforms: ['Shopee', 'Lazada', 'JIB', 'Advice', 'Power Buy', 'All'],
+    unit: 'Count',
+    aggregation_type: 'COUNT',
+    description: 'Total number of benchmark canonical SKUs defined in the core intelligence specification universe (28 models across 4 brands: HP=7, Epson=7, Canon=8, Brother=6).',
+    methodology: 'Count of canonical SKUs registered in CANONICAL_SKUS master registry for the brand.',
+    calculate: (records) => {
+      const brand = records[0]?.brand;
+      const count = brand ? CANONICAL_SKUS.filter((s) => s.brand === brand).length : CANONICAL_SKUS.length;
+      return {
+        value: count,
+        unit: 'Count',
+        observation_count: count,
+        evidence_ids: records.slice(0, 5).map((r) => r.evidence_id),
+        data_state: 'OBSERVED',
+        methodology_note: `Core benchmark specification universe defines ${count} canonical SKUs for ${brand || 'all brands'}.`,
+      };
+    },
+  },
+
+  OBSERVED_SKU_COUNT: {
+    metric_id: 'OBSERVED_SKU_COUNT',
+    name: 'Observed Active SKU Count',
+    channel: 'E-commerce',
+    applicable_platforms: ['Shopee', 'Lazada', 'JIB', 'Advice', 'Power Buy', 'Meta', 'All'],
+    unit: 'Count',
+    aggregation_type: 'COUNT',
+    description: 'Number of distinct ink tank printer models actively observed in empirical evidence for this brand and period.',
+    methodology: 'Count of distinct normalized product SKUs identified in evidence records for the segment.',
+    calculate: (records) => {
+      const distinctSkus = new Set(
+        records
+          .map((r) => r.product_sku)
+          .filter((s): s is string => typeof s === 'string' && s.trim().length > 0)
+      );
+      return {
+        value: distinctSkus.size,
+        unit: 'Count',
+        observation_count: records.length,
+        evidence_ids: records.slice(0, 10).map((r) => r.evidence_id),
+        data_state: distinctSkus.size > 0 ? 'OBSERVED' : 'INSUFFICIENT_EVIDENCE',
+        methodology_note: `Empirical evidence captures ${distinctSkus.size} distinct active models across ${records.length} observations.`,
+      };
+    },
+  },
+
+  MARKET_SKU_COUNT: {
+    metric_id: 'MARKET_SKU_COUNT',
+    name: 'Market Catalog Model Count',
+    channel: 'E-commerce',
+    applicable_platforms: ['Shopee', 'Lazada', 'JIB', 'Advice', 'Power Buy', 'All'],
+    unit: 'Count',
+    aggregation_type: 'COUNT',
+    description: 'Total number of printer models cataloged in the complete Thai ink tank market portfolio (65 models total; HP=12, Epson=20, Canon=18, Brother=15).',
+    methodology: 'Count of models registered in ALL_MARKET_SKUS for the brand.',
+    calculate: (records) => {
+      const brand = records[0]?.brand;
+      const count = brand ? ALL_MARKET_SKUS.filter((s) => s.brand === brand).length : ALL_MARKET_SKUS.length;
+      return {
+        value: count,
+        unit: 'Count',
+        observation_count: count,
+        evidence_ids: records.slice(0, 5).map((r) => r.evidence_id),
+        data_state: 'OBSERVED',
+        methodology_note: `Market catalog covers ${count} ink tank models for ${brand || 'all brands'} across Thailand.`,
+      };
+    },
+  },
+
+  // ============================================================================
+  // DATA CUT 5: Consumer Sentiment & Review Dimensions
+  // ============================================================================
+  // CONSUMER REVIEW & RATINGS METRICS
+  // ============================================================================
+
   AVG_CONSUMER_RATING: {
     metric_id: 'AVG_CONSUMER_RATING',
     name: 'Average Star Rating (out of 5)',
@@ -666,14 +786,11 @@ export const METRIC_DEFINITIONS: Record<MetricId, MetricDefinition> = {
     applicable_platforms: ['Shopee', 'Lazada', 'TikTok Shop', 'JIB', 'Advice', 'Power Buy', 'All'],
     unit: 'Score',
     aggregation_type: 'AVERAGE',
-    description: 'Mean star rating from verified buyer reviews across e-commerce marketplaces.',
-    methodology: 'Average of star ratings across verified consumer review records.',
+    description: 'Mean star rating from verified buyer reviews across e-commerce marketplaces (calculated strictly from reviews with numeric ratings).',
+    methodology: 'Average of star ratings across verified consumer review records with rating > 0. Does not assign synthetic ratings to unrated community discussions or include off-topic/tutorial records.',
     calculate: (records) => {
       const rated = records.filter(
-        (r) =>
-          r.channel === 'Consumer Review' &&
-          typeof r.rating === 'number' &&
-          r.rating > 0
+        (r) => isValidConsumerReview(r) && typeof r.rating === 'number' && r.rating > 0
       );
       if (rated.length === 0) {
         return {
@@ -693,7 +810,7 @@ export const METRIC_DEFINITIONS: Record<MetricId, MetricDefinition> = {
         observation_count: rated.length,
         evidence_ids: rated.map((r) => r.evidence_id),
         data_state: 'OBSERVED',
-        methodology_note: `Average star rating from ${rated.length} verified consumer reviews.`,
+        methodology_note: `Average star rating from ${rated.length} verified consumer reviews with explicit ratings.`,
       };
     },
   },
@@ -705,10 +822,10 @@ export const METRIC_DEFINITIONS: Record<MetricId, MetricDefinition> = {
     applicable_platforms: ['Shopee', 'Lazada', 'TikTok Shop', 'JIB', 'Advice', 'Power Buy', 'All'],
     unit: 'Count',
     aggregation_type: 'SUM',
-    description: 'Cumulative count of verified customer reviews captured across platforms.',
-    methodology: 'Count of verified consumer review records.',
+    description: 'Cumulative count of verified customer voice records (including rated e-commerce reviews and unrated Pantip community posts).',
+    methodology: 'Count of all verified consumer voice and review records, excluding quarantined off-topic hardware comments, tutorial essays, and AI copies.',
     calculate: (records) => {
-      const reviewRecords = records.filter((r) => r.channel === 'Consumer Review');
+      const reviewRecords = records.filter(isValidConsumerReview);
 
       if (reviewRecords.length === 0) {
         return {
@@ -727,7 +844,105 @@ export const METRIC_DEFINITIONS: Record<MetricId, MetricDefinition> = {
         observation_count: reviewRecords.length,
         evidence_ids: reviewRecords.map((r) => r.evidence_id),
         data_state: 'OBSERVED',
-        methodology_note: `Count of ${reviewRecords.length} verified customer review records.`,
+        methodology_note: `Count of ${reviewRecords.length} total customer voice records across e-commerce and community forums.`,
+      };
+    },
+  },
+
+  RATED_REVIEWS_COUNT: {
+    metric_id: 'RATED_REVIEWS_COUNT',
+    name: 'Rated Reviews Count',
+    channel: 'Consumer Review',
+    applicable_platforms: ['Shopee', 'Lazada', 'TikTok Shop', 'JIB', 'Advice', 'Power Buy', 'All'],
+    unit: 'Count',
+    aggregation_type: 'COUNT',
+    description: 'Count of verified customer reviews that include explicit numeric star ratings (1 to 5 stars).',
+    methodology: 'Count of Consumer Review records with numeric rating > 0, excluding off-topic records.',
+    calculate: (records) => {
+      const rated = records.filter(
+        (r) => isValidConsumerReview(r) && typeof r.rating === 'number' && r.rating > 0
+      );
+      return {
+        value: rated.length,
+        unit: 'Count',
+        observation_count: rated.length,
+        evidence_ids: rated.map((r) => r.evidence_id),
+        data_state: 'OBSERVED',
+        methodology_note: `Count of ${rated.length} verified customer reviews with explicit star ratings.`,
+      };
+    },
+  },
+
+  UNRATED_CONSUMER_VOICE_COUNT: {
+    metric_id: 'UNRATED_CONSUMER_VOICE_COUNT',
+    name: 'Unrated Consumer Voice Records',
+    channel: 'Consumer Review',
+    applicable_platforms: ['Pantip', 'All'],
+    unit: 'Count',
+    aggregation_type: 'COUNT',
+    description: 'Count of qualitative consumer voice records (such as Pantip forum discussions) that contain authentic user feedback without numeric star ratings.',
+    methodology: 'Count of verified Consumer Review records without numeric star ratings, excluding off-topic discussions.',
+    calculate: (records) => {
+      const unrated = records.filter(
+        (r) =>
+          isValidConsumerReview(r) &&
+          (r.rating === undefined || r.rating === null || r.rating <= 0)
+      );
+      return {
+        value: unrated.length,
+        unit: 'Count',
+        observation_count: unrated.length,
+        evidence_ids: unrated.map((r) => r.evidence_id),
+        data_state: 'OBSERVED',
+        methodology_note: `Count of ${unrated.length} qualitative community voice records without star ratings.`,
+      };
+    },
+  },
+
+  SHOPEE_REVIEW_COUNT: {
+    metric_id: 'SHOPEE_REVIEW_COUNT',
+    name: 'Shopee Review Count',
+    channel: 'Consumer Review',
+    applicable_platforms: ['Shopee', 'All'],
+    unit: 'Count',
+    aggregation_type: 'COUNT',
+    description: 'Count of customer reviews captured from Shopee Thailand verified purchaser listings.',
+    methodology: 'Count of legitimate Consumer Review records from Shopee.',
+    calculate: (records) => {
+      const shopeeReviews = records.filter(
+        (r) => isValidConsumerReview(r) && r.platform === 'Shopee'
+      );
+      return {
+        value: shopeeReviews.length,
+        unit: 'Count',
+        observation_count: shopeeReviews.length,
+        evidence_ids: shopeeReviews.map((r) => r.evidence_id),
+        data_state: 'OBSERVED',
+        methodology_note: `Count of ${shopeeReviews.length} verified customer reviews from Shopee Thailand.`,
+      };
+    },
+  },
+
+  PANTIP_CONSUMER_VOICE_COUNT: {
+    metric_id: 'PANTIP_CONSUMER_VOICE_COUNT',
+    name: 'Pantip Consumer Voice Posts',
+    channel: 'Consumer Review',
+    applicable_platforms: ['Pantip', 'All'],
+    unit: 'Count',
+    aggregation_type: 'COUNT',
+    description: 'Count of qualitative consumer voice records captured from Pantip.com Thai forum community threads.',
+    methodology: 'Count of legitimate Consumer Review records from Pantip, excluding off-topic hardware threads and tutorial essays.',
+    calculate: (records) => {
+      const pantipReviews = records.filter(
+        (r) => isValidConsumerReview(r) && r.platform === 'Pantip'
+      );
+      return {
+        value: pantipReviews.length,
+        unit: 'Count',
+        observation_count: pantipReviews.length,
+        evidence_ids: pantipReviews.map((r) => r.evidence_id),
+        data_state: 'OBSERVED',
+        methodology_note: `Count of ${pantipReviews.length} community voice posts from Pantip.com.`,
       };
     },
   },
@@ -743,10 +958,7 @@ export const METRIC_DEFINITIONS: Record<MetricId, MetricDefinition> = {
     methodology: '(Count of positive reviews [rating >= 4] / Total rated consumer reviews) * 100.',
     calculate: (records) => {
       const ratedReviews = records.filter(
-        (r) =>
-          r.channel === 'Consumer Review' &&
-          typeof r.rating === 'number' &&
-          r.rating > 0
+        (r) => isValidConsumerReview(r) && typeof r.rating === 'number' && r.rating > 0
       );
       if (ratedReviews.length === 0) {
         return {

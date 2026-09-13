@@ -32,6 +32,9 @@ import {
   DollarSign,
   Printer,
   Sparkles,
+  X,
+  ExternalLink,
+  FileText,
 } from 'lucide-react';
 import { motion, type Variants } from 'framer-motion';
 
@@ -80,17 +83,22 @@ export const ConsumerSentimentSection: React.FC<ConsumerSentimentSectionProps> =
 }) => {
   const [selectedBrandFilter, setSelectedBrandFilter] = useState<TargetBrand | 'All'>(selectedBrand);
   const [selectedThemeFilter, setSelectedThemeFilter] = useState<string>('All');
+  const [selectedEvidenceForModal, setSelectedEvidenceForModal] = useState<RawEvidenceRecord | null>(null);
 
   // Synchronize internal filter when parent global brand selection updates
   useEffect(() => {
     setSelectedBrandFilter(selectedBrand);
   }, [selectedBrand]);
 
-  // Filter reviews strictly by channel and analytical month
+  // Filter reviews strictly by channel, valid review category, and analytical month
   const reviews = useMemo(() => {
     return evidenceRecords.filter(
       (r) =>
         r.channel === 'Consumer Review' &&
+        r.category_status !== 'OFF_TOPIC' &&
+        r.category_status !== 'AI_COPIED_CONTENT' &&
+        r.category_status !== 'GENERAL_CATEGORY_CONTENT' &&
+        r.category_status !== 'SUPPORT_DISCUSSION' &&
         (selectedMonth === 'ALL' || (r.published_at && r.published_at.startsWith(selectedMonth)))
     );
   }, [evidenceRecords, selectedMonth]);
@@ -128,8 +136,8 @@ export const ConsumerSentimentSection: React.FC<ConsumerSentimentSectionProps> =
       const positivePct =
         sentimentRec?.value !== undefined && sentimentRec.value !== null
           ? sentimentRec.value
-          : brandReviews.length > 0
-          ? Math.round((positiveReviews / brandReviews.length) * 100)
+          : validRatingReviews.length > 0
+          ? Math.round((positiveReviews / validRatingReviews.length) * 100)
           : null;
 
       return {
@@ -419,7 +427,7 @@ export const ConsumerSentimentSection: React.FC<ConsumerSentimentSectionProps> =
                 {rev.raw_content_th && (
                   <div className="p-2.5 rounded-lg bg-black/50 border border-zinc-800/60 text-xs leading-relaxed">
                     <span className="text-[9px] font-mono text-zinc-500 uppercase block mb-1">
-                      🇹🇭 Thai Buyer Quote (Verified)
+                      🇹🇭 Thai Source Text
                     </span>
                     <p className="text-zinc-200 font-sans">
                       &ldquo;{rev.raw_content_th}&rdquo;
@@ -428,38 +436,222 @@ export const ConsumerSentimentSection: React.FC<ConsumerSentimentSectionProps> =
                 )}
 
                 {/* English Translation */}
-                {rev.content_en_translation && (
-                  <div className="text-xs text-zinc-400 leading-relaxed font-sans">
-                    <span className="text-[9px] font-mono text-zinc-500 uppercase block mb-0.5">
-                      🇬🇧 English Translation
-                    </span>
+                <div className="text-xs text-zinc-400 leading-relaxed font-sans">
+                  <span className="text-[9px] font-mono text-zinc-500 uppercase block mb-0.5">
+                    🇬🇧 English Translation
+                  </span>
+                  {rev.content_en_translation && (rev.translation_status === 'TRANSLATED' || rev.translation_status === 'SOURCE_ALREADY_ENGLISH' || !rev.translation_status) ? (
                     <p className="text-zinc-300">
                       {rev.content_en_translation}
                     </p>
-                  </div>
-                )}
+                  ) : (
+                    <p className="text-zinc-500 italic text-[11px]">
+                      English translation unavailable
+                    </p>
+                  )}
+                </div>
 
                 {/* Bottom Metadata & Trace Link */}
                 <div className="flex items-center justify-between pt-2 border-t border-zinc-800/60 text-xs">
-                  <span className="flex items-center gap-1 text-[10px] font-mono text-emerald-400">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                    Verified {rev.platform || 'Shopee'} Purchaser
-                  </span>
+                  {
+                    /* Truthful provenance label:
+                       - Pantip is always a community forum post, never a "Verified Purchaser".
+                       - Marketplace platforms (Shopee/Lazada/JIB) show verified only when
+                         the evidence record carries an actual platform-provided verification signal.
+                       - Otherwise show "Purchase verification unavailable".
+                    */
+                    rev.platform === 'Pantip' ? (
+                      <span className="flex items-center gap-1 text-[10px] font-mono text-sky-400">
+                        <MessageSquare className="w-3 h-3" />
+                        Community Forum Discussion
+                      </span>
+                    ) : (rev as { is_verified_purchase?: boolean }).is_verified_purchase ? (
+                      <span className="flex items-center gap-1 text-[10px] font-mono text-emerald-400">
+                        <CheckCircle2 className="w-3 h-3" />
+                        Verified {rev.platform} Purchaser
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-[10px] font-mono text-zinc-500">
+                        Purchase verification unavailable
+                      </span>
+                    )
+                  }
 
-                  <a
-                    href={getVerifiedWorkingSourceUrl(rev)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-[11px] text-sky-400 hover:text-sky-300 font-medium transition-colors"
-                  >
-                    <span>Verify on {rev.platform || 'Shopee'} ↗</span>
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedEvidenceForModal(rev)}
+                      className="flex items-center gap-1 text-[11px] text-indigo-400 hover:text-indigo-300 font-mono transition-colors cursor-pointer"
+                    >
+                      <FileText className="w-3 h-3" />
+                      <span>Inspect</span>
+                    </button>
+                    <a
+                      href={getVerifiedWorkingSourceUrl(rev)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-[11px] text-sky-400 hover:text-sky-300 font-medium transition-colors"
+                    >
+                      <span>View on {rev.platform || 'Source'} ↗</span>
+                    </a>
+                  </div>
                 </div>
               </Card>
             ))}
           </div>
         )}
       </motion.div>
+
+      {/* Forensic Review Evidence Modal */}
+      {selectedEvidenceForModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          onClick={() => setSelectedEvidenceForModal(null)}
+        >
+          <div
+            className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto bg-zinc-950 border border-zinc-800 rounded-2xl p-6 shadow-2xl space-y-5 text-left"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <BrandPill brand={selectedEvidenceForModal.brand} size="sm" />
+                  <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                    Forensic Review Observation
+                  </span>
+                </div>
+                <p className="text-[11px] font-mono text-zinc-400 mt-1">
+                  {selectedEvidenceForModal.evidence_id}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedEvidenceForModal(null)}
+                className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Forensic Attribute Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs font-mono">
+              <div className="p-2.5 rounded-lg bg-zinc-900/70 border border-zinc-800/80">
+                <span className="text-[10px] text-zinc-500 uppercase block">Category Status</span>
+                <span className="font-semibold text-emerald-400">
+                  {selectedEvidenceForModal.category_status || 'VERIFIED_REVIEW'}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-zinc-900/70 border border-zinc-800/80">
+                <span className="text-[10px] text-zinc-500 uppercase block">Translation Status</span>
+                <span className="font-semibold text-sky-400">
+                  {selectedEvidenceForModal.translation_status || 'TRANSLATED'}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-zinc-900/70 border border-zinc-800/80">
+                <span className="text-[10px] text-zinc-500 uppercase block">Platform</span>
+                <span className="font-semibold text-zinc-200">
+                  {selectedEvidenceForModal.platform}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-zinc-900/70 border border-zinc-800/80">
+                <span className="text-[10px] text-zinc-500 uppercase block">Published Date</span>
+                <span className="font-semibold text-amber-300">
+                  {selectedEvidenceForModal.published_at || 'Unverified'}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-zinc-900/70 border border-zinc-800/80">
+                <span className="text-[10px] text-zinc-500 uppercase block">Captured Date</span>
+                <span className="font-semibold text-zinc-400">
+                  {selectedEvidenceForModal.captured_at?.split('T')[0] || selectedEvidenceForModal.captured_at}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-zinc-900/70 border border-zinc-800/80">
+                <span className="text-[10px] text-zinc-500 uppercase block">Product SKU</span>
+                <span className="font-semibold text-zinc-200">
+                  {selectedEvidenceForModal.product_sku || 'General (No SKU)'}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-zinc-900/70 border border-zinc-800/80">
+                <span className="text-[10px] text-zinc-500 uppercase block">Detected Brands</span>
+                <span className="font-semibold text-zinc-300">
+                  {selectedEvidenceForModal.detected_brands?.join(', ') || 'None'}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-zinc-900/70 border border-zinc-800/80">
+                <span className="text-[10px] text-zinc-500 uppercase block">Attributed Brands</span>
+                <span className="font-semibold text-zinc-300">
+                  {selectedEvidenceForModal.attributed_brands?.join(', ') || selectedEvidenceForModal.brand}
+                </span>
+              </div>
+              <div className="p-2.5 rounded-lg bg-zinc-900/70 border border-zinc-800/80">
+                <span className="text-[10px] text-zinc-500 uppercase block">Sentiment / Rating</span>
+                <span className="font-semibold text-white">
+                  {(selectedEvidenceForModal.metadata?.sentiment as string | undefined) || 'OBSERVED'} {selectedEvidenceForModal.rating ? `(${selectedEvidenceForModal.rating}★)` : ''}
+                </span>
+              </div>
+            </div>
+
+            {/* Exclusion reason if any */}
+            {selectedEvidenceForModal.exclusion_reason && (
+              <div className="p-3 rounded-lg bg-rose-950/40 border border-rose-800/60 text-xs">
+                <span className="text-[10px] font-mono text-rose-400 uppercase block font-semibold mb-1">
+                  Exclusion Reason
+                </span>
+                <p className="text-rose-200">{selectedEvidenceForModal.exclusion_reason}</p>
+              </div>
+            )}
+
+            {/* Thai Source Text */}
+            <div className="p-3.5 rounded-xl bg-black/60 border border-zinc-800/90 text-xs leading-relaxed space-y-1.5">
+              <span className="text-[10px] font-mono text-zinc-400 uppercase font-semibold flex items-center gap-1">
+                <span>🇹🇭 Original Thai Source Content</span>
+              </span>
+              <p className="text-zinc-200 font-sans whitespace-pre-wrap">
+                {selectedEvidenceForModal.raw_content_th}
+              </p>
+            </div>
+
+            {/* English Translation */}
+            <div className="p-3.5 rounded-xl bg-zinc-900/50 border border-zinc-800/90 text-xs leading-relaxed space-y-1.5">
+              <span className="text-[10px] font-mono text-zinc-400 uppercase font-semibold flex items-center gap-1">
+                <span>🇬🇧 Verified English Translation</span>
+              </span>
+              {selectedEvidenceForModal.content_en_translation &&
+              (selectedEvidenceForModal.translation_status === 'TRANSLATED' ||
+                selectedEvidenceForModal.translation_status === 'SOURCE_ALREADY_ENGLISH') ? (
+                <p className="text-zinc-200 font-sans whitespace-pre-wrap">
+                  {selectedEvidenceForModal.content_en_translation}
+                </p>
+              ) : (
+                <p className="text-zinc-500 italic">
+                  English translation unavailable for this source text.
+                </p>
+              )}
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between pt-3 border-t border-zinc-800">
+              <a
+                href={getVerifiedWorkingSourceUrl(selectedEvidenceForModal)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-xs text-sky-400 hover:text-sky-300 font-mono transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Verify on {selectedEvidenceForModal.platform}</span>
+              </a>
+              <button
+                type="button"
+                onClick={() => setSelectedEvidenceForModal(null)}
+                className="px-4 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs text-white font-mono transition-colors"
+              >
+                Close Inspector
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };

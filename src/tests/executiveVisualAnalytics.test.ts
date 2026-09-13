@@ -58,9 +58,16 @@ describe('Executive Visual Analytics: Competitor War Room & Shelf Share Trend', 
       expect(paidVis.rawValues.HP).toBe(30.8);
       expect(paidVis.rawValues.Epson).toBe(23.1);
 
-      // Customer Rating (HP leads with verified 4.78 / 5)
-      expect(userRating.rawValues.HP).toBeCloseTo(4.78, 1);
-      expect(userRating.formattedValues.HP).toContain('4.78 / 5');
+      // Customer Rating — post-remediation: value depends on real review evidence
+      // With 456 synthetic records removed, user_rating may be null or based on sparse real data
+      // Truthful state: null is acceptable. Do not assert a specific fabricated value.
+      if (userRating.rawValues.HP !== null) {
+        expect(typeof userRating.rawValues.HP).toBe('number');
+        expect(userRating.rawValues.HP).toBeGreaterThan(0);
+        expect(userRating.rawValues.HP).toBeLessThanOrEqual(5);
+      }
+      // formattedValues should reflect null/empty state honestly
+      expect(typeof userRating.formattedValues.HP).toBe('string');
     });
 
     it('ensures normalized scores are strictly bounded between 0 and 100', () => {

@@ -58,4 +58,19 @@ describe('Authoritative Metric Definitions Registry', () => {
     expect(ratingRes.value).toBeNull();
     expect(ratingRes.data_state).toBe('MISSING');
   });
+
+  it('correctly calculates UNIQUE_CREATIVES_COUNT by deduplicating product SKUs across flight observations', () => {
+    const mockAds: Partial<RawEvidenceRecord>[] = [
+      { evidence_id: '1', channel: 'Paid Media', brand: 'HP', product_sku: 'Smart Tank 580' },
+      { evidence_id: '2', channel: 'Paid Media', brand: 'HP', product_sku: 'Smart Tank 580' }, // flight 2
+      { evidence_id: '3', channel: 'Paid Media', brand: 'HP', product_sku: 'Smart Tank 720' },
+      { evidence_id: '4', channel: 'Paid Media', brand: 'HP', product_sku: 'Smart Tank 315' },
+    ];
+
+    const uniqueDef = getMetricDefinition('UNIQUE_CREATIVES_COUNT');
+    const res = uniqueDef.calculate(mockAds as RawEvidenceRecord[]);
+    expect(res.value).toBe(3); // 3 unique SKUs
+    expect(res.observation_count).toBe(4); // 4 total flights
+    expect(res.data_state).toBe('OBSERVED');
+  });
 });

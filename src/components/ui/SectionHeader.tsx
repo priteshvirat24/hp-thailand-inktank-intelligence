@@ -69,7 +69,10 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
 
         {totalEvidence !== undefined && (
           <div className="flex items-center gap-2 self-start md:self-auto shrink-0 font-sans">
-            <span className="px-3 py-1 rounded-full bg-zinc-900/80 border border-zinc-800 text-xs text-zinc-400 flex items-center gap-2 shadow-sm">
+            <span
+              title="Section-specific verified evidence records matching active filter criteria"
+              className="px-3 py-1 rounded-full bg-zinc-900/80 border border-zinc-800 text-xs text-zinc-400 flex items-center gap-2 shadow-sm cursor-help"
+            >
               <span className="w-1.5 h-1.5 rounded-full bg-white/70 animate-pulse" />
               {filteredEvidence !== undefined && filteredEvidence !== totalEvidence ? (
                 <>

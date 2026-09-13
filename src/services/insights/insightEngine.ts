@@ -2,7 +2,7 @@
  * Authoritative Insights & Recommendations Intelligence Engine (Phase 5A)
  * 
  * Deterministic Pipeline:
- * Raw Evidence Lake (4,167+ verified observations)
+ * Raw Evidence Lake (3,653 immutable scraped records)
  *   ↓
  * Analytical Metric Cube (Aggregated cross-dimensional metrics across June, July, August 2026)
  *   ↓

@@ -42,3 +42,7 @@ Scrapling/
 __pycache__/
 *.pyc
 tsconfig.tsbuildinfo
+
+# Local forensic backups — must not be committed
+.local-backup/
+scratch/

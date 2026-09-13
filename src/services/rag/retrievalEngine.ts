@@ -95,8 +95,33 @@ export class RetrievalEngine {
       if (qLower.includes('sales') || qLower.includes('traction') || qLower.includes('sold') || qLower.includes('ยอดขาย')) {
         metricsToFetch.push('OBSERVABLE_SALES_TRACTION_INDEX');
       }
-      if (qLower.includes('touchpoint') || qLower.includes('visibility') || qLower.includes('presence')) {
+      if (
+        qLower.includes('sku') ||
+        qLower.includes('model') ||
+        qLower.includes('portfolio') ||
+        qLower.includes('product range') ||
+        qLower.includes('กี่รุ่น')
+      ) {
+        metricsToFetch.push('CANONICAL_SKU_COUNT', 'OBSERVED_SKU_COUNT', 'MARKET_SKU_COUNT');
+      }
+      if (qLower.includes('touchpoint') || qLower.includes('touch point') || qLower.includes('presence')) {
         metricsToFetch.push('TOTAL_VISIBILITY_TOUCHPOINTS');
+      }
+      if (
+        qLower.includes('review') ||
+        qLower.includes('rating') ||
+        qLower.includes('sentiment') ||
+        qLower.includes('pantip') ||
+        qLower.includes('รีวิว') ||
+        qLower.includes('คะแนน')
+      ) {
+        metricsToFetch.push(
+          'TOTAL_CONSUMER_REVIEWS_COUNT',
+          'RATED_REVIEWS_COUNT',
+          'UNRATED_CONSUMER_VOICE_COUNT',
+          'AVG_CONSUMER_RATING',
+          'POSITIVE_SENTIMENT_PCT'
+        );
       }
     }
 
@@ -189,7 +214,17 @@ export class RetrievalEngine {
       for (const cb of effectivePlan.entities.comparisonBrands) {
         targetBrandSet.add(cb.toLowerCase());
       }
-      candidateChunks = candidateChunks.filter((c) => targetBrandSet.has(c.brand.toLowerCase()));
+      candidateChunks = candidateChunks.filter((c) => {
+        if (targetBrandSet.has(c.brand.toLowerCase())) return true;
+        // For comparative consumer review chunks, check if any target brand is mentioned
+        if (c.channel === 'Consumer Review') {
+          for (const tb of targetBrandSet) {
+            const regex = new RegExp(`\\b${tb}\\b|${tb === 'hp' ? 'เอชพี' : tb === 'epson' ? 'เอปสัน' : tb === 'canon' ? 'แคนนอน' : 'บราเดอร์'}`, 'i');
+            if (regex.test(c.content)) return true;
+          }
+        }
+        return false;
+      });
     }
 
     // Priority 2: Query-level month entities override UI filter (RAG-BUG-003, RAG-BUG-008)
@@ -215,6 +250,24 @@ export class RetrievalEngine {
     if (!isAllOrEmpty(effectiveChannel)) {
       const channelLower = effectiveChannel!.toLowerCase();
       candidateChunks = candidateChunks.filter((c) => c.channel.toLowerCase() === channelLower);
+    }
+
+    // Priority 3.5: RAG Consumer Review Protection (Phase 22 Integrity)
+    // Filter out quarantined categories from consumer sentiment retrieval
+    if (isSentimentQuery) {
+      candidateChunks = candidateChunks.filter((c) => {
+        const cLower = c.content.toLowerCase();
+        if (
+          cLower.includes('category status: off_topic') ||
+          cLower.includes('category status: ai_copied_content') ||
+          cLower.includes('category status: general_category_content') ||
+          cLower.includes('category status: support_discussion') ||
+          cLower.includes('attribution status: excluded')
+        ) {
+          return false;
+        }
+        return true;
+      });
     }
 
     // Priority 4: Platform filter
@@ -348,3 +401,11 @@ export class RetrievalEngine {
 }
 
 export const retrievalEngine = new RetrievalEngine();
+
+/**
+ * Check if query is asking about off-topic non-printer hardware
+ */
+export function isOffTopicForRag(query: string): boolean {
+  const q = query.toLowerCase();
+  return /\b(omen|victus|pavilion|laptop|notebook|โน๊ตบุ๊ค|โน้ตบุ๊ก|การ์ดจอ|gpu|rtx|gtx|ssd|nvme|bios|motherboard|เมนบอร์ด|desktop\s*pc|gaming\s*pc)\b/i.test(q);
+}

@@ -17,7 +17,8 @@ export type PlatformType =
   | 'TikTok Shop'
   | 'JIB'
   | 'Advice'
-  | 'Power Buy';
+  | 'Power Buy'
+  | 'Pantip';
 
 export type SourcePriority = 'mandatory' | 'secondary' | 'optional' | 'dropped';
 

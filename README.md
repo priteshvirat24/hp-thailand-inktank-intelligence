@@ -3,7 +3,7 @@
 [![Framework: Next.js 15](https://img.shields.io/badge/framework-Next.js_15-black.svg)](https://nextjs.org/)
 [![Language: TypeScript](https://img.shields.io/badge/language-TypeScript_5.8-blue.svg)](https://www.typescriptlang.org/)
 [![Styling: Tailwind CSS](https://img.shields.io/badge/styling-Tailwind_CSS-38bdf8.svg)](https://tailwindcss.com/)
-[![Tests: Vitest (261 Passed)](https://img.shields.io/badge/tests-261%20passing-emerald.svg)](https://vitest.dev/)
+[![Tests: Vitest (435 Passed)](https://img.shields.io/badge/tests-435%20passing-emerald.svg)](https://vitest.dev/)
 [![Status: Phase 7 Verified](https://img.shields.io/badge/status-Phase_7_Verified-emerald.svg)](#project-overview)
 [![Live Demo](https://img.shields.io/badge/deployment-Vercel_Live-blue.svg)](https://hp-thailand-inktank-intelligence.vercel.app)
 
@@ -12,14 +12,18 @@ Production-grade competitive intelligence platform providing automated tracking,
 
 **Live Production URL:** [https://hp-thailand-inktank-intelligence.vercel.app](https://hp-thailand-inktank-intelligence.vercel.app)
 
-## Key Architecture Layers
-* **Phase 2A (Canonical SKU Master):** 28 Canonical SKUs, deterministic 4-stage SKU normalizer, 6-gate category filter.
-* **Phase 2B (Scraper Pipeline Contracts):** Provider abstraction (Apify & Bright Data), 8 source adapters (Meta Ads, Google Ads, Shopee Mall, LazMall, TikTok Shop, JIB, Social feeds), deterministic SHA-256 evidence hashing (`EVID-{PLATFORM}-{HEX}`), Zod validation, idempotent evidence storage.
-* **Phase 2C (Analytical Metric Cube):** Multi-dimensional aggregation engine ($Brand \times Month \times Channel \times Platform \times SKU \times Metric$) across 18 specialized metric definitions and 5 Data Cuts. Full evidence lineage preservation and missing-vs-zero semantics.
-* **Phase 3A (Executive Dashboard & Analytics UI):** Production dashboard featuring 8 strategic sections: Executive Overview, Visibility & SOV, Paid Advertising, Social Media Activity, E-Commerce & Pricing, SKU Explorer, Evidence Lake, and RAG Intelligence Q&A entry point.
-* **Phase 3B (Live Ingestion Runner):** Provider-ready live crawl execution, zero-secret health checks, run history, and automated Analytical Cube rebuild.
-* **Phase 4A (RAG Retrieval & Grounding Engine):** 4-part grounded answer contract, deterministic chunk IDs (`CHUNK-{EVID}-{INDEX}-{HASH}`), hybrid retrieval, and dual evidence lineage.
-* **Internet Evidence Acquisition Layer:** Generalized web crawler, SSRF security guardrails, robots.txt compliance, Schema.org JSON-LD extraction, automated provider escalation, SERP query discovery, domain crawlability diagnostics, and Web Intelligence Dashboard UI.
+## System Architecture & Engineering Specification
+The platform features an enterprise-grade architecture across web acquisition, forensic data processing, multi-dimensional OLAP aggregation, grounded RAG, and executive visualization.
+
+👉 **[Read the Full System Architecture Specification & Mermaid Diagrams](docs/architecture.md)**
+
+### Key Subsystems:
+* **Canonical SKU Master & Invariant Filtering:** 28 Canonical SKUs, deterministic 4-stage SKU normalizer, 6-gate category filter rejecting consumables, cartridges, lasers, and non-printer hardware.
+* **Forensic Review Reprocessor & Translation:** Mistral AI authentic English translation, 100% Thai source preservation, Buddhist Era date normalization (`BE 2567 -> 2024 CE`), multi-brand entity attribution, and zero synthetic wrappers.
+* **Analytical Metric Cube (OLAP):** Multi-dimensional aggregation engine ($Brand \times Month \times Channel \times Platform \times SKU \times Metric$) across 18 specialized metric definitions, 5 Data Cuts, cell-to-evidence lineage preservation, and missing-vs-zero semantics.
+* **Strategic RAG Intelligence Engine:** 4-part grounded answer contract, hybrid dense/lexical retrieval, conversational query understanding, unsupported scope interception, and deterministic numerical validation (`numericalValidator.ts`).
+* **Executive Dashboard UI:** Single-page Next.js 15 + React 19 dashboard featuring 12 interactive domain sections, global floating RAG drawer, and the forensic review evidence modal.
+* **Cryptographic Evidence Lake:** 3,653 immutable records with SHA-256 evidence hashing (`EVID-{PLATFORM}-{HEX}`) and visual screenshot manifest bindings.
 
 ## How Web Crawling & Discovery Works
 

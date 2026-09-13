@@ -1,0 +1,47 @@
+{
+  "timestamp": "2026-09-13T08:07:13.244Z",
+  "isDryRun": false,
+  "totalRecords": 3653,
+  "consumerReviewRecords": 138,
+  "before": {
+    "total": 138,
+    "verified": 98,
+    "comparative": 21,
+    "offTopic": 11,
+    "generalEssay": 1,
+    "supportQa": 6,
+    "aiCopied": 1
+  },
+  "after": {
+    "verifiedReviews": 97,
+    "comparativeReviews": 21,
+    "offTopic": 11,
+    "generalContent": 1,
+    "supportDiscussions": 7,
+    "aiCopied": 1,
+    "inWindow": 52,
+    "outOfWindow": 86
+  },
+  "modifications": {
+    "brandReassignments": 0,
+    "skuCorrections": 0,
+    "sentimentCorrections": 0,
+    "temporalReconstructed": 0,
+    "translationsFixed": 0,
+    "translationFailures": 0
+  },
+  "brandsBreakdown": {
+    "HP": 59,
+    "Epson": 28,
+    "Canon": 27,
+    "Brother": 24
+  },
+  "categoryBreakdown": {
+    "VERIFIED_REVIEW": 97,
+    "VERIFIED_COMPARATIVE_REVIEW": 21,
+    "OFF_TOPIC": 11,
+    "GENERAL_CATEGORY_CONTENT": 1,
+    "SUPPORT_DISCUSSION": 7,
+    "AI_COPIED_CONTENT": 1
+  }
+}

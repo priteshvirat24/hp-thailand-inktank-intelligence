@@ -234,10 +234,19 @@ export const ExecutiveVisualAnalytics: React.FC<ExecutiveVisualAnalyticsProps> =
           </h3>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-[4px] bg-[#161618] border border-[#26262a] text-zinc-400 flex items-center gap-1.5">
-            <ShieldCheck className="w-3 h-3 text-emerald-400" />
-            <span>100% Genuine Scraped Data</span>
-          </span>
+          {/* Provenance coverage badge — dynamically reflects actual verified record count.
+              NEVER claim "100% Genuine" from a static string; compute it from the evidence store. */}
+          {data && (data.total_evidence_observations ?? 0) > 0 ? (
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-[4px] bg-[#161618] border border-[#26262a] text-zinc-400 flex items-center gap-1.5">
+              <ShieldCheck className="w-3 h-3 text-emerald-400" />
+              <span>{data.total_evidence_observations.toLocaleString()} Verified Observations</span>
+            </span>
+          ) : (
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-[4px] bg-[#161618] border border-[#26262a] text-zinc-500 flex items-center gap-1.5">
+              <ShieldCheck className="w-3 h-3 text-zinc-600" />
+              <span>Source verification unavailable</span>
+            </span>
+          )}
         </div>
       </div>
 
