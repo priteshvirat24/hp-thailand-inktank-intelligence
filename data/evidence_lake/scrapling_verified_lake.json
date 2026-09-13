@@ -131969,7 +131969,7 @@
     "channel": "Consumer Review",
     "platform": "Pantip",
     "activity_type": "Consumer Review",
-    "product_sku": "CANON-PIXMA-G2020",
+    "product_sku": "CANON-PIXMA-G2010",
     "raw_title": "[Pantip Forum] Canon G2010 พิมพ์ภาพถ่ายบนกระดาษ Photo สีสดใส (ความคิดเห็นที่ 1)",
     "raw_content_th": "งบเท่าไร ครับ ถ้าไม่ได้ เน้น Print งานสีรูปถ่ายอะไรที่ต้องเปรียบเทียบ ก็ลองดูเป็น Brother ครับ T310 ไม่มี WiFi T510w มี WiFi ส่วน Canon นั้น G2000 กับ G2010 ต่างกันตรงหน้าปัทม์ (ใช่ไหมครับ) G2000 ตกรุ่นไปแล้ว ถ้าซื้อใหม่ก็จะเป็น G2010 ครับ G2010 ไม่มี WiFi G3010 มี WiFi ครับ - ถ้าแบ่งใช้กันหลายคน หลายเครื่อง แนะนำให้ใช้แบบมี WiFi ครับ - ถ้าซื้อ2 เครื่อง แล้วแบ่งงานกัน Print (รุ่นเดียวกันไปเลย) ก็จะดีครับ เผื่อเครื่องใดเครื่องหนึ่ง มีปัญหา ก็จะได้ส่งซ่อม แล้วมีเครื่องใช้อยู่อีก",
     "content_en_translation": "What’s the price range? If you’re focusing on printing high-quality color photos or documents that require precise color matching, I’d recommend considering Brother models. The **Brother T310** (no WiFi) and **Brother T510W** (with WiFi) are solid options. For Canon, the **G2000** and **G2010** differ only in the printhead—correct? The **G2000** is discontinued, so if you’re buying new, you’d need the **G2010** (no WiFi), while the **G3010** includes WiFi. If multiple people will be sharing printers across several machines, I’d strongly suggest going with WiFi-enabled models for convenience. If you’re buying two identical units to split the workload—so if one fails, the other can cover—it’s a smart backup strategy.",
@@ -132028,11 +132028,11 @@
     ],
     "attribution_status": "MULTI_BRAND",
     "detected_skus": [
-      "CANON-PIXMA-G2020",
+      "CANON-PIXMA-G2010",
       "CANON-PIXMA-G3010"
     ],
     "attributed_skus": [
-      "CANON-PIXMA-G2020",
+      "CANON-PIXMA-G2010",
       "CANON-PIXMA-G3010"
     ],
     "translation_status": "TRANSLATED",
@@ -132476,11 +132476,13 @@
     "attribution_status": "CONFIRMED",
     "detected_skus": [
       "CANON-PIXMA-G3020",
+      "CANON-PIXMA-G2010",
       "CANON-PIXMA-G2020",
       "CANON-PIXMA-G3010"
     ],
     "attributed_skus": [
       "CANON-PIXMA-G3020",
+      "CANON-PIXMA-G2010",
       "CANON-PIXMA-G2020",
       "CANON-PIXMA-G3010"
     ],
@@ -135237,7 +135239,7 @@
     "channel": "Consumer Review",
     "platform": "Shopee",
     "activity_type": "Consumer Review",
-    "product_sku": "CANON-PIXMA-G2020",
+    "product_sku": "CANON-PIXMA-G2010",
     "raw_title": "[Shopee Verified Review] Canon PIXMA G2010 (5★)",
     "raw_content_th": "Canon G2010 สีสดมาก พิมพ์ภาพถ่ายสวยเนียน หมึกแท้ราคาจับต้องได้ สแกนเอกสารชัดเจน ถ่ายเอกสารบัตรประชาชนได้ง่าย เหมาะกับร้านค้าเล็กๆ",
     "content_en_translation": "The **Canon G2010** delivers vibrant colors and produces stunning, high-quality photos with smooth gradients. The genuine ink is reasonably priced and performs well. It also scans documents clearly and effortlessly captures passport-sized ID photos, making it an excellent choice for small businesses and retail shops.",
@@ -135290,10 +135292,10 @@
     ],
     "attribution_status": "CONFIRMED",
     "detected_skus": [
-      "CANON-PIXMA-G2020"
+      "CANON-PIXMA-G2010"
     ],
     "attributed_skus": [
-      "CANON-PIXMA-G2020"
+      "CANON-PIXMA-G2010"
     ],
     "translation_status": "TRANSLATED",
     "temporal_window_status": "IN_WINDOW",

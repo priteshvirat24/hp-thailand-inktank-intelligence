@@ -38,7 +38,8 @@ const CANONICAL_SKU_PATTERNS: Array<{ brand: Brand; sku: string; regex: RegExp }
   { brand: 'Epson', sku: 'EPSON-ET-L4260', regex: /\b(?:l4260|l-4260)\b/i },
   // Canon
   { brand: 'Canon', sku: 'CANON-PIXMA-G3020', regex: /\b(?:g3020|g-3020)\b/i },
-  { brand: 'Canon', sku: 'CANON-PIXMA-G2020', regex: /\b(?:g2020|g-2020|g2010)\b/i },
+  { brand: 'Canon', sku: 'CANON-PIXMA-G2010', regex: /\b(?:g2010|g-2010)\b/i },
+  { brand: 'Canon', sku: 'CANON-PIXMA-G2020', regex: /\b(?:g2020|g-2020)\b/i },
   { brand: 'Canon', sku: 'CANON-PIXMA-G3010', regex: /\b(?:g3010|g-3010)\b/i },
   { brand: 'Canon', sku: 'CANON-PIXMA-G3730', regex: /\b(?:g3730|g-3730)\b/i },
   { brand: 'Canon', sku: 'CANON-PIXMA-G2730', regex: /\b(?:g2730|g-2730)\b/i },
